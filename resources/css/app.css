@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Modern Industrial Corporate palette — DESIGN.md */
+        --color-navy-900: 11 31 51;
+        --color-navy-800: 18 49 77;
+        --color-navy-700: 23 70 107;
+
+        --color-charcoal: 27 31 35;
+        --color-slate-700: 62 72 82;
+        --color-slate-500: 104 117 129;
+
+        --color-gray-200: 217 222 227;
+        --color-gray-100: 238 241 243;
+
+        --color-off-white: 248 249 247;
+        --color-white: 255 255 255;
+
+        --color-success: 22 132 71;
+        --color-warning: 176 118 6;
+        --color-danger: 178 34 34;
+
+        /* Semantic tokens (public site default) */
+        --background: var(--color-off-white);
+        --foreground: var(--color-charcoal);
+        --surface: var(--color-white);
+        --primary: var(--color-navy-900);
+        --primary-foreground: var(--color-white);
+        --muted: var(--color-gray-100);
+        --muted-foreground: var(--color-slate-500);
+        --border: var(--color-gray-200);
+    }
+
+    body {
+        @apply bg-background text-foreground antialiased;
+        font-feature-settings: 'cv11', 'ss01';
+    }
+}
