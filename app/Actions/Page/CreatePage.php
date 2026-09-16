@@ -5,6 +5,8 @@ namespace App\Actions\Page;
 use App\Enums\PageType;
 use App\Models\Page;
 use App\Services\ActivityLogService;
+use App\Services\MediaUploadService;
+use App\Services\SeoService;
 use App\Support\SlugGenerator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +15,8 @@ class CreatePage
 {
     public function __construct(
         private readonly ActivityLogService $activityLog,
+        private readonly MediaUploadService $media,
+        private readonly SeoService $seo,
     ) {}
 
     public function handle(array $data): Page
@@ -32,7 +36,7 @@ class CreatePage
                 'updated_by' => Auth::id(),
             ]);
 
-            $page->seoMetadata()->create($data['seo'] ?? []);
+            $this->seo->saveMetadata($page, $data['seo'] ?? [], $this->media, 'seo/pages');
 
             $this->activityLog->record('page.created', $page, ['title' => $page->title]);
 

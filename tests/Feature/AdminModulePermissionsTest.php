@@ -42,7 +42,7 @@ test('super admin can reach every seeded module placeholder route', function () 
     $routes = [
         'admin.pages', 'admin.homepage', 'admin.products', 'admin.products.categories',
         'admin.capabilities', 'admin.facilities', 'admin.machines', 'admin.certifications',
-        'admin.industries', 'admin.news', 'admin.news.categories', 'admin.careers',
+        'admin.industries', 'admin.milestones', 'admin.news', 'admin.news.categories', 'admin.careers',
         'admin.careers.applications', 'admin.inquiries', 'admin.media', 'admin.seo',
         'admin.users', 'admin.roles', 'admin.activity-logs', 'admin.settings',
     ];

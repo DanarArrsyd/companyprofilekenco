@@ -25,7 +25,8 @@ class UpdatePageRequest extends FormRequest
             'seo.canonical_url' => ['nullable', 'url', 'max:255'],
             'seo.og_title' => ['nullable', 'string', 'max:70'],
             'seo.og_description' => ['nullable', 'string', 'max:200'],
-            'seo.og_image' => ['nullable', 'string', 'max:255'],
+            'seo.og_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'seo.og_image_path' => ['nullable', 'string', 'max:255'],
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];

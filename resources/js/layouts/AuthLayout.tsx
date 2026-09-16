@@ -1,13 +1,16 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
 
 export default function AuthLayout({ children }: PropsWithChildren) {
+    const { siteSettings } = usePage().props;
+    const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
+
     return (
         <div className="flex min-h-screen flex-col items-center justify-center bg-navy-900 px-4 py-12">
             <div className="w-full max-w-md">
                 <div className="mb-8 flex justify-center">
                     <Link href="/" className="text-xl font-semibold tracking-tight text-white">
-                        Kenco Manufacturing
+                        {companyName}
                     </Link>
                 </div>
 

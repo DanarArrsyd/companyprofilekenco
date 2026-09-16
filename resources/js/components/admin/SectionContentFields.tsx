@@ -46,7 +46,7 @@ export function SectionContentFields({
     sectionType: string;
     content: Content;
     onChange: (content: Content) => void;
-    pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[] };
+    pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[]; facilities?: PickerOption[] };
 }) {
     const set = (key: string, value: unknown) => onChange({ ...content, [key]: value });
 
@@ -88,6 +88,15 @@ export function SectionContentFields({
                             <Input id="secondary_cta_url" value={str(content, 'secondary_cta_url')} onChange={(e) => set('secondary_cta_url', e.target.value)} className="mt-1.5" />
                         </div>
                     </div>
+                </div>
+            );
+
+        case 'company_intro':
+            return (
+                <div>
+                    <Label htmlFor="image">Supporting Image URL</Label>
+                    <Input id="image" value={str(content, 'image')} onChange={(e) => set('image', e.target.value)} className="mt-1.5" />
+                    <p className="mt-1.5 text-xs text-slate-500">Title/Subtitle above are used as the heading and body copy.</p>
                 </div>
             );
 
@@ -225,9 +234,14 @@ export function SectionContentFields({
         }
 
         case 'capabilities':
-        case 'products': {
-            const options = sectionType === 'capabilities' ? pickerOptions?.capabilities : pickerOptions?.products;
-            const idsKey = sectionType === 'capabilities' ? 'capability_ids' : 'product_ids';
+        case 'products':
+        case 'facilities': {
+            const options = {
+                capabilities: pickerOptions?.capabilities,
+                products: pickerOptions?.products,
+                facilities: pickerOptions?.facilities,
+            }[sectionType];
+            const idsKey = { capabilities: 'capability_ids', products: 'product_ids', facilities: 'facility_ids' }[sectionType];
             const selected = Array.isArray(content[idsKey]) ? (content[idsKey] as number[]) : [];
 
             const toggle = (id: number) => {
@@ -249,8 +263,8 @@ export function SectionContentFields({
                         <Label>Featured {sectionType}</Label>
                         {!options || options.length === 0 ? (
                             <p className="mt-2 rounded border border-dashed border-border p-4 text-sm text-slate-500">
-                                No published {sectionType} available yet. Create them in a later phase, then come
-                                back to feature them here.
+                                No published {sectionType} available yet. Publish some, then come back to feature
+                                them here.
                             </p>
                         ) : (
                             <div className="mt-2 space-y-1 rounded border border-border p-3">
@@ -267,68 +281,6 @@ export function SectionContentFields({
                                 ))}
                             </div>
                         )}
-                    </div>
-                </div>
-            );
-        }
-
-        case 'facilities': {
-            const items = Array.isArray(content.items) ? (content.items as { title: string; description: string }[]) : [];
-
-            const updateItem = (index: number, key: 'title' | 'description', value: string) => {
-                const next = [...items];
-                next[index] = { ...next[index], [key]: value };
-                set('items', next);
-            };
-
-            return (
-                <div className="space-y-4">
-                    <div>
-                        <Label htmlFor="heading">Heading</Label>
-                        <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
-                    </div>
-                    <div>
-                        <Label htmlFor="description">Description</Label>
-                        <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
-                    </div>
-
-                    <div className="space-y-3">
-                        <Label>Featured facility highlights</Label>
-                        {items.map((item, index) => (
-                            <div key={index} className="flex items-start gap-2">
-                                <div className="flex-1 space-y-2">
-                                    <Input
-                                        value={item.title ?? ''}
-                                        onChange={(e) => updateItem(index, 'title', e.target.value)}
-                                        placeholder="Facility name"
-                                    />
-                                    <TextArea
-                                        id={`facility-${index}`}
-                                        value={item.description ?? ''}
-                                        onChange={(v) => updateItem(index, 'description', v)}
-                                        rows={2}
-                                    />
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    onClick={() => set('items', items.filter((_, i) => i !== index))}
-                                    aria-label="Remove facility highlight"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ))}
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => set('items', [...items, { title: '', description: '' }])}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add highlight
-                        </Button>
                     </div>
                 </div>
             );

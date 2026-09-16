@@ -36,6 +36,10 @@ export default {
                     DEFAULT: 'rgb(var(--muted) / <alpha-value>)',
                     foreground: 'rgb(var(--muted-foreground) / <alpha-value>)',
                 },
+                secondary: {
+                    DEFAULT: 'rgb(var(--secondary) / <alpha-value>)',
+                    foreground: 'rgb(var(--secondary-foreground) / <alpha-value>)',
+                },
                 border: 'rgb(var(--border) / <alpha-value>)',
                 success: 'rgb(var(--color-success) / <alpha-value>)',
                 warning: 'rgb(var(--color-warning) / <alpha-value>)',
@@ -61,6 +65,10 @@ export default {
                 h2: ['40px', { lineHeight: '1.15', fontWeight: '700' }],
                 h3: ['30px', { lineHeight: '1.2', fontWeight: '600' }],
                 h4: ['23px', { lineHeight: '1.3', fontWeight: '600' }],
+                'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
+                body: ['16px', { lineHeight: '1.65', fontWeight: '400' }],
+                small: ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+                caption: ['12.5px', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.06em' }],
             },
             borderRadius: {
                 DEFAULT: '6px',

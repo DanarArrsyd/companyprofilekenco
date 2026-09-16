@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['product_id', 'media_id', 'order', 'is_primary'])]
+#[Fillable(['product_id', 'media_id', 'path', 'alt_text', 'order', 'is_primary'])]
 class ProductImage extends Model
 {
     protected function casts(): array

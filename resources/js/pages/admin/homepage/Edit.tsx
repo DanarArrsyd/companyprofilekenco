@@ -22,11 +22,13 @@ export default function Edit({
     page,
     availableCapabilities,
     availableProducts,
+    availableFacilities,
 }: {
     page: CmsPage;
     sectionTypes: string[];
     availableCapabilities: { id: number; name: string }[];
     availableProducts: { id: number; name: string }[];
+    availableFacilities: { id: number; name: string }[];
 }) {
     const sections = page.sections ?? [];
 
@@ -50,7 +52,11 @@ export default function Edit({
                         fixed
                         label={SECTION_LABELS[section.section_type] ?? section.section_type}
                         onMove={() => undefined}
-                        pickerOptions={{ capabilities: availableCapabilities, products: availableProducts }}
+                        pickerOptions={{
+                            capabilities: availableCapabilities,
+                            products: availableProducts,
+                            facilities: availableFacilities,
+                        }}
                     />
                 ))}
             </div>

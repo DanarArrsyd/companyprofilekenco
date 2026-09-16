@@ -31,11 +31,75 @@
         --primary-foreground: var(--color-white);
         --muted: var(--color-gray-100);
         --muted-foreground: var(--color-slate-500);
+        --secondary: var(--color-gray-100);
+        --secondary-foreground: var(--color-charcoal);
         --border: var(--color-gray-200);
     }
 
     body {
         @apply bg-background text-foreground antialiased;
         font-feature-settings: 'cv11', 'ss01';
+    }
+}
+
+@layer components {
+    /* Editorial reading style for TipTap-generated article HTML — custom,
+       token-driven, no Tailwind Typography plugin needed for one page. */
+    .article-prose {
+        @apply text-body text-slate-700;
+    }
+
+    .article-prose > * + * {
+        @apply mt-5;
+    }
+
+    .article-prose h2 {
+        @apply mt-10 text-h3 text-navy-900;
+    }
+
+    .article-prose h3 {
+        @apply mt-8 text-h4 text-navy-900;
+    }
+
+    .article-prose ul,
+    .article-prose ol {
+        @apply space-y-2 pl-6;
+    }
+
+    .article-prose ul {
+        @apply list-disc;
+    }
+
+    .article-prose ol {
+        @apply list-decimal;
+    }
+
+    .article-prose blockquote {
+        @apply border-l-2 border-navy-900 pl-5 text-body-lg italic text-slate-600;
+    }
+
+    .article-prose a {
+        @apply text-navy-700 underline underline-offset-2 hover:text-navy-900;
+    }
+
+    .article-prose strong {
+        @apply font-semibold text-foreground;
+    }
+
+    .article-prose img {
+        @apply w-full;
+    }
+}
+
+@layer utilities {
+    /* Hides the scrollbar chrome on a scroll container without disabling
+       scroll — used on the homepage milestone timeline (Phase 9C.5). */
+    .scrollbar-hide {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
     }
 }

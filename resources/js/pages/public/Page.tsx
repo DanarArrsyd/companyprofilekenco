@@ -1,7 +1,19 @@
+import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CmsPage, ResolvedSeo } from '@/types/cms';
+
+/**
+ * Static eyebrow/H1 copy for the pages CLAUDE.md requires under /company —
+ * matches the benchmark pattern used by Products/Facilities/Certifications
+ * (a fixed banner per page type, not CMS-sourced). Any other standard page
+ * falls back to its own title with no eyebrow.
+ */
+const HEADER_COPY: Record<string, { eyebrow: string; heading: string }> = {
+    company: { eyebrow: 'Our Company', heading: 'Company' },
+    'company/vision-mission': { eyebrow: 'Our Direction', heading: 'Vision & Mission' },
+};
 
 export default function Page({
     page,
@@ -13,6 +25,7 @@ export default function Page({
     preview: boolean;
 }) {
     const sections = page.sections ?? [];
+    const header = HEADER_COPY[page.slug];
 
     return (
         <PublicLayout>
@@ -24,14 +37,13 @@ export default function Page({
                 </div>
             )}
 
-            {sections.length === 0 ? (
-                <div className="mx-auto max-w-content px-5 py-24 text-center sm:px-6 lg:px-8">
-                    <h1 className="text-h1 text-navy-900">{page.title}</h1>
-                    <p className="mt-4 text-slate-500">This page has no content yet.</p>
+            <section className="border-b border-border">
+                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+                    <SectionHeader as="h1" eyebrow={header?.eyebrow} heading={header?.heading ?? page.title} />
                 </div>
-            ) : (
-                sections.map((section) => <SectionRenderer key={section.id} section={section} />)
-            )}
+            </section>
+
+            {sections.length > 0 && sections.map((section) => <SectionRenderer key={section.id} section={section} />)}
         </PublicLayout>
     );
 }

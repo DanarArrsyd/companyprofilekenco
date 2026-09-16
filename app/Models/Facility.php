@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'slug',
     'location',
     'description',
+    'image',
+    'sort_order',
     'status',
     'published_at',
     'created_by',

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['name', 'slug', 'description', 'status', 'published_at'])]
+#[Fillable(['name', 'slug', 'description', 'image', 'sort_order', 'status', 'published_at'])]
 class Industry extends Model
 {
     use HasFactory, HasPublishingLifecycle, SoftDeletes;

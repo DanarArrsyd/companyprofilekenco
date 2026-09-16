@@ -60,6 +60,7 @@ export const adminNavGroups: AdminNavGroup[] = [
         items: [
             { name: 'Capabilities', href: 'admin.capabilities', permission: 'capabilities.view' },
             { name: 'Facilities', href: 'admin.facilities', permission: 'facilities.view' },
+            { name: 'Facility Categories', href: 'admin.facilities.categories', permission: 'facilities.view' },
             { name: 'Machines', href: 'admin.machines', permission: 'facilities.view' },
         ],
     },
@@ -69,13 +70,17 @@ export const adminNavGroups: AdminNavGroup[] = [
         permission: 'certifications.view',
         items: [
             { name: 'Certifications', href: 'admin.certifications', permission: 'certifications.view' },
+            { name: 'Quality Content', href: 'admin.quality-content', permission: 'certifications.view' },
         ],
     },
     {
         label: 'Corporate',
         icon: Building2,
         permission: 'industries.view',
-        items: [{ name: 'Industries', href: 'admin.industries', permission: 'industries.view' }],
+        items: [
+            { name: 'Industries', href: 'admin.industries', permission: 'industries.view' },
+            { name: 'Milestones', href: 'admin.milestones', permission: 'milestones.view' },
+        ],
     },
     {
         label: 'News',

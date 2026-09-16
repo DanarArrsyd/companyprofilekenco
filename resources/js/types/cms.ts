@@ -44,6 +44,12 @@ export interface ResolvedSeo {
     og_title: string | null;
     og_description: string | null;
     og_image: string | null;
+    og_type?: string;
+    twitter_card?: string;
+    twitter_title?: string | null;
+    twitter_description?: string | null;
+    twitter_image?: string | null;
+    twitter_site?: string | null;
     robots_index: boolean;
     robots_follow: boolean;
 }

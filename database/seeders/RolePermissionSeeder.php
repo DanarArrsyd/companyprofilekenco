@@ -46,6 +46,11 @@ class RolePermissionSeeder extends Seeder
         'industries.update',
         'industries.delete',
 
+        'milestones.view',
+        'milestones.create',
+        'milestones.update',
+        'milestones.delete',
+
         'news.view',
         'news.create',
         'news.update',
@@ -85,6 +90,9 @@ class RolePermissionSeeder extends Seeder
         'industries.view',
         'industries.create',
         'industries.update',
+        'milestones.view',
+        'milestones.create',
+        'milestones.update',
         'news.view',
         'news.create',
         'news.update',

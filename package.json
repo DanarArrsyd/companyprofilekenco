@@ -32,5 +32,11 @@
     },
     "optionalDependencies": {
         "@laravel/multiplex": "^0.4.1"
+    },
+    "dependencies": {
+        "@tiptap/extension-link": "^2.27.3",
+        "@tiptap/pm": "^2.27.3",
+        "@tiptap/react": "^2.27.3",
+        "@tiptap/starter-kit": "^2.27.3"
     }
 }

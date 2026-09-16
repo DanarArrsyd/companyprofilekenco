@@ -17,8 +17,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'title',
     'slug',
     'excerpt',
-    'body',
-    'cover_media_id',
+    'content',
+    'featured_image',
+    'author_id',
+    'is_featured',
     'status',
     'published_at',
     'created_by',
@@ -33,6 +35,7 @@ class Article extends Model
         return [
             'status' => ContentStatus::class,
             'published_at' => 'datetime',
+            'is_featured' => 'boolean',
         ];
     }
 
@@ -41,8 +44,8 @@ class Article extends Model
         return $this->belongsTo(NewsCategory::class, 'news_category_id');
     }
 
-    public function coverMedia(): BelongsTo
+    public function author(): BelongsTo
     {
-        return $this->belongsTo(Media::class, 'cover_media_id');
+        return $this->belongsTo(User::class, 'author_id');
     }
 }

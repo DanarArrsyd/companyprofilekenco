@@ -18,7 +18,8 @@ class ArticleFactory extends Factory
             'title' => $title,
             'slug' => Str::slug($title),
             'excerpt' => fake()->sentence(),
-            'body' => fake()->paragraphs(3, true),
+            'content' => '<p>'.fake()->paragraphs(3, true).'</p>',
+            'is_featured' => false,
             'status' => ContentStatus::Draft,
             'published_at' => null,
         ];

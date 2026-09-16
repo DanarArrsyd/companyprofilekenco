@@ -4,6 +4,8 @@ namespace App\Actions\Page;
 
 use App\Models\Page;
 use App\Services\ActivityLogService;
+use App\Services\MediaUploadService;
+use App\Services\SeoService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +13,8 @@ class UpdatePage
 {
     public function __construct(
         private readonly ActivityLogService $activityLog,
+        private readonly MediaUploadService $media,
+        private readonly SeoService $seo,
     ) {}
 
     public function handle(Page $page, array $data): Page
@@ -25,7 +29,7 @@ class UpdatePage
                 'updated_by' => Auth::id(),
             ]);
 
-            $page->seoMetadata()->updateOrCreate([], $data['seo'] ?? []);
+            $this->seo->saveMetadata($page, $data['seo'] ?? [], $this->media, 'seo/pages');
 
             $this->activityLog->record('page.updated', $page, ['title' => $page->title]);
 

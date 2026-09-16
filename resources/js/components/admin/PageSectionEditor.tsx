@@ -28,7 +28,7 @@ export function PageSectionEditor({
     isFirst: boolean;
     isLast: boolean;
     onMove: (direction: 'up' | 'down') => void;
-    pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[] };
+    pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[]; facilities?: PickerOption[] };
     fixed?: boolean;
     label?: string;
 }) {

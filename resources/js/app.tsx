@@ -7,7 +7,12 @@ import { createRoot } from 'react-dom/client';
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    // Public pages resolve their own full title (via SeoService, including
+    // the company name and an admin-configurable separator) — only suffix
+    // here when the resolved title doesn't already end with it, so admin
+    // pages (which pass a bare title) keep their existing "Title - App"
+    // behavior without public pages ending up with the company name twice.
+    title: (title) => (title.endsWith(appName) ? title : `${title} - ${appName}`),
     resolve: (name) =>
         resolvePageComponent(
             `./pages/${name}.tsx`,

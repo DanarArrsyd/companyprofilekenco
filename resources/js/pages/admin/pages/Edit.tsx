@@ -6,6 +6,7 @@ import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageSectionEditor } from '@/components/admin/PageSectionEditor';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,17 +28,21 @@ export default function Edit({
     const sections = page.sections ?? [];
     const [newSectionType, setNewSectionType] = useState(sectionTypeOptions[0]?.value ?? 'text');
 
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        _method: string; title: string; status: string; published_at: string; seo: SeoFieldsData;
+    }>({
+        _method: 'put',
         title: page.title,
         status: page.status,
         published_at: page.published_at ? page.published_at.slice(0, 16) : '',
         seo: {
+            ...SEO_FIELDS_DEFAULT,
             meta_title: page.seoMetadata?.meta_title ?? '',
             meta_description: page.seoMetadata?.meta_description ?? '',
             canonical_url: page.seoMetadata?.canonical_url ?? '',
             og_title: page.seoMetadata?.og_title ?? '',
             og_description: page.seoMetadata?.og_description ?? '',
-            og_image: page.seoMetadata?.og_image ?? '',
+            og_image_path: page.seoMetadata?.og_image ?? '',
             robots_index: page.seoMetadata?.robots_index ?? true,
             robots_follow: page.seoMetadata?.robots_follow ?? true,
         },
@@ -45,7 +50,7 @@ export default function Edit({
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        put(route('admin.pages.update', page.id));
+        post(route('admin.pages.update', page.id), { forceFormData: true });
     };
 
     const addSection = () => {
@@ -159,52 +164,13 @@ export default function Edit({
                     </FormSection>
 
                     <FormSection title="SEO" description="Search engine and social sharing metadata.">
-                        <div>
-                            <Label htmlFor="meta_title">Meta title</Label>
-                            <Input
-                                id="meta_title"
-                                value={data.seo.meta_title}
-                                onChange={(e) => setData('seo', { ...data.seo, meta_title: e.target.value })}
-                                className="mt-1.5"
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="meta_description">Meta description</Label>
-                            <textarea
-                                id="meta_description"
-                                value={data.seo.meta_description}
-                                onChange={(e) => setData('seo', { ...data.seo, meta_description: e.target.value })}
-                                rows={3}
-                                className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm"
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="canonical_url">Canonical URL</Label>
-                            <Input
-                                id="canonical_url"
-                                value={data.seo.canonical_url}
-                                onChange={(e) => setData('seo', { ...data.seo, canonical_url: e.target.value })}
-                                className="mt-1.5"
-                            />
-                        </div>
-                        <div>
-                            <Label htmlFor="og_image">OG Image URL</Label>
-                            <Input
-                                id="og_image"
-                                value={data.seo.og_image}
-                                onChange={(e) => setData('seo', { ...data.seo, og_image: e.target.value })}
-                                className="mt-1.5"
-                            />
-                        </div>
-                        <label className="flex items-center gap-2 text-sm text-slate-700">
-                            <input
-                                type="checkbox"
-                                checked={data.seo.robots_index}
-                                onChange={(e) => setData('seo', { ...data.seo, robots_index: e.target.checked })}
-                                className="rounded border-border"
-                            />
-                            Indexable by search engines
-                        </label>
+                        <SeoFields
+                            data={data.seo}
+                            onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
+                            errors={errors}
+                            titleFallback={page.title}
+                            pageUrl={`/${page.slug}`}
+                        />
                     </FormSection>
 
                     <FormActions>

@@ -7,6 +7,7 @@ use App\Enums\PageType;
 use App\Enums\SectionType;
 use App\Http\Controllers\Controller;
 use App\Models\Capability;
+use App\Models\Facility;
 use App\Models\Page;
 use App\Models\Product;
 use Inertia\Inertia;
@@ -28,6 +29,10 @@ class HomepageController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name']),
             'availableProducts' => Product::query()
+                ->published()
+                ->orderBy('name')
+                ->get(['id', 'name']),
+            'availableFacilities' => Facility::query()
                 ->published()
                 ->orderBy('name')
                 ->get(['id', 'name']),

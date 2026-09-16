@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Requests\Admin\QualityContent;
+
+use App\Enums\ContentStatus;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
+
+class UpdateQualityContentRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:255'],
+            'summary' => ['nullable', 'string', 'max:255'],
+            'content' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'status' => ['required', new Enum(ContentStatus::class)],
+            'published_at' => ['nullable', 'date'],
+        ];
+    }
+}

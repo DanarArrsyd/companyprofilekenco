@@ -1,0 +1,81 @@
+name: Deploy to Staging
+
+# Manual trigger only, deliberately — this is the first deployment phase for
+# this project and the staging pipeline has not been proven reliable yet.
+# Once several manual runs have gone cleanly, revisit switching this to
+# `on: push: branches: [main]` in a later phase.
+#
+# This workflow deploys to staging.kencomanufactur.co.id ONLY. It has no
+# knowledge of, and no path anywhere near, the production document root.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  deploy-staging:
+    name: Build and deploy to staging
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3 (for composer.lock validation only — vendor/ is installed server-side, not shipped)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Validate composer files
+        run: composer validate --no-check-publish
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Load SSH deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Add staging host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.STAGING_PORT }}" "${{ secrets.STAGING_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync release to staging "incoming" directory
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.STAGING_PORT }}" \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude "tests" \
+            --exclude ".env" \
+            --exclude "storage" \
+            --exclude "public/storage" \
+            ./ "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}:${{ secrets.STAGING_PATH }}/incoming/"
+
+      - name: Run remote deploy script
+        run: |
+          ssh -p "${{ secrets.STAGING_PORT }}" "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" \
+            "bash ${{ secrets.STAGING_PATH }}/incoming/scripts/deploy-staging.sh"
+
+      - name: Smoke test
+        run: |
+          curl -fsS https://staging.kencomanufactur.co.id/up
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://staging.kencomanufactur.co.id/
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://staging.kencomanufactur.co.id/admin/login
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://staging.kencomanufactur.co.id/products
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://staging.kencomanufactur.co.id/news
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://staging.kencomanufactur.co.id/contact
+          curl -fsS https://staging.kencomanufactur.co.id/sitemap.xml > /dev/null
+          curl -fsS https://staging.kencomanufactur.co.id/robots.txt

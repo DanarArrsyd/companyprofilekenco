@@ -7,6 +7,7 @@ use App\Models\Concerns\HasAuditedBy;
 use App\Models\Concerns\HasPublishingLifecycle;
 use App\Models\Concerns\HasSeoMetadata;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'slug',
     'short_description',
     'description',
+    'material',
+    'application',
+    'manufacturing_process',
+    'featured_image',
+    'is_featured',
     'status',
     'published_at',
     'created_by',
@@ -33,6 +39,7 @@ class Product extends Model
         return [
             'status' => ContentStatus::class,
             'published_at' => 'datetime',
+            'is_featured' => 'boolean',
         ];
     }
 
@@ -44,5 +51,10 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('order');
+    }
+
+    public function scopeFeatured(Builder $query): Builder
+    {
+        return $query->where('is_featured', true);
     }
 }

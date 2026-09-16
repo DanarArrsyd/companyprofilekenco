@@ -12,6 +12,18 @@ export interface FlashMessages {
     info?: string | null;
 }
 
+export interface SiteSettings {
+    company_name: string;
+    tagline: string | null;
+    logo: string | null;
+    address: string | null;
+    phone: string | null;
+    email: string | null;
+    operating_hours: string | null;
+    map_embed_url: string | null;
+    social: { linkedin: string | null; youtube: string | null; instagram: string | null };
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -21,4 +33,5 @@ export type PageProps<
         permissions: string[];
     };
     flash: FlashMessages;
+    siteSettings: SiteSettings;
 };

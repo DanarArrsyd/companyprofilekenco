@@ -4,32 +4,26 @@ import { FormEventHandler } from 'react';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 
 export default function Create({ statusOptions }: { statusOptions: string[] }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<{
+        title: string; slug: string; status: string; published_at: string; seo: SeoFieldsData;
+    }>({
         title: '',
         slug: '',
         status: 'draft',
         published_at: '',
-        seo: {
-            meta_title: '',
-            meta_description: '',
-            canonical_url: '',
-            og_title: '',
-            og_description: '',
-            og_image: '',
-            robots_index: true as boolean,
-            robots_follow: true as boolean,
-        },
+        seo: SEO_FIELDS_DEFAULT,
     });
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('admin.pages.store'));
+        post(route('admin.pages.store'), { forceFormData: true });
     };
 
     return (
@@ -101,34 +95,13 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 </FormSection>
 
                 <FormSection title="SEO" description="Search engine and social sharing metadata.">
-                    <div>
-                        <Label htmlFor="meta_title">Meta title</Label>
-                        <Input
-                            id="meta_title"
-                            value={data.seo.meta_title}
-                            onChange={(e) => setData('seo', { ...data.seo, meta_title: e.target.value })}
-                            className="mt-1.5"
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="meta_description">Meta description</Label>
-                        <textarea
-                            id="meta_description"
-                            value={data.seo.meta_description}
-                            onChange={(e) => setData('seo', { ...data.seo, meta_description: e.target.value })}
-                            rows={3}
-                            className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm"
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor="canonical_url">Canonical URL</Label>
-                        <Input
-                            id="canonical_url"
-                            value={data.seo.canonical_url}
-                            onChange={(e) => setData('seo', { ...data.seo, canonical_url: e.target.value })}
-                            className="mt-1.5"
-                        />
-                    </div>
+                    <SeoFields
+                        data={data.seo}
+                        onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
+                        errors={errors}
+                        titleFallback={data.title || 'New Page'}
+                        pageUrl={`/${data.slug || '...'}`}
+                    />
                 </FormSection>
 
                 <FormActions>
