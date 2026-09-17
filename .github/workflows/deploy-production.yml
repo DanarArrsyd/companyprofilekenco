@@ -1,0 +1,122 @@
+name: Deploy to Production
+
+# Manual trigger only — NEVER on push. This workflow is not touched by any
+# other automation in this repo, and this file alone does not perform a
+# cutover: it syncs a release to production's incoming/ and runs
+# scripts/deploy-production.sh, which itself defaults to PREPARE mode
+# (application/ only, public_html/ never touched) unless explicitly told
+# to cut over — see the "Confirm cutover" input below and
+# docs/PRODUCTION-CUTOVER.md for the full human checklist this is one part
+# of. Do not run this workflow casually; running it with cutover confirmed
+# switches live production traffic.
+#
+# This workflow deploys to kencomanufactur.co.id ONLY, using its own
+# `production` GitHub Environment and its own PRODUCTION_* secrets — it
+# never reads any STAGING_* secret by name, so a typo can't silently reuse
+# staging credentials against production.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_cutover:
+        description: 'Type SWITCH-PRODUCTION-NOW to actually cut over (anything else runs PREPARE only, leaving the live legacy site untouched)'
+        required: false
+        default: ''
+
+jobs:
+  deploy-production:
+    name: Build and deploy to production
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3 (for composer.lock validation only — vendor/ is installed server-side, not shipped)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          coverage: none
+
+      - name: Validate composer files
+        run: composer validate --no-check-publish
+
+      - name: Install Composer dependencies (for the test suite only)
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env for CI test run
+        run: cp .env.example .env
+
+      - name: Generate app key for CI test run
+        run: php artisan key:generate
+
+      - name: Run backend tests (must pass before any production deploy)
+        run: php artisan test
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Load SSH deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+
+      - name: Add production host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.PRODUCTION_PORT }}" "${{ secrets.PRODUCTION_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync release to production "incoming" directory
+        run: |
+          rsync -az --delete \
+            -e "ssh -p ${{ secrets.PRODUCTION_PORT }}" \
+            --exclude ".git" \
+            --exclude "node_modules" \
+            --exclude "tests" \
+            --exclude ".env" \
+            --exclude "storage" \
+            --exclude "public/storage" \
+            ./ "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}/incoming/"
+
+      - name: Run remote deploy script
+        env:
+          CONFIRM_CUTOVER_INPUT: ${{ github.event.inputs.confirm_cutover }}
+        run: |
+          if [ "$CONFIRM_CUTOVER_INPUT" = "SWITCH-PRODUCTION-NOW" ]; then
+            echo "::warning::Cutover confirmed via workflow input — public_html will be switched."
+            CUTOVER_ENV="CUTOVER_CONFIRM=SWITCH-PRODUCTION-NOW"
+          else
+            echo "Cutover NOT confirmed — running in PREPARE mode only (public_html untouched)."
+            CUTOVER_ENV=""
+          fi
+
+          ssh -p "${{ secrets.PRODUCTION_PORT }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" \
+            "${CUTOVER_ENV} bash ${{ secrets.PRODUCTION_PATH }}/incoming/scripts/deploy-production.sh"
+
+      - name: Smoke test
+        env:
+          CONFIRM_CUTOVER_INPUT: ${{ github.event.inputs.confirm_cutover }}
+        run: |
+          if [ "$CONFIRM_CUTOVER_INPUT" != "SWITCH-PRODUCTION-NOW" ]; then
+            echo "PREPARE mode only — skipping public smoke tests (public_html still serves the legacy site)."
+            exit 0
+          fi
+
+          curl -fsS https://kencomanufactur.co.id/up
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/admin/login
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/products
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/news
+          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/contact
+          curl -fsS https://kencomanufactur.co.id/sitemap.xml > /dev/null
+          curl -fsS https://kencomanufactur.co.id/robots.txt
