@@ -8,6 +8,7 @@ jobs:
   backend:
     name: Backend (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
+    needs: frontend
     strategy:
       matrix:
         php: ["8.3"]
@@ -29,6 +30,12 @@ jobs:
 
       - name: Generate app key
         run: php artisan key:generate
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: public-build
+          path: public/build
 
       - name: Run backend tests
         run: php artisan test
