@@ -22,12 +22,19 @@ use App\Models\ProductCategory;
 use App\Models\QualityContent;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 /**
  * Realistic sample content across every public page, purely additive —
  * never deletes or touches existing rows, safe to run repeatedly (models
  * without a natural unique key just grow; re-running does not corrupt
  * anything, it only adds more sample rows).
+ *
+ * Deliberately uses plain Model::create() with explicit literal values
+ * instead of factories/fake() — factories depend on fakerphp/faker, which
+ * is require-dev only and is not installed on staging/production
+ * (deploy scripts run `composer install --no-dev`). This seeder must run
+ * there, so it cannot depend on a dev-only package.
  *
  * No real photography exists yet, so every image field is left null — the
  * ImagePlaceholder fallback already used throughout the public site
@@ -43,7 +50,7 @@ class DemoContentSeeder extends Seeder
         $industries = $this->seedIndustries();
         $certifications = $this->seedCertifications();
         $qualityContents = $this->seedQualityContent();
-        [$capabilities] = $this->seedCapabilities();
+        $capabilities = $this->seedCapabilities();
         $products = $this->seedProducts();
         $facilities = $this->seedFacilities();
         $this->seedMilestones();
@@ -71,75 +78,92 @@ class DemoContentSeeder extends Seeder
             ['name' => 'Consumer Goods', 'description' => 'High-volume plastic and metal parts for consumer product brands.'],
         ];
 
-        return collect($names)->map(fn (array $i) => Industry::factory()->published()->create([
+        return collect($names)->map(fn (array $i) => Industry::create([
             'name' => $i['name'],
-            'slug' => \Illuminate\Support\Str::slug($i['name']),
+            'slug' => Str::slug($i['name']),
             'description' => $i['description'],
+            'status' => ContentStatus::Published,
+            'published_at' => now()->subDay(),
         ]));
     }
 
     private function seedCertifications()
     {
         $certs = [
-            ['name' => 'ISO 9001:2015', 'issuer' => 'SGS'],
-            ['name' => 'IATF 16949:2016', 'issuer' => 'TÜV Rheinland'],
-            ['name' => 'ISO 14001:2015', 'issuer' => 'SGS'],
-            ['name' => 'ISO 45001:2018', 'issuer' => 'Bureau Veritas'],
+            ['name' => 'ISO 9001:2015', 'issuer' => 'SGS', 'number' => 'CERT-9001-2015'],
+            ['name' => 'IATF 16949:2016', 'issuer' => 'TÜV Rheinland', 'number' => 'CERT-16949-2016'],
+            ['name' => 'ISO 14001:2015', 'issuer' => 'SGS', 'number' => 'CERT-14001-2015'],
+            ['name' => 'ISO 45001:2018', 'issuer' => 'Bureau Veritas', 'number' => 'CERT-45001-2018'],
         ];
 
-        return collect($certs)->map(fn (array $c, int $i) => Certification::factory()->published()->create([
+        return collect($certs)->map(fn (array $c, int $i) => Certification::create([
             'name' => $c['name'],
             'issuer' => $c['issuer'],
+            'certificate_number' => $c['number'],
+            'issued_at' => now()->subYears(2),
+            'expires_at' => now()->addYears(2),
             'sort_order' => $i,
+            'status' => ContentStatus::Published,
+            'published_at' => now()->subDay(),
         ]));
     }
 
     private function seedQualityContent()
     {
         $items = [
-            ['title' => 'Quality Policy', 'summary' => 'Our commitment to zero-defect manufacturing at every stage.'],
-            ['title' => 'Inspection Process', 'summary' => 'Incoming, in-process, and final inspection on every production run.'],
-            ['title' => 'Continuous Improvement', 'summary' => 'Kaizen-driven process reviews across all production lines.'],
+            ['title' => 'Quality Policy', 'summary' => 'Our commitment to zero-defect manufacturing at every stage.', 'content' => 'Every product that leaves our facilities is manufactured under documented process controls, with quality built in at each station rather than inspected in at the end.'],
+            ['title' => 'Inspection Process', 'summary' => 'Incoming, in-process, and final inspection on every production run.', 'content' => 'Raw materials are inspected on arrival, parts are checked at defined intervals during production, and every shipment undergoes final inspection before release.'],
+            ['title' => 'Continuous Improvement', 'summary' => 'Kaizen-driven process reviews across all production lines.', 'content' => 'Production teams run regular process reviews to identify defect sources and reduce variation, with corrective actions tracked to closure.'],
         ];
 
-        return collect($items)->map(fn (array $q, int $i) => QualityContent::factory()->published()->create([
+        return collect($items)->map(fn (array $q, int $i) => QualityContent::create([
             'title' => $q['title'],
-            'slug' => \Illuminate\Support\Str::slug($q['title']),
+            'slug' => Str::slug($q['title']),
             'summary' => $q['summary'],
+            'content' => $q['content'],
             'sort_order' => $i,
+            'status' => ContentStatus::Published,
+            'published_at' => now()->subDay(),
         ]));
     }
 
-    private function seedCapabilities(): array
+    private function seedCapabilities()
     {
         $defs = [
             [
                 'name' => 'Metal Stamping',
                 'summary' => 'High-volume progressive die stamping for precision metal components.',
+                'description' => 'Our stamping lines run progressive dies for high-volume metal components, from prototype tooling through full production, with in-line dimensional checks on every run.',
                 'steps' => ['Tool & Die Design', 'Progressive Die Stamping', 'In-line Quality Inspection'],
             ],
             [
                 'name' => 'Injection Molding',
                 'summary' => 'Precision plastic injection molding from prototype through mass production.',
+                'description' => 'From mold design and flow simulation through mass production, our molding presses handle engineering-grade resins for structural and cosmetic plastic parts.',
                 'steps' => ['Mold Design & Simulation', 'Injection Molding', 'Post-Mold Finishing'],
             ],
             [
                 'name' => 'CNC Machining',
                 'summary' => 'Multi-axis CNC machining for tight-tolerance metal and plastic parts.',
+                'description' => 'Multi-axis CNC centers machine metal and plastic parts to tight tolerances, programmed directly from customer CAD data and verified on CMM equipment.',
                 'steps' => ['CAM Programming', 'Multi-Axis Machining', 'Dimensional Inspection'],
             ],
             [
                 'name' => 'Assembly & Testing',
                 'summary' => 'Sub-assembly, functional testing, and final packaging.',
+                'description' => 'We combine components into finished sub-assemblies, run functional testing against customer specifications, and package for direct shipment to the production line.',
                 'steps' => ['Sub-Assembly', 'Functional Testing', 'Packaging & Kitting'],
             ],
         ];
 
-        $capabilities = collect($defs)->map(function (array $c) {
-            $capability = Capability::factory()->published()->create([
+        return collect($defs)->map(function (array $c) {
+            $capability = Capability::create([
                 'name' => $c['name'],
-                'slug' => \Illuminate\Support\Str::slug($c['name']),
+                'slug' => Str::slug($c['name']),
                 'summary' => $c['summary'],
+                'description' => $c['description'],
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
             ]);
 
             foreach ($c['steps'] as $i => $title) {
@@ -153,14 +177,25 @@ class DemoContentSeeder extends Seeder
 
             return $capability;
         });
-
-        return [$capabilities];
     }
 
     private function seedProducts()
     {
-        $category = ProductCategory::factory()->create(['name' => 'Stamped Metal Components']);
-        $category2 = ProductCategory::factory()->create(['name' => 'Molded Plastic Parts']);
+        $category = ProductCategory::create([
+            'name' => 'Stamped Metal Components',
+            'slug' => 'stamped-metal-components',
+            'description' => 'Precision stamped metal parts for automotive and industrial assemblies.',
+            'sort_order' => 0,
+            'status' => ContentStatus::Published,
+        ]);
+
+        $category2 = ProductCategory::create([
+            'name' => 'Molded Plastic Parts',
+            'slug' => 'molded-plastic-parts',
+            'description' => 'Injection molded plastic components and housings.',
+            'sort_order' => 1,
+            'status' => ContentStatus::Published,
+        ]);
 
         $defs = [
             ['name' => 'Precision Bracket Assembly', 'category' => $category, 'featured' => true],
@@ -171,33 +206,65 @@ class DemoContentSeeder extends Seeder
             ['name' => 'Custom Enclosure Panel', 'category' => $category2, 'featured' => false],
         ];
 
-        return collect($defs)->map(fn (array $p) => Product::factory()->published()->create([
+        return collect($defs)->map(fn (array $p) => Product::create([
             'product_category_id' => $p['category']->id,
             'name' => $p['name'],
-            'slug' => \Illuminate\Support\Str::slug($p['name']),
+            'slug' => Str::slug($p['name']),
             'short_description' => 'Manufactured to customer print specifications with full dimensional traceability.',
+            'description' => 'Produced on our precision production lines under documented process controls, with material certification and dimensional reports available on request.',
             'is_featured' => $p['featured'],
+            'status' => ContentStatus::Published,
+            'published_at' => now()->subDay(),
         ]));
     }
 
     private function seedFacilities()
     {
-        $category = FacilityCategory::factory()->create(['name' => 'Manufacturing Plant']);
+        $category = FacilityCategory::create([
+            'name' => 'Manufacturing Plant',
+            'slug' => 'manufacturing-plant',
+            'description' => 'Primary production facilities.',
+            'sort_order' => 0,
+            'status' => ContentStatus::Published,
+        ]);
+
+        $machineDefs = [
+            ['name' => 'Progressive Stamping Press', 'brand' => 'Komatsu', 'model' => 'OBS-250', 'capacity' => '250 ton', 'quantity' => 4],
+            ['name' => 'Horizontal Injection Molder', 'brand' => 'Arburg', 'model' => 'Allrounder 570', 'capacity' => '150 ton', 'quantity' => 3],
+            ['name' => '5-Axis CNC Machining Center', 'brand' => 'DMG Mori', 'model' => 'DMU 50', 'capacity' => 'N/A', 'quantity' => 2],
+        ];
 
         $defs = [
             'Plant 1 — Stamping & Assembly',
             'Plant 2 — Injection Molding',
         ];
 
-        return collect($defs)->map(function (string $name) use ($category) {
-            $facility = Facility::factory()->published()->create([
+        return collect($defs)->map(function (string $name) use ($category, $machineDefs) {
+            $facility = Facility::create([
                 'facility_category_id' => $category->id,
                 'name' => $name,
-                'slug' => \Illuminate\Support\Str::slug($name),
+                'slug' => Str::slug($name),
                 'location' => 'Karawang, West Java, Indonesia',
+                'description' => 'A production facility operating under ISO 9001 and IATF 16949 quality management systems.',
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
             ]);
 
-            Machine::factory()->count(3)->create(['facility_id' => $facility->id]);
+            foreach ($machineDefs as $i => $m) {
+                Machine::create([
+                    'facility_id' => $facility->id,
+                    'name' => $m['name'],
+                    'brand' => $m['brand'],
+                    'model' => $m['model'],
+                    'quantity' => $m['quantity'],
+                    'capacity' => $m['capacity'],
+                    'description' => null,
+                    'specification' => null,
+                    'sort_order' => $i,
+                    'status' => ContentStatus::Published,
+                    'is_active' => true,
+                ]);
+            }
 
             return $facility;
         });
@@ -214,7 +281,7 @@ class DemoContentSeeder extends Seeder
         ];
 
         foreach ($timeline as $i => $m) {
-            Milestone::factory()->create([
+            Milestone::create([
                 'year' => $m['year'],
                 'title' => $m['title'],
                 'description' => $m['description'],
@@ -225,26 +292,31 @@ class DemoContentSeeder extends Seeder
 
     private function seedNews(?User $author): void
     {
-        $categories = collect(['Company News', 'Product Updates', 'Industry Insights'])
-            ->map(fn (string $name) => NewsCategory::factory()->create(['name' => $name]));
+        $categories = collect([
+            ['name' => 'Company News', 'slug' => 'company-news'],
+            ['name' => 'Product Updates', 'slug' => 'product-updates'],
+            ['name' => 'Industry Insights', 'slug' => 'industry-insights'],
+        ])->map(fn (array $c) => NewsCategory::create($c));
 
-        $titles = [
-            'Kenco Manufactur Achieves IATF 16949 Certification',
-            'New Injection Molding Line Now Operational',
-            'Expanding Our Automotive Supply Partnerships',
-            'How We Reduced Defect Rates Through Automation',
-            'Kenco Manufactur Joins Regional Manufacturing Association',
-            'Year in Review: Production Milestones',
+        $articles = [
+            ['title' => 'Kenco Manufactur Achieves IATF 16949 Certification', 'excerpt' => 'Our quality management system is now certified to the automotive industry standard.'],
+            ['title' => 'New Injection Molding Line Now Operational', 'excerpt' => 'Plant 2 has added a new production line to support growing customer demand.'],
+            ['title' => 'Expanding Our Automotive Supply Partnerships', 'excerpt' => 'We are pleased to announce new partnerships with tier-1 automotive suppliers.'],
+            ['title' => 'How We Reduced Defect Rates Through Automation', 'excerpt' => 'A look at the automated inspection systems now running across our production lines.'],
+            ['title' => 'Kenco Manufactur Joins Regional Manufacturing Association', 'excerpt' => 'Strengthening our connections within the regional manufacturing community.'],
+            ['title' => 'Year in Review: Production Milestones', 'excerpt' => 'A look back at the production milestones reached this year.'],
         ];
 
-        foreach ($titles as $i => $title) {
-            Article::factory()->published()->create([
+        foreach ($articles as $i => $a) {
+            Article::create([
                 'news_category_id' => $categories[$i % $categories->count()]->id,
                 'author_id' => $author?->id,
-                'title' => $title,
-                'slug' => \Illuminate\Support\Str::slug($title),
-                'excerpt' => 'A brief update from the Kenco Manufactur production floor and leadership team.',
+                'title' => $a['title'],
+                'slug' => Str::slug($a['title']),
+                'excerpt' => $a['excerpt'],
+                'content' => '<p>'.$a['excerpt'].' Our team continues to invest in process discipline and equipment to serve our customers reliably.</p>',
                 'is_featured' => $i === 0,
+                'status' => ContentStatus::Published,
                 'published_at' => now()->subDays($i * 3),
             ]);
         }
@@ -260,12 +332,16 @@ class DemoContentSeeder extends Seeder
         ];
 
         foreach ($roles as $r) {
-            JobVacancy::factory()->published()->create([
+            JobVacancy::create([
                 'title' => $r['title'],
-                'slug' => \Illuminate\Support\Str::slug($r['title'].'-'.uniqid()),
+                'slug' => Str::slug($r['title'].'-'.Str::random(6)),
                 'department' => $r['department'],
                 'location' => 'Karawang, West Java, Indonesia',
                 'employment_type' => $r['type'],
+                'description' => 'We are looking for a '.$r['title'].' to join our '.$r['department'].' team in Karawang.',
+                'requirements' => 'Relevant experience in a manufacturing environment, strong attention to detail, and willingness to work in a production setting.',
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
             ]);
         }
     }
