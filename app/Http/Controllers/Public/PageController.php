@@ -10,6 +10,18 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
+    /**
+     * Slugs CLAUDE.md requires to exist as public routes regardless of
+     * whether their CMS Page record has been created yet — these render
+     * their static header shell with an empty state instead of a 404, the
+     * same way Facilities/Industries always render their shell even with
+     * zero published items.
+     */
+    private const REQUIRED_SLUGS = [
+        'company' => 'Company',
+        'company/vision-mission' => 'Vision & Mission',
+    ];
+
     public function __construct(
         private readonly SeoService $seo,
     ) {}
@@ -25,7 +37,7 @@ class PageController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return $this->render($page);
+        return $this->render($slug, $page);
     }
 
     /**
@@ -36,16 +48,29 @@ class PageController extends Controller
     {
         $slug = $path ? "company/{$path}" : 'company';
 
-        return $this->show($slug);
+        if (! array_key_exists($slug, self::REQUIRED_SLUGS)) {
+            return $this->show($slug);
+        }
+
+        $page = Page::query()
+            ->standard()
+            ->published()
+            ->where('slug', $slug)
+            ->first();
+
+        return $this->render($slug, $page);
     }
 
-    private function render(Page $page): Response
+    private function render(string $slug, ?Page $page): Response
     {
-        $page->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
+        $page?->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
 
         return Inertia::render('public/Page', [
+            'slug' => $slug,
             'page' => $page,
-            'seo' => $this->seo->resolve($page, $page->title),
+            'seo' => $page
+                ? $this->seo->resolve($page, $page->title)
+                : $this->seo->resolveStatic(self::REQUIRED_SLUGS[$slug] ?? $slug),
             'preview' => false,
         ]);
     }

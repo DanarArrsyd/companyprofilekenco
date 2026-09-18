@@ -16,16 +16,18 @@ const HEADER_COPY: Record<string, { eyebrow: string; heading: string }> = {
 };
 
 export default function Page({
+    slug,
     page,
     seo,
     preview,
 }: {
-    page: CmsPage;
+    slug: string;
+    page: CmsPage | null;
     seo: ResolvedSeo;
     preview: boolean;
 }) {
-    const sections = page.sections ?? [];
-    const header = HEADER_COPY[page.slug];
+    const sections = page?.sections ?? [];
+    const header = HEADER_COPY[slug];
 
     return (
         <PublicLayout>
@@ -39,11 +41,17 @@ export default function Page({
 
             <section className="border-b border-border">
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader as="h1" eyebrow={header?.eyebrow} heading={header?.heading ?? page.title} />
+                    <SectionHeader as="h1" eyebrow={header?.eyebrow} heading={header?.heading ?? page?.title ?? slug} />
                 </div>
             </section>
 
-            {sections.length > 0 && sections.map((section) => <SectionRenderer key={section.id} section={section} />)}
+            {sections.length > 0 ? (
+                sections.map((section) => <SectionRenderer key={section.id} section={section} />)
+            ) : (
+                <p className="mx-auto max-w-content px-5 py-16 text-small text-muted-foreground sm:px-6 lg:px-8">
+                    No content published yet.
+                </p>
+            )}
         </PublicLayout>
     );
 }

@@ -77,3 +77,25 @@ test('company/milestones page has been removed and returns 404', function () {
 
     $response->assertNotFound();
 });
+
+test('company page renders its header shell with no 404 when no Page record exists yet', function () {
+    $response = $this->get('/company');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('public/Page')
+        ->where('slug', 'company')
+        ->where('page', null)
+    );
+});
+
+test('vision and mission page renders its header shell with no 404 when no Page record exists yet', function () {
+    $response = $this->get('/company/vision-mission');
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('public/Page')
+        ->where('slug', 'company/vision-mission')
+        ->where('page', null)
+    );
+});
