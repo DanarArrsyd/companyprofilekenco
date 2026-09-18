@@ -43,6 +43,11 @@ function isActive(currentUrl: string, href: string): boolean {
     return href === '/' ? currentUrl === '/' : currentUrl.startsWith(href);
 }
 
+// Keep in sync with the drawer panel's `duration-[320ms]` Tailwind class —
+// the exit animation must finish before the dialog unmounts.
+const DRAWER_TRANSITION_MS = 320;
+const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
+
 export function PublicNavbar({
     companyName,
     logo,
@@ -61,6 +66,7 @@ export function PublicNavbar({
 }) {
     const { url } = usePage();
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [drawerMounted, setDrawerMounted] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [navbarHidden, setNavbarHidden] = useState(false);
@@ -97,18 +103,29 @@ export function PublicNavbar({
         return () => window.removeEventListener('scroll', onScroll);
     }, [drawerOpen]);
 
+    // Mount the dialog for open AND for the duration of the close transition,
+    // so the exit animation gets a chance to play instead of being clipped
+    // by an instant unmount.
     useEffect(() => {
-        if (!drawerOpen) {
-            setDrawerEntered(false);
-            return;
-        }
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (drawerOpen) {
+            setDrawerMounted(true);
+            if (reduced) {
+                setDrawerEntered(true);
+                return;
+            }
+            const id = requestAnimationFrame(() => setDrawerEntered(true));
+            return () => cancelAnimationFrame(id);
+        }
+
+        setDrawerEntered(false);
         if (reduced) {
-            setDrawerEntered(true);
+            setDrawerMounted(false);
             return;
         }
-        const id = requestAnimationFrame(() => setDrawerEntered(true));
-        return () => cancelAnimationFrame(id);
+        const timeout = window.setTimeout(() => setDrawerMounted(false), DRAWER_TRANSITION_MS);
+        return () => window.clearTimeout(timeout);
     }, [drawerOpen]);
 
     useEffect(() => {
@@ -121,7 +138,7 @@ export function PublicNavbar({
     }, [drawerOpen]);
 
     useEffect(() => {
-        if (!drawerOpen) return;
+        if (!drawerMounted) return;
 
         const lockedScrollY = window.scrollY;
         const body = document.body;
@@ -147,7 +164,7 @@ export function PublicNavbar({
             window.scrollTo(0, lockedScrollY);
             root.style.scrollBehavior = previousScrollBehavior;
         };
-    }, [drawerOpen]);
+    }, [drawerMounted]);
 
     useEffect(() => {
         if (!drawerOpen) return;
@@ -165,7 +182,7 @@ export function PublicNavbar({
 
     return (
         <header
-            className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-200 ease-out motion-reduce:transition-none ${
+            className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
                 getNavbarTransformClass(navbarHidden, drawerOpen)
             } ${getNavbarSurfaceClass(transparentHero, drawerOpen)}`}
         >
@@ -183,11 +200,11 @@ export function PublicNavbar({
                 <button
                     ref={openButtonRef}
                     type="button"
-                    onClick={() => setDrawerOpen(true)}
-                    aria-label="Open navigation menu"
+                    onClick={() => setDrawerOpen((open) => !open)}
+                    aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
                     aria-haspopup="dialog"
                     aria-expanded={drawerOpen}
-                    className={`inline-flex items-center justify-center p-2 transition-colors duration-200 ${
+                    className={`relative inline-flex h-10 w-10 items-center justify-center transition-colors duration-200 active:scale-90 ${
                         transparentHero
                             ? light
                                 ? 'text-navy-900 hover:text-navy-700'
@@ -195,14 +212,27 @@ export function PublicNavbar({
                             : 'text-slate-700 hover:text-navy-900'
                     }`}
                 >
-                    <Menu className="h-6 w-6" aria-hidden="true" />
+                    <span className="relative inline-flex h-6 w-6 items-center justify-center">
+                        <Menu
+                            className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                drawerOpen ? 'rotate-90 scale-75 opacity-0' : 'rotate-0 scale-100 opacity-100'
+                            }`}
+                            aria-hidden="true"
+                        />
+                        <X
+                            className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                drawerOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-75 opacity-0'
+                            }`}
+                            aria-hidden="true"
+                        />
+                    </span>
                 </button>
             </div>
 
-            {drawerOpen && (
+            {drawerMounted && (
                 <div className="fixed inset-0 z-[60]">
                     <div
-                        className={`absolute inset-0 bg-charcoal/50 transition-opacity duration-200 ease-out ${drawerEntered ? 'opacity-100' : 'opacity-0'}`}
+                        className={`absolute inset-0 bg-charcoal/50 transition-opacity duration-300 ${DRAWER_EASE} ${drawerEntered ? 'opacity-100' : 'opacity-0'}`}
                         onClick={() => setDrawerOpen(false)}
                         aria-hidden="true"
                     />
@@ -211,7 +241,7 @@ export function PublicNavbar({
                         role="dialog"
                         aria-modal="true"
                         aria-label="Navigation menu"
-                        className={`absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-navy-900 text-white shadow-xl transition-transform duration-200 ease-out ${
+                        className={`absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-navy-900 text-white shadow-xl transition-transform duration-[320ms] ${DRAWER_EASE} ${
                             drawerEntered ? 'translate-x-0' : 'translate-x-full'
                         }`}
                     >
@@ -230,8 +260,14 @@ export function PublicNavbar({
 
                         <nav className="flex-1 overflow-y-auto px-5 py-6" aria-label="Primary">
                             <ul className="space-y-1">
-                                {NAV.map((item) => (
-                                    <li key={item.label}>
+                                {NAV.map((item, index) => (
+                                    <li
+                                        key={item.label}
+                                        className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-x-0 motion-reduce:opacity-100 ${
+                                            drawerEntered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+                                        }`}
+                                        style={{ transitionDelay: drawerEntered ? `${80 + index * 40}ms` : '0ms' }}
+                                    >
                                         {item.children ? (
                                             <details className="group" open={item.children.some((c) => isActive(url, c.href))}>
                                                 <summary className="flex cursor-pointer list-none items-center justify-between border-b border-white/10 py-3 text-h4">
@@ -271,7 +307,12 @@ export function PublicNavbar({
                             </ul>
                         </nav>
 
-                        <div className="border-t border-white/10 p-5">
+                        <div
+                            className={`border-t border-white/10 p-5 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
+                                drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                            }`}
+                            style={{ transitionDelay: drawerEntered ? `${80 + NAV.length * 40}ms` : '0ms' }}
+                        >
                             <Button asChild className="w-full bg-white text-navy-900 hover:bg-white/90">
                                 <Link href="/contact">Contact Us</Link>
                             </Button>

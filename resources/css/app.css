@@ -3,6 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+
     :root {
         /* Modern Industrial Corporate palette — DESIGN.md */
         --color-navy-900: 11 31 51;
