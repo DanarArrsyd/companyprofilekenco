@@ -354,8 +354,16 @@ export function PublicNavbar({
                         </div>
                     </nav>
 
-                    {/* Submenu preview — desktop/tablet only, blank until a parent item is previewed. */}
-                    <div className="hidden bg-background px-14 py-24 text-navy-900 md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20">
+                    {/*
+                        Submenu preview — desktop/tablet only. Stays navy (blended
+                        with the left column) until a parent item is previewed,
+                        then flips to the light surface to host its children.
+                    */}
+                    <div
+                        className={`hidden px-14 py-24 transition-colors duration-300 ${DRAWER_EASE} motion-reduce:transition-none md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20 ${
+                            previewedItem ? 'bg-background text-navy-900' : 'bg-navy-900 text-white'
+                        }`}
+                    >
                         {previewedItem?.children && (
                             <ul key={previewedItem.label} className="space-y-3">
                                 {previewedItem.children.map((child, index) => (
