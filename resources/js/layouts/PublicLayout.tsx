@@ -8,8 +8,13 @@ export default function PublicLayout({
     children,
     heroVariant = 'solid',
 }: PropsWithChildren<{
-    /** 'transparent' floats the header over a full-bleed hero image (see resources/js/components/public/Hero.tsx); 'solid' is every other page. */
-    heroVariant?: 'transparent' | 'solid';
+    /**
+     * 'transparent-dark' / 'transparent-light' float the header over a
+     * full-bleed hero image (see resources/js/components/public/Hero.tsx),
+     * in white or navy text depending on how light the hero image/overlay
+     * is. 'solid' is every page without a hero.
+     */
+    heroVariant?: 'transparent-dark' | 'transparent-light' | 'solid';
 }>) {
     const { siteSettings } = usePage().props;
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';

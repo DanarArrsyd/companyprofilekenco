@@ -281,7 +281,7 @@ export default function Home({
         );
     }
 
-    const heroVariant = sections[0]?.section_type === 'hero' ? 'transparent' : 'solid';
+    const heroVariant = sections[0]?.section_type === 'hero' ? 'transparent-dark' : 'solid';
 
     return (
         <PublicLayout heroVariant={heroVariant}>

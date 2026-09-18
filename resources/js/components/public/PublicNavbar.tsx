@@ -43,8 +43,14 @@ export function PublicNavbar({
 }: {
     companyName: string;
     logo?: string | null;
-    /** 'transparent' floats the header over a hero image; 'solid' is the normal readable header used on every other page. */
-    variant?: 'transparent' | 'solid';
+    /**
+     * 'transparent-dark' floats the header (white text/icons) over a dark
+     * hero photo. 'transparent-light' floats it (navy text/icons) over a
+     * light/washed-out hero photo. 'solid' is the normal readable header
+     * used on every page without a hero. All three become the same solid
+     * look once the page scrolls past the hero.
+     */
+    variant?: 'transparent-dark' | 'transparent-light' | 'solid';
 }) {
     const { url } = usePage();
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -105,10 +111,11 @@ export function PublicNavbar({
         return () => document.removeEventListener('keydown', onKeyDown);
     }, [drawerOpen]);
 
-    // Only actually transparent while the requested variant is 'transparent'
-    // AND the page hasn't been scrolled yet — past that point it reads
-    // exactly like the solid header, on every page, including this one.
-    const transparent = variant === 'transparent' && !scrolled;
+    // Only actually transparent while the requested variant is one of the
+    // transparent-* modes AND the page hasn't been scrolled yet — past that
+    // point it reads exactly like the solid header, on every page.
+    const transparent = variant !== 'solid' && !scrolled;
+    const light = variant === 'transparent-light';
 
     return (
         <header
@@ -119,7 +126,9 @@ export function PublicNavbar({
             <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
                 <Link
                     href="/"
-                    className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${transparent ? 'text-white' : 'text-navy-900'}`}
+                    className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${
+                        transparent && !light ? 'text-white' : 'text-navy-900'
+                    }`}
                 >
                     {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
                     {companyName}
@@ -133,7 +142,11 @@ export function PublicNavbar({
                     aria-haspopup="dialog"
                     aria-expanded={drawerOpen}
                     className={`inline-flex items-center justify-center p-2 transition-colors duration-200 ${
-                        transparent ? 'text-white hover:text-white/70' : 'text-slate-700 hover:text-navy-900'
+                        transparent
+                            ? light
+                                ? 'text-navy-900 hover:text-navy-700'
+                                : 'text-white hover:text-white/70'
+                            : 'text-slate-700 hover:text-navy-900'
                     }`}
                 >
                     <Menu className="h-6 w-6" aria-hidden="true" />

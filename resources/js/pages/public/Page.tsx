@@ -1,3 +1,4 @@
+import { AboutHero, AboutHeroContent } from '@/components/public/AboutHero';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
@@ -23,6 +24,23 @@ const HEADER_COPY: Record<string, { eyebrow: string; heading: string; descriptio
     },
 };
 
+/**
+ * The Company/About page gets the full-bleed hero treatment (see
+ * AboutHero.tsx) instead of the plain SectionHeader banner every other
+ * standard page uses. Image is left unset until a real photo is supplied —
+ * AboutHero falls back to the site's standard ImagePlaceholder.
+ */
+const ABOUT_HERO_CONTENT: Record<string, AboutHeroContent> = {
+    company: {
+        heading: 'Sekilas Tentang Kami',
+        introBefore: 'Didirikan pada tahun 2017, ',
+        introEmphasis: 'PT Kenco Manufactur Indonesia',
+        introAfter: ' bergerak di bidang manufaktur dan metal stamping untuk mendukung kebutuhan industri otomotif. Didukung empat Business Unit, perusahaan terus berkembang dengan mengutamakan kualitas dan kepuasan pelanggan.',
+        highlight: 'Berfokus pada solusi manufaktur yang efisien, berkualitas, dan sesuai kebutuhan pelanggan.',
+        image: null,
+    },
+};
+
 export default function Page({
     slug,
     page,
@@ -36,9 +54,10 @@ export default function Page({
 }) {
     const sections = page?.sections ?? [];
     const header = HEADER_COPY[slug];
+    const aboutHero = ABOUT_HERO_CONTENT[slug];
 
     return (
-        <PublicLayout>
+        <PublicLayout heroVariant={aboutHero ? 'transparent-light' : 'solid'}>
             <SeoHead seo={seo} />
 
             {preview && (
@@ -47,16 +66,20 @@ export default function Page({
                 </div>
             )}
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={header?.eyebrow}
-                        heading={header?.heading ?? page?.title ?? slug}
-                        description={header?.description}
-                    />
-                </div>
-            </section>
+            {aboutHero ? (
+                <AboutHero content={aboutHero} />
+            ) : (
+                <section className="border-b border-border">
+                    <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+                        <SectionHeader
+                            as="h1"
+                            eyebrow={header?.eyebrow}
+                            heading={header?.heading ?? page?.title ?? slug}
+                            description={header?.description}
+                        />
+                    </div>
+                </section>
+            )}
 
             {sections.length > 0 ? (
                 sections.map((section) => <SectionRenderer key={section.id} section={section} />)
