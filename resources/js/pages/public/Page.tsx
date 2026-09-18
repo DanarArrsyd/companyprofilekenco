@@ -10,9 +10,17 @@ import { CmsPage, ResolvedSeo } from '@/types/cms';
  * (a fixed banner per page type, not CMS-sourced). Any other standard page
  * falls back to its own title with no eyebrow.
  */
-const HEADER_COPY: Record<string, { eyebrow: string; heading: string }> = {
-    company: { eyebrow: 'Our Company', heading: 'Company' },
-    'company/vision-mission': { eyebrow: 'Our Direction', heading: 'Vision & Mission' },
+const HEADER_COPY: Record<string, { eyebrow: string; heading: string; description: string }> = {
+    company: {
+        eyebrow: 'Our Company',
+        heading: 'Company',
+        description: 'Who we are and how we build precision manufacturing for our customers.',
+    },
+    'company/vision-mission': {
+        eyebrow: 'Our Direction',
+        heading: 'Vision & Mission',
+        description: 'The principles that guide how we manufacture, and where we aim to be.',
+    },
 };
 
 export default function Page({
@@ -41,7 +49,12 @@ export default function Page({
 
             <section className="border-b border-border">
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader as="h1" eyebrow={header?.eyebrow} heading={header?.heading ?? page?.title ?? slug} />
+                    <SectionHeader
+                        as="h1"
+                        eyebrow={header?.eyebrow}
+                        heading={header?.heading ?? page?.title ?? slug}
+                        description={header?.description}
+                    />
                 </div>
             </section>
 
