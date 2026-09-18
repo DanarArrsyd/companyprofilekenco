@@ -181,52 +181,64 @@ export function PublicNavbar({
     const light = variant === 'transparent-light';
 
     return (
-        <header
-            className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
-                getNavbarTransformClass(navbarHidden, drawerOpen)
-            } ${getNavbarSurfaceClass(transparentHero, drawerOpen)}`}
-        >
-            <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
-                <Link
-                    href="/"
-                    className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${
-                        transparentHero && !light ? 'text-white' : 'text-navy-900'
-                    }`}
-                >
-                    {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
-                    {companyName}
-                </Link>
+        <header className="fixed inset-x-0 top-0 z-50">
+            {/*
+                The hide-on-scroll slide only ever applies to this bar (logo +
+                surface). The menu trigger below lives outside it so it stays
+                reachable and instantly tappable even while the bar is off-screen
+                — no waiting on a re-entrance transition before the drawer can open.
+            */}
+            <div
+                className={`transition-[transform,background-color,border-color] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${getNavbarTransformClass(navbarHidden)} ${getNavbarSurfaceClass(transparentHero, drawerOpen)}`}
+            >
+                <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
+                    <Link
+                        href="/"
+                        className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${
+                            transparentHero && !light ? 'text-white' : 'text-navy-900'
+                        }`}
+                    >
+                        {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
+                        {companyName}
+                    </Link>
 
-                <button
-                    ref={openButtonRef}
-                    type="button"
-                    onClick={() => setDrawerOpen((open) => !open)}
-                    aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                    aria-haspopup="dialog"
-                    aria-expanded={drawerOpen}
-                    className={`relative inline-flex h-10 w-10 items-center justify-center transition-colors duration-200 active:scale-90 ${
-                        transparentHero
-                            ? light
-                                ? 'text-navy-900 hover:text-navy-700'
-                                : 'text-white hover:text-white/70'
-                            : 'text-slate-700 hover:text-navy-900'
-                    }`}
-                >
-                    <span className="relative inline-flex h-6 w-6 items-center justify-center">
-                        <Menu
-                            className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                drawerOpen ? 'rotate-90 scale-75 opacity-0' : 'rotate-0 scale-100 opacity-100'
-                            }`}
-                            aria-hidden="true"
-                        />
-                        <X
-                            className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                drawerOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-75 opacity-0'
-                            }`}
-                            aria-hidden="true"
-                        />
-                    </span>
-                </button>
+                    <span className="h-10 w-10" aria-hidden="true" />
+                </div>
+            </div>
+
+            <div className="pointer-events-none absolute inset-0">
+                <div className="mx-auto flex h-20 max-w-content items-center justify-end px-5 sm:px-6 lg:px-8">
+                    <button
+                        ref={openButtonRef}
+                        type="button"
+                        onClick={() => setDrawerOpen((open) => !open)}
+                        aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                        aria-haspopup="dialog"
+                        aria-expanded={drawerOpen}
+                        className={`pointer-events-auto relative inline-flex h-10 w-10 items-center justify-center transition-colors duration-200 active:scale-90 ${
+                            transparentHero
+                                ? light
+                                    ? 'text-navy-900 hover:text-navy-700'
+                                    : 'text-white hover:text-white/70'
+                                : 'text-slate-700 hover:text-navy-900'
+                        }`}
+                    >
+                        <span className="relative inline-flex h-6 w-6 items-center justify-center">
+                            <Menu
+                                className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                    drawerOpen ? 'rotate-90 scale-75 opacity-0' : 'rotate-0 scale-100 opacity-100'
+                                }`}
+                                aria-hidden="true"
+                            />
+                            <X
+                                className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                    drawerOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-75 opacity-0'
+                                }`}
+                                aria-hidden="true"
+                            />
+                        </span>
+                    </button>
+                </div>
             </div>
 
             {drawerMounted && (

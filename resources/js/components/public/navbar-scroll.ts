@@ -27,9 +27,7 @@ export function shouldRestoreMenuTriggerFocus(wasDrawerOpen: boolean, drawerOpen
     return wasDrawerOpen && !drawerOpen;
 }
 
-export function getNavbarTransformClass(navbarHidden: boolean, drawerOpen: boolean): string {
-    if (drawerOpen) return 'transform-none';
-
+export function getNavbarTransformClass(navbarHidden: boolean): string {
     return navbarHidden ? '-translate-y-full' : 'translate-y-0';
 }
 
