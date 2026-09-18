@@ -2,7 +2,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { getNavbarHidden, getNavbarTransformClass, shouldRestoreMenuTriggerFocus } from '@/components/public/navbar-scroll';
+import {
+    createNavbarHiddenUpdater,
+    getBodyScrollLockStyles,
+    getNavbarSurfaceClass,
+    getNavbarTransformClass,
+    shouldRestoreMenuTriggerFocus,
+} from '@/components/public/navbar-scroll';
 import { Button } from '@/components/ui/button';
 
 interface NavLink {
@@ -75,16 +81,14 @@ export function PublicNavbar({
 
         const onScroll = () => {
             const currentY = window.scrollY;
+            const updateNavbarHidden = createNavbarHiddenUpdater({
+                previousY: previousScrollYRef.current,
+                currentY,
+                drawerOpen,
+            });
 
             setScrolled(currentY > 24);
-            setNavbarHidden((wasHidden) =>
-                getNavbarHidden({
-                    previousY: previousScrollYRef.current,
-                    currentY,
-                    wasHidden,
-                    drawerOpen,
-                }),
-            );
+            setNavbarHidden(updateNavbarHidden);
             previousScrollYRef.current = currentY;
         };
 
@@ -108,16 +112,40 @@ export function PublicNavbar({
     }, [drawerOpen]);
 
     useEffect(() => {
-        document.body.style.overflow = drawerOpen ? 'hidden' : '';
         if (drawerOpen) {
             closeButtonRef.current?.focus();
         } else if (shouldRestoreMenuTriggerFocus(previousDrawerOpenRef.current, drawerOpen)) {
             openButtonRef.current?.focus();
         }
         previousDrawerOpenRef.current = drawerOpen;
+    }, [drawerOpen]);
+
+    useEffect(() => {
+        if (!drawerOpen) return;
+
+        const lockedScrollY = window.scrollY;
+        const body = document.body;
+        const root = document.documentElement;
+        const previousBodyStyles = {
+            position: body.style.position,
+            top: body.style.top,
+            left: body.style.left,
+            right: body.style.right,
+            width: body.style.width,
+        };
+        const previousRootOverflow = root.style.overflow;
+        const previousScrollBehavior = root.style.scrollBehavior;
+        const lockStyles = getBodyScrollLockStyles(lockedScrollY);
+
+        Object.assign(body.style, lockStyles);
+        root.style.overflow = 'hidden';
 
         return () => {
-            document.body.style.overflow = '';
+            Object.assign(body.style, previousBodyStyles);
+            root.style.overflow = previousRootOverflow;
+            root.style.scrollBehavior = 'auto';
+            window.scrollTo(0, lockedScrollY);
+            root.style.scrollBehavior = previousScrollBehavior;
         };
     }, [drawerOpen]);
 
@@ -139,9 +167,7 @@ export function PublicNavbar({
         <header
             className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-200 ease-out motion-reduce:transition-none ${
                 getNavbarTransformClass(navbarHidden, drawerOpen)
-            } ${
-                transparentHero ? 'bg-transparent' : 'border-b border-white/30 bg-white/60 backdrop-blur-md'
-            }`}
+            } ${getNavbarSurfaceClass(transparentHero, drawerOpen)}`}
         >
             <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
                 <Link
