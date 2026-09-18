@@ -26,9 +26,11 @@ use Illuminate\Support\Str;
 
 /**
  * Realistic sample content across every public page, purely additive —
- * never deletes or touches existing rows, safe to run repeatedly (models
- * without a natural unique key just grow; re-running does not corrupt
- * anything, it only adds more sample rows).
+ * never deletes or touches existing rows. Idempotent: every record is
+ * created via firstOrCreate() keyed on its natural unique field (slug,
+ * or name where no slug exists), so running this multiple times updates
+ * nothing and never hits a duplicate-entry error — it just leaves
+ * already-seeded rows as they are.
  *
  * Deliberately uses plain Model::create() with explicit literal values
  * instead of factories/fake() — factories depend on fakerphp/faker, which
@@ -78,13 +80,15 @@ class DemoContentSeeder extends Seeder
             ['name' => 'Consumer Goods', 'description' => 'High-volume plastic and metal parts for consumer product brands.'],
         ];
 
-        return collect($names)->map(fn (array $i) => Industry::create([
-            'name' => $i['name'],
-            'slug' => Str::slug($i['name']),
-            'description' => $i['description'],
-            'status' => ContentStatus::Published,
-            'published_at' => now()->subDay(),
-        ]));
+        return collect($names)->map(fn (array $i) => Industry::query()->firstOrCreate(
+            ['slug' => Str::slug($i['name'])],
+            [
+                'name' => $i['name'],
+                'description' => $i['description'],
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
+            ],
+        ));
     }
 
     private function seedCertifications()
@@ -96,16 +100,18 @@ class DemoContentSeeder extends Seeder
             ['name' => 'ISO 45001:2018', 'issuer' => 'Bureau Veritas', 'number' => 'CERT-45001-2018'],
         ];
 
-        return collect($certs)->map(fn (array $c, int $i) => Certification::create([
-            'name' => $c['name'],
-            'issuer' => $c['issuer'],
-            'certificate_number' => $c['number'],
-            'issued_at' => now()->subYears(2),
-            'expires_at' => now()->addYears(2),
-            'sort_order' => $i,
-            'status' => ContentStatus::Published,
-            'published_at' => now()->subDay(),
-        ]));
+        return collect($certs)->map(fn (array $c, int $i) => Certification::query()->firstOrCreate(
+            ['certificate_number' => $c['number']],
+            [
+                'name' => $c['name'],
+                'issuer' => $c['issuer'],
+                'issued_at' => now()->subYears(2),
+                'expires_at' => now()->addYears(2),
+                'sort_order' => $i,
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
+            ],
+        ));
     }
 
     private function seedQualityContent()
@@ -116,15 +122,17 @@ class DemoContentSeeder extends Seeder
             ['title' => 'Continuous Improvement', 'summary' => 'Kaizen-driven process reviews across all production lines.', 'content' => 'Production teams run regular process reviews to identify defect sources and reduce variation, with corrective actions tracked to closure.'],
         ];
 
-        return collect($items)->map(fn (array $q, int $i) => QualityContent::create([
-            'title' => $q['title'],
-            'slug' => Str::slug($q['title']),
-            'summary' => $q['summary'],
-            'content' => $q['content'],
-            'sort_order' => $i,
-            'status' => ContentStatus::Published,
-            'published_at' => now()->subDay(),
-        ]));
+        return collect($items)->map(fn (array $q, int $i) => QualityContent::query()->firstOrCreate(
+            ['slug' => Str::slug($q['title'])],
+            [
+                'title' => $q['title'],
+                'summary' => $q['summary'],
+                'content' => $q['content'],
+                'sort_order' => $i,
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
+            ],
+        ));
     }
 
     private function seedCapabilities()
@@ -157,22 +165,26 @@ class DemoContentSeeder extends Seeder
         ];
 
         return collect($defs)->map(function (array $c) {
-            $capability = Capability::create([
-                'name' => $c['name'],
-                'slug' => Str::slug($c['name']),
-                'summary' => $c['summary'],
-                'description' => $c['description'],
-                'status' => ContentStatus::Published,
-                'published_at' => now()->subDay(),
-            ]);
+            $capability = Capability::query()->firstOrCreate(
+                ['slug' => Str::slug($c['name'])],
+                [
+                    'name' => $c['name'],
+                    'summary' => $c['summary'],
+                    'description' => $c['description'],
+                    'status' => ContentStatus::Published,
+                    'published_at' => now()->subDay(),
+                ],
+            );
 
-            foreach ($c['steps'] as $i => $title) {
-                CapabilityStep::create([
-                    'capability_id' => $capability->id,
-                    'title' => $title,
-                    'description' => null,
-                    'sort_order' => $i,
-                ]);
+            if ($capability->steps()->count() === 0) {
+                foreach ($c['steps'] as $i => $title) {
+                    CapabilityStep::create([
+                        'capability_id' => $capability->id,
+                        'title' => $title,
+                        'description' => null,
+                        'sort_order' => $i,
+                    ]);
+                }
             }
 
             return $capability;
@@ -181,21 +193,25 @@ class DemoContentSeeder extends Seeder
 
     private function seedProducts()
     {
-        $category = ProductCategory::create([
-            'name' => 'Stamped Metal Components',
-            'slug' => 'stamped-metal-components',
-            'description' => 'Precision stamped metal parts for automotive and industrial assemblies.',
-            'sort_order' => 0,
-            'status' => ContentStatus::Published,
-        ]);
+        $category = ProductCategory::query()->firstOrCreate(
+            ['slug' => 'stamped-metal-components'],
+            [
+                'name' => 'Stamped Metal Components',
+                'description' => 'Precision stamped metal parts for automotive and industrial assemblies.',
+                'sort_order' => 0,
+                'status' => ContentStatus::Published,
+            ],
+        );
 
-        $category2 = ProductCategory::create([
-            'name' => 'Molded Plastic Parts',
-            'slug' => 'molded-plastic-parts',
-            'description' => 'Injection molded plastic components and housings.',
-            'sort_order' => 1,
-            'status' => ContentStatus::Published,
-        ]);
+        $category2 = ProductCategory::query()->firstOrCreate(
+            ['slug' => 'molded-plastic-parts'],
+            [
+                'name' => 'Molded Plastic Parts',
+                'description' => 'Injection molded plastic components and housings.',
+                'sort_order' => 1,
+                'status' => ContentStatus::Published,
+            ],
+        );
 
         $defs = [
             ['name' => 'Precision Bracket Assembly', 'category' => $category, 'featured' => true],
@@ -206,27 +222,31 @@ class DemoContentSeeder extends Seeder
             ['name' => 'Custom Enclosure Panel', 'category' => $category2, 'featured' => false],
         ];
 
-        return collect($defs)->map(fn (array $p) => Product::create([
-            'product_category_id' => $p['category']->id,
-            'name' => $p['name'],
-            'slug' => Str::slug($p['name']),
-            'short_description' => 'Manufactured to customer print specifications with full dimensional traceability.',
-            'description' => 'Produced on our precision production lines under documented process controls, with material certification and dimensional reports available on request.',
-            'is_featured' => $p['featured'],
-            'status' => ContentStatus::Published,
-            'published_at' => now()->subDay(),
-        ]));
+        return collect($defs)->map(fn (array $p) => Product::query()->firstOrCreate(
+            ['slug' => Str::slug($p['name'])],
+            [
+                'product_category_id' => $p['category']->id,
+                'name' => $p['name'],
+                'short_description' => 'Manufactured to customer print specifications with full dimensional traceability.',
+                'description' => 'Produced on our precision production lines under documented process controls, with material certification and dimensional reports available on request.',
+                'is_featured' => $p['featured'],
+                'status' => ContentStatus::Published,
+                'published_at' => now()->subDay(),
+            ],
+        ));
     }
 
     private function seedFacilities()
     {
-        $category = FacilityCategory::create([
-            'name' => 'Manufacturing Plant',
-            'slug' => 'manufacturing-plant',
-            'description' => 'Primary production facilities.',
-            'sort_order' => 0,
-            'status' => ContentStatus::Published,
-        ]);
+        $category = FacilityCategory::query()->firstOrCreate(
+            ['slug' => 'manufacturing-plant'],
+            [
+                'name' => 'Manufacturing Plant',
+                'description' => 'Primary production facilities.',
+                'sort_order' => 0,
+                'status' => ContentStatus::Published,
+            ],
+        );
 
         $machineDefs = [
             ['name' => 'Progressive Stamping Press', 'brand' => 'Komatsu', 'model' => 'OBS-250', 'capacity' => '250 ton', 'quantity' => 4],
@@ -240,30 +260,34 @@ class DemoContentSeeder extends Seeder
         ];
 
         return collect($defs)->map(function (string $name) use ($category, $machineDefs) {
-            $facility = Facility::create([
-                'facility_category_id' => $category->id,
-                'name' => $name,
-                'slug' => Str::slug($name),
-                'location' => 'Karawang, West Java, Indonesia',
-                'description' => 'A production facility operating under ISO 9001 and IATF 16949 quality management systems.',
-                'status' => ContentStatus::Published,
-                'published_at' => now()->subDay(),
-            ]);
-
-            foreach ($machineDefs as $i => $m) {
-                Machine::create([
-                    'facility_id' => $facility->id,
-                    'name' => $m['name'],
-                    'brand' => $m['brand'],
-                    'model' => $m['model'],
-                    'quantity' => $m['quantity'],
-                    'capacity' => $m['capacity'],
-                    'description' => null,
-                    'specification' => null,
-                    'sort_order' => $i,
+            $facility = Facility::query()->firstOrCreate(
+                ['slug' => Str::slug($name)],
+                [
+                    'facility_category_id' => $category->id,
+                    'name' => $name,
+                    'location' => 'Karawang, West Java, Indonesia',
+                    'description' => 'A production facility operating under ISO 9001 and IATF 16949 quality management systems.',
                     'status' => ContentStatus::Published,
-                    'is_active' => true,
-                ]);
+                    'published_at' => now()->subDay(),
+                ],
+            );
+
+            if ($facility->machines()->count() === 0) {
+                foreach ($machineDefs as $i => $m) {
+                    Machine::create([
+                        'facility_id' => $facility->id,
+                        'name' => $m['name'],
+                        'brand' => $m['brand'],
+                        'model' => $m['model'],
+                        'quantity' => $m['quantity'],
+                        'capacity' => $m['capacity'],
+                        'description' => null,
+                        'specification' => null,
+                        'sort_order' => $i,
+                        'status' => ContentStatus::Published,
+                        'is_active' => true,
+                    ]);
+                }
             }
 
             return $facility;
@@ -272,6 +296,13 @@ class DemoContentSeeder extends Seeder
 
     private function seedMilestones(): void
     {
+        // Milestone has no natural unique column, so guard idempotency at
+        // the batch level instead — skip entirely if any milestone already
+        // exists rather than risking duplicate timeline entries.
+        if (Milestone::query()->count() > 0) {
+            return;
+        }
+
         $timeline = [
             ['year' => 2005, 'title' => 'Company Founded', 'description' => 'Started operations as a precision metal stamping supplier.'],
             ['year' => 2010, 'title' => 'ISO 9001 Certified', 'description' => 'Achieved our first quality management certification.'],
@@ -296,7 +327,7 @@ class DemoContentSeeder extends Seeder
             ['name' => 'Company News', 'slug' => 'company-news'],
             ['name' => 'Product Updates', 'slug' => 'product-updates'],
             ['name' => 'Industry Insights', 'slug' => 'industry-insights'],
-        ])->map(fn (array $c) => NewsCategory::create($c));
+        ])->map(fn (array $c) => NewsCategory::query()->firstOrCreate(['slug' => $c['slug']], $c));
 
         $articles = [
             ['title' => 'Kenco Manufactur Achieves IATF 16949 Certification', 'excerpt' => 'Our quality management system is now certified to the automotive industry standard.'],
@@ -308,17 +339,19 @@ class DemoContentSeeder extends Seeder
         ];
 
         foreach ($articles as $i => $a) {
-            Article::create([
-                'news_category_id' => $categories[$i % $categories->count()]->id,
-                'author_id' => $author?->id,
-                'title' => $a['title'],
-                'slug' => Str::slug($a['title']),
-                'excerpt' => $a['excerpt'],
-                'content' => '<p>'.$a['excerpt'].' Our team continues to invest in process discipline and equipment to serve our customers reliably.</p>',
-                'is_featured' => $i === 0,
-                'status' => ContentStatus::Published,
-                'published_at' => now()->subDays($i * 3),
-            ]);
+            Article::query()->firstOrCreate(
+                ['slug' => Str::slug($a['title'])],
+                [
+                    'news_category_id' => $categories[$i % $categories->count()]->id,
+                    'author_id' => $author?->id,
+                    'title' => $a['title'],
+                    'excerpt' => $a['excerpt'],
+                    'content' => '<p>'.$a['excerpt'].' Our team continues to invest in process discipline and equipment to serve our customers reliably.</p>',
+                    'is_featured' => $i === 0,
+                    'status' => ContentStatus::Published,
+                    'published_at' => now()->subDays($i * 3),
+                ],
+            );
         }
     }
 
@@ -332,17 +365,19 @@ class DemoContentSeeder extends Seeder
         ];
 
         foreach ($roles as $r) {
-            JobVacancy::create([
-                'title' => $r['title'],
-                'slug' => Str::slug($r['title'].'-'.Str::random(6)),
-                'department' => $r['department'],
-                'location' => 'Karawang, West Java, Indonesia',
-                'employment_type' => $r['type'],
-                'description' => 'We are looking for a '.$r['title'].' to join our '.$r['department'].' team in Karawang.',
-                'requirements' => 'Relevant experience in a manufacturing environment, strong attention to detail, and willingness to work in a production setting.',
-                'status' => ContentStatus::Published,
-                'published_at' => now()->subDay(),
-            ]);
+            JobVacancy::query()->firstOrCreate(
+                ['slug' => Str::slug($r['title'])],
+                [
+                    'title' => $r['title'],
+                    'department' => $r['department'],
+                    'location' => 'Karawang, West Java, Indonesia',
+                    'employment_type' => $r['type'],
+                    'description' => 'We are looking for a '.$r['title'].' to join our '.$r['department'].' team in Karawang.',
+                    'requirements' => 'Relevant experience in a manufacturing environment, strong attention to detail, and willingness to work in a production setting.',
+                    'status' => ContentStatus::Published,
+                    'published_at' => now()->subDay(),
+                ],
+            );
         }
     }
 
