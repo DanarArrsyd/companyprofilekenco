@@ -39,6 +39,9 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Copy .env for frontend build (VITE_APP_NAME)
+        run: cp .env.example .env
+
       - name: Build frontend assets
         run: npm run build
 
