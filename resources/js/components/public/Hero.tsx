@@ -37,47 +37,51 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
         : 'opacity-0 translate-y-3';
 
     return (
-        <section className="border-b border-border bg-surface">
-            <div className="mx-auto grid max-w-content grid-cols-1 lg:grid-cols-[3fr_2fr]">
-                <div className="flex flex-col justify-center px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
-                    <div className={`max-w-xl transition-all duration-500 ease-out ${textState}`}>
-                        {content.eyebrow && (
-                            <p className="text-caption uppercase text-muted-foreground">{content.eyebrow}</p>
-                        )}
-                        <h1 className="mt-4 text-h1 text-navy-900" style={{ textWrap: 'balance' }}>
-                            {heading}
-                        </h1>
-                        {content.description && (
-                            <p className="mt-6 text-body-lg text-slate-700">{content.description}</p>
-                        )}
-                        <div className="mt-10 flex flex-wrap gap-4">
-                            {content.primary_cta_label && content.primary_cta_url && (
-                                <Button asChild>
-                                    <Link href={content.primary_cta_url}>{content.primary_cta_label}</Link>
-                                </Button>
-                            )}
-                            {content.secondary_cta_label && content.secondary_cta_url && (
-                                <Button asChild variant="secondary">
-                                    <Link href={content.secondary_cta_url}>{content.secondary_cta_label}</Link>
-                                </Button>
-                            )}
-                        </div>
-                    </div>
-                </div>
+        <section className="relative isolate min-h-[560px] w-full overflow-hidden bg-navy-900 sm:min-h-[640px] lg:min-h-[760px]">
+            <div className="absolute inset-0">
+                {content.image ? (
+                    <img
+                        src={`/storage/${content.image}`}
+                        alt=""
+                        className="h-full w-full object-cover"
+                        loading="eager"
+                        // @ts-expect-error fetchpriority is valid HTML but not yet in React's DOM typings
+                        fetchpriority="high"
+                    />
+                ) : (
+                    <ImagePlaceholder className="h-full min-h-[560px]" />
+                )}
+            </div>
 
-                <div className="order-first aspect-[4/3] w-full bg-muted lg:order-last lg:aspect-auto">
-                    {content.image ? (
-                        <img
-                            src={`/storage/${content.image}`}
-                            alt=""
-                            className="h-full w-full object-cover"
-                            loading="eager"
-                            // @ts-expect-error fetchpriority is valid HTML but not yet in React's DOM typings
-                            fetchpriority="high"
-                        />
-                    ) : (
-                        <ImagePlaceholder className="min-h-[280px]" />
+            {/* Dark overlay/gradient — the hero's own readability layer for the
+                transparent header on top of it, not a separate navbar background. */}
+            <div className="absolute inset-0 bg-navy-900/20" aria-hidden="true" />
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-navy-900/70 to-transparent sm:h-40" aria-hidden="true" />
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-navy-900/80 via-navy-900/30 to-transparent" aria-hidden="true" />
+
+            <div className="relative mx-auto flex min-h-[560px] max-w-content flex-col justify-end px-5 pb-16 pt-28 sm:min-h-[640px] sm:px-6 sm:pt-32 lg:min-h-[760px] lg:px-8 lg:pb-24 lg:pt-36">
+                <div className={`max-w-xl transition-all duration-500 ease-out ${textState}`}>
+                    {content.eyebrow && (
+                        <p className="text-caption uppercase text-white/70">{content.eyebrow}</p>
                     )}
+                    <h1 className="mt-4 text-h1 text-white" style={{ textWrap: 'balance' }}>
+                        {heading}
+                    </h1>
+                    {content.description && (
+                        <p className="mt-6 text-body-lg text-white/85">{content.description}</p>
+                    )}
+                    <div className="mt-10 flex flex-wrap gap-4">
+                        {content.primary_cta_label && content.primary_cta_url && (
+                            <Button asChild>
+                                <Link href={content.primary_cta_url}>{content.primary_cta_label}</Link>
+                            </Button>
+                        )}
+                        {content.secondary_cta_label && content.secondary_cta_url && (
+                            <Button asChild variant="secondary" className="border-white/40 text-white hover:bg-white/10">
+                                <Link href={content.secondary_cta_url}>{content.secondary_cta_label}</Link>
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
         </section>

@@ -281,8 +281,10 @@ export default function Home({
         );
     }
 
+    const heroVariant = sections[0]?.section_type === 'hero' ? 'transparent' : 'solid';
+
     return (
-        <PublicLayout>
+        <PublicLayout heroVariant={heroVariant}>
             <SeoHead seo={seo} schema={schema} />
 
             {sections.map((section) => (
