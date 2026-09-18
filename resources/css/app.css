@@ -53,6 +53,29 @@
 }
 
 @layer components {
+    /* Entrance for the full-page nav menu's right-pane submenu links —
+       replays on every hover/focus switch since the list remounts via `key`. */
+    @keyframes submenu-item-enter {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .submenu-item-enter {
+        animation: submenu-item-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .submenu-item-enter {
+            animation: none;
+        }
+    }
+
     /* Editorial reading style for TipTap-generated article HTML — custom,
        token-driven, no Tailwind Typography plugin needed for one page. */
     .article-prose {

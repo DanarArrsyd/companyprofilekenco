@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import {
@@ -43,8 +43,8 @@ function isActive(currentUrl: string, href: string): boolean {
     return href === '/' ? currentUrl === '/' : currentUrl.startsWith(href);
 }
 
-// Keep in sync with the drawer panel's `duration-[320ms]` Tailwind class —
-// the exit animation must finish before the dialog unmounts.
+// Keep in sync with the menu overlay's `duration-[320ms]` Tailwind class —
+// the exit animation must finish before it unmounts.
 const DRAWER_TRANSITION_MS = 320;
 const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
 
@@ -70,6 +70,7 @@ export function PublicNavbar({
     const [drawerEntered, setDrawerEntered] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [navbarHidden, setNavbarHidden] = useState(false);
+    const [previewedItem, setPreviewedItem] = useState<NavItem | null>(null);
     const openButtonRef = useRef<HTMLButtonElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
     const previousDrawerOpenRef = useRef(false);
@@ -79,6 +80,12 @@ export function PublicNavbar({
         setDrawerOpen(false);
         setNavbarHidden(false);
     }, [url]);
+
+    // Clear the desktop right-pane preview whenever the menu closes, so it
+    // reopens blank instead of showing whatever was last hovered.
+    useEffect(() => {
+        if (!drawerOpen) setPreviewedItem(null);
+    }, [drawerOpen]);
 
     // Keep navigation out of the content's way while moving down, then make
     // it immediately reachable again when the visitor reverses direction.
@@ -242,47 +249,57 @@ export function PublicNavbar({
             </div>
 
             {drawerMounted && (
-                <div className="fixed inset-0 z-[60]">
-                    <div
-                        className={`absolute inset-0 bg-charcoal/50 transition-opacity duration-300 ${DRAWER_EASE} ${drawerEntered ? 'opacity-100' : 'opacity-0'}`}
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Navigation menu"
+                    className={`fixed inset-0 z-[60] flex flex-col overflow-y-auto md:flex-row md:overflow-hidden transition-[opacity,transform] duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none ${
+                        drawerEntered ? 'scale-100 opacity-100' : 'scale-[0.98] opacity-0'
+                    }`}
+                >
+                    <button
+                        ref={closeButtonRef}
+                        type="button"
                         onClick={() => setDrawerOpen(false)}
-                        aria-hidden="true"
-                    />
-
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-label="Navigation menu"
-                        className={`absolute inset-y-0 right-0 flex w-full max-w-sm flex-col bg-navy-900 text-white shadow-xl transition-transform duration-[320ms] ${DRAWER_EASE} ${
-                            drawerEntered ? 'translate-x-0' : 'translate-x-full'
-                        }`}
+                        aria-label="Close navigation menu"
+                        className="fixed right-5 top-5 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy-900 shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
                     >
-                        <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
-                            <span className="text-base font-semibold">{companyName}</span>
-                            <button
-                                ref={closeButtonRef}
-                                type="button"
-                                onClick={() => setDrawerOpen(false)}
-                                aria-label="Close navigation menu"
-                                className="p-2 text-white/80 transition-colors hover:text-white"
-                            >
-                                <X className="h-6 w-6" aria-hidden="true" />
-                            </button>
-                        </div>
+                        <X className="h-5 w-5" aria-hidden="true" />
+                    </button>
 
-                        <nav className="flex-1 overflow-y-auto px-5 py-6" aria-label="Primary">
-                            <ul className="space-y-1">
-                                {NAV.map((item, index) => (
-                                    <li
-                                        key={item.label}
-                                        className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-x-0 motion-reduce:opacity-100 ${
-                                            drawerEntered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
-                                        }`}
-                                        style={{ transitionDelay: drawerEntered ? `${80 + index * 40}ms` : '0ms' }}
-                                    >
-                                        {item.children ? (
-                                            <details className="group" open={item.children.some((c) => isActive(url, c.href))}>
-                                                <summary className="flex cursor-pointer list-none items-center justify-between border-b border-white/10 py-3 text-h4">
+                    {/* Main menu — always navy/white, full width on mobile. */}
+                    <nav
+                        aria-label="Primary"
+                        className="flex w-full shrink-0 flex-col bg-navy-900 px-6 pb-10 pt-24 text-white sm:px-10 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
+                    >
+                        <ul className="flex-1">
+                            {NAV.map((item, index) => (
+                                <li
+                                    key={item.label}
+                                    className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
+                                        drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+                                    }`}
+                                    style={{ transitionDelay: drawerEntered ? `${60 + index * 40}ms` : '0ms' }}
+                                >
+                                    {item.children ? (
+                                        <>
+                                            {/* Desktop: hover/focus previews children in the right pane. */}
+                                            <button
+                                                type="button"
+                                                onMouseEnter={() => setPreviewedItem(item)}
+                                                onFocus={() => setPreviewedItem(item)}
+                                                onClick={() => setPreviewedItem(item)}
+                                                className={`hidden w-full items-center justify-between border-b border-white/10 py-4 text-left text-h3 font-semibold transition-colors duration-200 md:flex ${
+                                                    previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
+                                                }`}
+                                            >
+                                                {item.label}
+                                                <ChevronRight className="h-5 w-5 shrink-0 opacity-50" aria-hidden="true" />
+                                            </button>
+
+                                            {/* Mobile: stacked accordion, no right pane to hover into. */}
+                                            <details className="group md:hidden" open={item.children.some((c) => isActive(url, c.href))}>
+                                                <summary className="flex cursor-pointer list-none items-center justify-between border-b border-white/10 py-4 text-h3 font-semibold">
                                                     {item.label}
                                                     <ChevronDown
                                                         className="h-5 w-5 text-white/60 transition-transform group-open:rotate-180"
@@ -304,31 +321,63 @@ export function PublicNavbar({
                                                     ))}
                                                 </ul>
                                             </details>
-                                        ) : (
-                                            <Link
-                                                href={item.href!}
-                                                className={`block border-b border-white/10 py-3 text-h4 ${
-                                                    isActive(url, item.href!) ? 'text-white' : 'text-white/90 hover:text-white'
-                                                }`}
-                                            >
-                                                {item.label}
-                                            </Link>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
+                                        </>
+                                    ) : (
+                                        <Link
+                                            href={item.href!}
+                                            onMouseEnter={() => setPreviewedItem(null)}
+                                            onFocus={() => setPreviewedItem(null)}
+                                            className={`block border-b border-white/10 py-4 text-h3 font-semibold transition-colors duration-200 ${
+                                                isActive(url, item.href!) ? 'text-white' : 'text-white/90 hover:text-white'
+                                            }`}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
 
                         <div
-                            className={`border-t border-white/10 p-5 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
-                                drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                            className={`mt-8 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
+                                drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
                             }`}
-                            style={{ transitionDelay: drawerEntered ? `${80 + NAV.length * 40}ms` : '0ms' }}
+                            style={{ transitionDelay: drawerEntered ? `${60 + NAV.length * 40}ms` : '0ms' }}
                         >
-                            <Button asChild className="w-full bg-white text-navy-900 hover:bg-white/90">
+                            <Button
+                                asChild
+                                variant="secondary"
+                                className="w-full border-white/30 bg-transparent text-white hover:bg-white hover:text-navy-900"
+                            >
                                 <Link href="/contact">Contact Us</Link>
                             </Button>
                         </div>
+                    </nav>
+
+                    {/* Submenu preview — desktop/tablet only, blank until a parent item is previewed. */}
+                    <div className="hidden bg-off-white px-14 py-24 text-navy-900 md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20">
+                        {previewedItem?.children && (
+                            <ul key={previewedItem.label} className="space-y-3">
+                                {previewedItem.children.map((child, index) => (
+                                    <li
+                                        key={child.href}
+                                        className="submenu-item-enter"
+                                        style={{ animationDelay: `${index * 40}ms` }}
+                                    >
+                                        <Link
+                                            href={child.href}
+                                            className={`block text-h4 font-medium transition-colors duration-200 ${
+                                                isActive(url, child.href)
+                                                    ? 'text-navy-900 underline decoration-2 underline-offset-4'
+                                                    : 'text-navy-700 hover:text-navy-900'
+                                            }`}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
             )}
