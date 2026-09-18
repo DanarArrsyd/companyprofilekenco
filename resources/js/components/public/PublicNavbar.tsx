@@ -355,7 +355,7 @@ export function PublicNavbar({
                     </nav>
 
                     {/* Submenu preview — desktop/tablet only, blank until a parent item is previewed. */}
-                    <div className="hidden bg-off-white px-14 py-24 text-navy-900 md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20">
+                    <div className="hidden bg-background px-14 py-24 text-navy-900 md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20">
                         {previewedItem?.children && (
                             <ul key={previewedItem.label} className="space-y-3">
                                 {previewedItem.children.map((child, index) => (
