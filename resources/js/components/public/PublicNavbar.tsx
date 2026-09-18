@@ -49,12 +49,24 @@ export function PublicNavbar({
     const { url } = usePage();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const openButtonRef = useRef<HTMLButtonElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
         setDrawerOpen(false);
     }, [url]);
+
+    // The transparent (hero) header switches to the solid look once the
+    // page is scrolled past the hero's top band — the header itself stays
+    // fixed to the viewport at all times so it's always reachable, on every
+    // page, the same way the solid header already is.
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 24);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         if (!drawerOpen) {
@@ -93,20 +105,21 @@ export function PublicNavbar({
         return () => document.removeEventListener('keydown', onKeyDown);
     }, [drawerOpen]);
 
-    const transparent = variant === 'transparent';
+    // Only actually transparent while the requested variant is 'transparent'
+    // AND the page hasn't been scrolled yet — past that point it reads
+    // exactly like the solid header, on every page, including this one.
+    const transparent = variant === 'transparent' && !scrolled;
 
     return (
         <header
-            className={
-                transparent
-                    ? 'absolute inset-x-0 top-0 z-50 bg-transparent'
-                    : 'sticky top-0 z-40 border-b border-border bg-surface'
-            }
+            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ease-out ${
+                transparent ? 'bg-transparent' : 'border-b border-border bg-surface'
+            }`}
         >
             <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
                 <Link
                     href="/"
-                    className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight ${transparent ? 'text-white' : 'text-navy-900'}`}
+                    className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${transparent ? 'text-white' : 'text-navy-900'}`}
                 >
                     {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
                     {companyName}
@@ -119,7 +132,7 @@ export function PublicNavbar({
                     aria-label="Open navigation menu"
                     aria-haspopup="dialog"
                     aria-expanded={drawerOpen}
-                    className={`inline-flex items-center justify-center p-2 transition-colors ${
+                    className={`inline-flex items-center justify-center p-2 transition-colors duration-200 ${
                         transparent ? 'text-white hover:text-white/70' : 'text-slate-700 hover:text-navy-900'
                     }`}
                 >
