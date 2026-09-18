@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { getNavbarHidden, shouldRestoreMenuTriggerFocus } from '@/components/public/navbar-scroll';
 import { Button } from '@/components/ui/button';
 
 interface NavLink {
@@ -46,9 +47,9 @@ export function PublicNavbar({
     /**
      * 'transparent-dark' floats the header (white text/icons) over a dark
      * hero photo. 'transparent-light' floats it (navy text/icons) over a
-     * light/washed-out hero photo. 'solid' is the normal readable header
-     * used on every page without a hero. All three become the same solid
-     * look once the page scrolls past the hero.
+     * light/washed-out hero photo. 'solid' is used on pages without a hero.
+     * Away from the top, every variant uses the same translucent surface so
+     * the page remains visible behind the navigation.
      */
     variant?: 'transparent-dark' | 'transparent-light' | 'solid';
 }) {
@@ -56,23 +57,41 @@ export function PublicNavbar({
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const [navbarHidden, setNavbarHidden] = useState(false);
     const openButtonRef = useRef<HTMLButtonElement>(null);
     const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const previousDrawerOpenRef = useRef(false);
+    const previousScrollYRef = useRef(0);
 
     useEffect(() => {
         setDrawerOpen(false);
+        setNavbarHidden(false);
     }, [url]);
 
-    // The transparent (hero) header switches to the solid look once the
-    // page is scrolled past the hero's top band — the header itself stays
-    // fixed to the viewport at all times so it's always reachable, on every
-    // page, the same way the solid header already is.
+    // Keep navigation out of the content's way while moving down, then make
+    // it immediately reachable again when the visitor reverses direction.
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 24);
+        previousScrollYRef.current = window.scrollY;
+
+        const onScroll = () => {
+            const currentY = window.scrollY;
+
+            setScrolled(currentY > 24);
+            setNavbarHidden((wasHidden) =>
+                getNavbarHidden({
+                    previousY: previousScrollYRef.current,
+                    currentY,
+                    wasHidden,
+                    drawerOpen,
+                }),
+            );
+            previousScrollYRef.current = currentY;
+        };
+
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
-    }, []);
+    }, [drawerOpen]);
 
     useEffect(() => {
         if (!drawerOpen) {
@@ -92,9 +111,11 @@ export function PublicNavbar({
         document.body.style.overflow = drawerOpen ? 'hidden' : '';
         if (drawerOpen) {
             closeButtonRef.current?.focus();
-        } else {
+        } else if (shouldRestoreMenuTriggerFocus(previousDrawerOpenRef.current, drawerOpen)) {
             openButtonRef.current?.focus();
         }
+        previousDrawerOpenRef.current = drawerOpen;
+
         return () => {
             document.body.style.overflow = '';
         };
@@ -111,23 +132,22 @@ export function PublicNavbar({
         return () => document.removeEventListener('keydown', onKeyDown);
     }, [drawerOpen]);
 
-    // Only actually transparent while the requested variant is one of the
-    // transparent-* modes AND the page hasn't been scrolled yet — past that
-    // point it reads exactly like the solid header, on every page.
-    const transparent = variant !== 'solid' && !scrolled;
+    const transparentHero = variant !== 'solid' && !scrolled;
     const light = variant === 'transparent-light';
 
     return (
         <header
-            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-200 ease-out ${
-                transparent ? 'bg-transparent' : 'border-b border-border bg-surface'
+            className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-200 ease-out motion-reduce:transition-none ${
+                navbarHidden ? '-translate-y-full' : 'translate-y-0'
+            } ${
+                transparentHero ? 'bg-transparent' : 'border-b border-white/30 bg-white/60 backdrop-blur-md'
             }`}
         >
             <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
                 <Link
                     href="/"
                     className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${
-                        transparent && !light ? 'text-white' : 'text-navy-900'
+                        transparentHero && !light ? 'text-white' : 'text-navy-900'
                     }`}
                 >
                     {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
@@ -142,7 +162,7 @@ export function PublicNavbar({
                     aria-haspopup="dialog"
                     aria-expanded={drawerOpen}
                     className={`inline-flex items-center justify-center p-2 transition-colors duration-200 ${
-                        transparent
+                        transparentHero
                             ? light
                                 ? 'text-navy-900 hover:text-navy-700'
                                 : 'text-white hover:text-white/70'

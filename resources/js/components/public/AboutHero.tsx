@@ -67,7 +67,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
             <img
                 src="/images/about-accent.png"
                 alt=""
-                className="pointer-events-none absolute -bottom-10 -right-10 w-[62%] max-w-none sm:-bottom-8 sm:right-0 sm:w-[54%] lg:w-[58%]"
+                className="pointer-events-none absolute -bottom-10 -right-10 w-[62%] max-w-none sm:-bottom-8 sm:right-0 sm:w-[54%] lg:-bottom-[30%] lg:-right-[10%] lg:w-[58%]"
                 aria-hidden="true"
             />
 
