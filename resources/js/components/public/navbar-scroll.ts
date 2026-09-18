@@ -18,3 +18,9 @@ export function getNavbarHidden({ previousY, currentY, wasHidden, drawerOpen }: 
 export function shouldRestoreMenuTriggerFocus(wasDrawerOpen: boolean, drawerOpen: boolean): boolean {
     return wasDrawerOpen && !drawerOpen;
 }
+
+export function getNavbarTransformClass(navbarHidden: boolean, drawerOpen: boolean): string {
+    if (drawerOpen) return 'transform-none';
+
+    return navbarHidden ? '-translate-y-full' : 'translate-y-0';
+}

@@ -9,6 +9,11 @@ const shouldRestoreMenuTriggerFocus = (
         shouldRestoreMenuTriggerFocus?: (wasDrawerOpen: boolean, drawerOpen: boolean) => boolean;
     }
 ).shouldRestoreMenuTriggerFocus;
+const getNavbarTransformClass = (
+    navbarState as unknown as {
+        getNavbarTransformClass?: (navbarHidden: boolean, drawerOpen: boolean) => string;
+    }
+).getNavbarTransformClass;
 
 test('keeps the navbar visible near the top of the page', () => {
     assert.equal(getNavbarHidden({ previousY: 0, currentY: 16, wasHidden: false, drawerOpen: false }), false);
@@ -32,4 +37,8 @@ test('does not focus the menu trigger during the initial closed state', () => {
 
 test('restores focus to the menu trigger only after an open drawer closes', () => {
     assert.equal(shouldRestoreMenuTriggerFocus?.(true, false), true);
+});
+
+test('removes the header transform while the viewport-fixed drawer is open', () => {
+    assert.equal(getNavbarTransformClass?.(false, true), 'transform-none');
 });

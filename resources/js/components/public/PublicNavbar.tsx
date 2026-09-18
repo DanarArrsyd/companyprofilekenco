@@ -2,7 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { getNavbarHidden, shouldRestoreMenuTriggerFocus } from '@/components/public/navbar-scroll';
+import { getNavbarHidden, getNavbarTransformClass, shouldRestoreMenuTriggerFocus } from '@/components/public/navbar-scroll';
 import { Button } from '@/components/ui/button';
 
 interface NavLink {
@@ -138,7 +138,7 @@ export function PublicNavbar({
     return (
         <header
             className={`fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-200 ease-out motion-reduce:transition-none ${
-                navbarHidden ? '-translate-y-full' : 'translate-y-0'
+                getNavbarTransformClass(navbarHidden, drawerOpen)
             } ${
                 transparentHero ? 'bg-transparent' : 'border-b border-white/30 bg-white/60 backdrop-blur-md'
             }`}
