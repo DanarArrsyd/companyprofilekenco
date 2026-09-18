@@ -25,17 +25,16 @@ const HEADER_COPY: Record<string, { eyebrow: string; heading: string; descriptio
 };
 
 /**
- * The Company/About page gets the full-bleed hero treatment (see
- * AboutHero.tsx) instead of the plain SectionHeader banner every other
- * standard page uses. Image is left unset until a real photo is supplied —
- * AboutHero falls back to the site's standard ImagePlaceholder.
+ * Slugs that get the full-bleed hero treatment (see AboutHero.tsx) instead
+ * of the plain SectionHeader banner every other standard page uses, and
+ * the fallback content shown until an admin adds a real 'hero' PageSection
+ * to that page (see the merge logic in the component below — once such a
+ * section exists, its own heading/description/highlight/image win).
  */
 const ABOUT_HERO_CONTENT: Record<string, AboutHeroContent> = {
     company: {
         heading: 'Sekilas Tentang Kami',
-        introBefore: 'Didirikan pada tahun 2017, ',
-        introEmphasis: 'PT Kenco Manufactur Indonesia',
-        introAfter: ' bergerak di bidang manufaktur dan metal stamping untuk mendukung kebutuhan industri otomotif. Didukung empat Business Unit, perusahaan terus berkembang dengan mengutamakan kualitas dan kepuasan pelanggan.',
+        description: 'Didirikan pada tahun 2017, PT Kenco Manufactur Indonesia bergerak di bidang manufaktur dan metal stamping untuk mendukung kebutuhan industri otomotif. Didukung empat Business Unit, perusahaan terus berkembang dengan mengutamakan kualitas dan kepuasan pelanggan.',
         highlight: 'Berfokus pada solusi manufaktur yang efisien, berkualitas, dan sesuai kebutuhan pelanggan.',
         image: null,
     },
@@ -52,9 +51,22 @@ export default function Page({
     seo: ResolvedSeo;
     preview: boolean;
 }) {
-    const sections = page?.sections ?? [];
     const header = HEADER_COPY[slug];
-    const aboutHero = ABOUT_HERO_CONTENT[slug];
+    const aboutHeroDefaults = ABOUT_HERO_CONTENT[slug];
+
+    // When an admin has added a real 'hero' PageSection to this page, its
+    // content wins over the static fallback above — and it's excluded from
+    // the generic sections loop below so it doesn't also render twice
+    // through SectionRenderer's own (differently-styled) 'hero' case.
+    const heroSection = aboutHeroDefaults ? page?.sections?.find((s) => s.section_type === 'hero') : undefined;
+    const sections = heroSection ? (page?.sections ?? []).filter((s) => s.id !== heroSection.id) : page?.sections ?? [];
+
+    const aboutHero: AboutHeroContent | undefined = aboutHeroDefaults && {
+        heading: (heroSection?.content?.heading as string) || heroSection?.title || aboutHeroDefaults.heading,
+        description: (heroSection?.content?.description as string) || aboutHeroDefaults.description,
+        highlight: (heroSection?.content?.highlight as string) || aboutHeroDefaults.highlight,
+        image: (heroSection?.content?.image as string) || aboutHeroDefaults.image,
+    };
 
     return (
         <PublicLayout heroVariant={aboutHero ? 'transparent-light' : 'solid'}>

@@ -69,6 +69,12 @@ export function SectionContentFields({
                     <div>
                         <Label htmlFor="image">Image URL</Label>
                         <Input id="image" value={str(content, 'image')} onChange={(e) => set('image', e.target.value)} className="mt-1.5" />
+                        <p className="mt-1.5 text-xs text-slate-500">Upload the photo in Media Library, then paste its path here (e.g. library/filename.jpg).</p>
+                    </div>
+                    <div>
+                        <Label htmlFor="highlight">Highlight statement</Label>
+                        <TextArea id="highlight" value={str(content, 'highlight')} onChange={(v) => set('highlight', v)} rows={2} />
+                        <p className="mt-1.5 text-xs text-slate-500">Only used by page-intro heroes (e.g. the Company page) that show a second, shorter statement alongside the description.</p>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>

@@ -395,11 +395,24 @@ class DemoContentSeeder extends Seeder
 
         if ($company->sections()->count() === 0) {
             $company->sections()->create([
+                'section_type' => SectionType::Hero,
+                'title' => 'Sekilas Tentang Kami',
+                'content' => [
+                    'heading' => 'Sekilas Tentang Kami',
+                    'description' => 'Didirikan pada tahun 2017, PT Kenco Manufactur Indonesia bergerak di bidang manufaktur dan metal stamping untuk mendukung kebutuhan industri otomotif. Didukung empat Business Unit, perusahaan terus berkembang dengan mengutamakan kualitas dan kepuasan pelanggan.',
+                    'highlight' => 'Berfokus pada solusi manufaktur yang efisien, berkualitas, dan sesuai kebutuhan pelanggan.',
+                    'image' => 'library/company-about-hero.png',
+                ],
+                'sort_order' => 0,
+                'is_active' => true,
+            ]);
+
+            $company->sections()->create([
                 'section_type' => SectionType::Text,
                 'title' => 'Who We Are',
                 'subtitle' => null,
                 'content' => ['body' => 'PT. Kenco Manufactur Indonesia is a precision manufacturing partner serving automotive, electronics, and industrial customers. We combine metal stamping, injection molding, and CNC machining under one roof to deliver components on schedule and to print.'],
-                'sort_order' => 0,
+                'sort_order' => 1,
                 'is_active' => true,
             ]);
 
@@ -412,7 +425,7 @@ class DemoContentSeeder extends Seeder
                     ['label' => 'Facilities', 'value' => '2'],
                     ['label' => 'Countries Served', 'value' => '8'],
                 ]],
-                'sort_order' => 1,
+                'sort_order' => 2,
                 'is_active' => true,
             ]);
         }
