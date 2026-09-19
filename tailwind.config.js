@@ -60,11 +60,15 @@ export default {
                 wide: '1440px',
             },
             fontSize: {
-                display: ['64px', { lineHeight: '1.05', fontWeight: '700' }],
-                h1: ['52px', { lineHeight: '1.1', fontWeight: '700' }],
-                h2: ['40px', { lineHeight: '1.15', fontWeight: '700' }],
-                h3: ['30px', { lineHeight: '1.2', fontWeight: '600' }],
-                h4: ['23px', { lineHeight: '1.3', fontWeight: '600' }],
+                // Fluid via clamp(min, preferred, max): scales down smoothly on
+                // narrow viewports instead of holding a fixed desktop-sized px
+                // value everywhere it's used — the `max` here is the original
+                // fixed size, so desktop (~1100px+ viewport) is unchanged.
+                display: ['clamp(2.25rem, 1.25rem + 5vw, 4rem)', { lineHeight: '1.05', fontWeight: '700' }],
+                h1: ['clamp(1.75rem, 1rem + 4vw, 3.25rem)', { lineHeight: '1.15', fontWeight: '700' }],
+                h2: ['clamp(1.5rem, 0.9rem + 3.2vw, 2.5rem)', { lineHeight: '1.2', fontWeight: '700' }],
+                h3: ['clamp(1.25rem, 0.85rem + 2.2vw, 1.875rem)', { lineHeight: '1.25', fontWeight: '600' }],
+                h4: ['clamp(1.125rem, 0.85rem + 1.4vw, 1.4375rem)', { lineHeight: '1.35', fontWeight: '600' }],
                 'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
                 body: ['16px', { lineHeight: '1.65', fontWeight: '400' }],
                 small: ['14px', { lineHeight: '1.5', fontWeight: '400' }],
