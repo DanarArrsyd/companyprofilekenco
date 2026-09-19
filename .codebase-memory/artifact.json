@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "863df49e777e1c4ed5c76a39d347b4087523659b",
-    "indexed_at": "2026-09-19T17:49:26Z",
+    "commit": "0d19fd6cd11ac970ecf168a1be0b1d4b00c0b51a",
+    "indexed_at": "2026-09-19T18:30:04Z",
     "project": "Applications-XAMPP-xamppfiles-htdocs-companyprofilekenco",
-    "nodes": 3173,
-    "edges": 8233,
+    "nodes": 3174,
+    "edges": 8234,
     "original_size": 11993088,
-    "compressed_size": 1715636,
+    "compressed_size": 1715563,
     "compression_level": 3
 }

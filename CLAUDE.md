@@ -363,6 +363,17 @@ A feature is finished only if:
 - no debug code remains
 - feature has relevant tests
 
+## Project Working Memory
+
+- Use Caveman communication mode by default, as defined in `AGENTS.md`.
+- Treat the supplied 1532 × 852 Vision–Mission screenshot as the desktop visual reference.
+- Keep Vision–Mission asymmetric: tall white polygon on the left, shorter navy polygon on the right, with aligned headings and independent text positioning.
+- Keep Vision–Mission content CMS-driven; do not hardcode the displayed language or copy.
+- Vision–Mission implementation lives in `resources/js/components/public/SectionRenderer.tsx`; torn-paper assets live in `public/images/vision-mission-paper-*.png`.
+- Vision–Mission uses Montserrat with Inter fallback; font loading is configured in `resources/views/app.blade.php`.
+- Verify visual changes at 1532 px desktop and 390 px mobile, then run `npm run build` and `php artisan test`.
+- Deploy staging manually with `gh workflow run deploy-staging.yml --ref main`, then verify `https://staging.kencomanufactur.co.id/company#vision-mission`.
+
 ## Companion Specifications
 
 Read [AGENTS.md](AGENTS.md), [DESIGN.md](DESIGN.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DATABASE.md](DATABASE.md), [SEO.md](SEO.md), and [SKILL.md](SKILL.md) together. Public SEO requires the initial-HTML rendering acceptance criteria in SEO.md and the production runtime described in ARCHITECTURE.md.
