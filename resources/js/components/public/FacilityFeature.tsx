@@ -81,7 +81,7 @@ export function FacilityFeature({
                 )}
 
                 {showLink && (
-                    <Link href="/facilities" className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
+                    <Link href="/company#facilities" className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
                         View All Facilities &rarr;
                     </Link>
                 )}

@@ -4,9 +4,7 @@ use App\Http\Controllers\Public\CapabilityController;
 use App\Http\Controllers\Public\CareerController;
 use App\Http\Controllers\Public\CertificationController;
 use App\Http\Controllers\Public\ContactController;
-use App\Http\Controllers\Public\FacilityController;
 use App\Http\Controllers\Public\HomeController;
-use App\Http\Controllers\Public\IndustryController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\ProductController;
@@ -20,6 +18,14 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('robots.txt', [RobotsController::class, 'index'])->name('robots');
 
+// /company is now one long page merging About, Vision & Mission, Facilities,
+// and Industries into #about/#vision-mission/#facilities/#industries
+// sections — these three old standalone URLs redirect there permanently.
+// Registered before the company/{path?} wildcard so the literal match wins.
+Route::redirect('company/vision-mission', '/company#vision-mission', 301);
+Route::redirect('facilities', '/company#facilities', 301);
+Route::redirect('industries', '/company#industries', 301);
+
 Route::get('company/{path?}', [PageController::class, 'company'])
     ->where('path', '.*')
     ->name('public.company');
@@ -30,13 +36,9 @@ Route::get('products/{slug}', [ProductController::class, 'show'])->name('public.
 Route::get('capabilities', [CapabilityController::class, 'index'])->name('public.capabilities');
 Route::get('capabilities/{slug}', [CapabilityController::class, 'show'])->name('public.capabilities.show');
 
-Route::get('facilities', [FacilityController::class, 'index'])->name('public.facilities');
-
 Route::get('quality', [QualityController::class, 'index'])->name('public.quality');
 
 Route::get('certifications', [CertificationController::class, 'index'])->name('public.certifications');
-
-Route::get('industries', [IndustryController::class, 'index'])->name('public.industries');
 
 Route::get('news', [NewsController::class, 'index'])->name('public.news');
 Route::get('news/{slug}', [NewsController::class, 'show'])->name('public.news.show');

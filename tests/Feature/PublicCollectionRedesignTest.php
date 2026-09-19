@@ -21,10 +21,10 @@ test('facility machine specs are publicly visible when the relationship exists',
         'status' => 'draft',
     ]);
 
-    $response = $this->get('/facilities');
+    $response = $this->get('/company');
 
     $response->assertInertia(fn ($page) => $page
-        ->component('public/facilities/Index')
+        ->component('public/company/Index')
         ->where('facilities.0.machines.0.name', 'CNC Mill')
         ->where('facilities.0.machines.0.brand', 'Haas')
         ->has('facilities.0.machines', 1)
@@ -34,11 +34,11 @@ test('facility machine specs are publicly visible when the relationship exists',
 test('facility with no machines renders safely without inventing data', function () {
     Facility::factory()->published()->create(['name' => 'Empty Facility']);
 
-    $response = $this->get('/facilities');
+    $response = $this->get('/company');
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('public/facilities/Index')
+        ->component('public/company/Index')
         ->has('facilities.0.machines', 0)
     );
 });

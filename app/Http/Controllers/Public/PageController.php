@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\Facility;
+use App\Models\Industry;
 use App\Models\Page;
 use App\Services\SeoService;
 use Inertia\Inertia;
@@ -10,18 +12,6 @@ use Inertia\Response;
 
 class PageController extends Controller
 {
-    /**
-     * Slugs CLAUDE.md requires to exist as public routes regardless of
-     * whether their CMS Page record has been created yet — these render
-     * their static header shell with an empty state instead of a 404, the
-     * same way Facilities/Industries always render their shell even with
-     * zero published items.
-     */
-    private const REQUIRED_SLUGS = [
-        'company' => 'Company',
-        'company/vision-mission' => 'Vision & Mission',
-    ];
-
     public function __construct(
         private readonly SeoService $seo,
     ) {}
@@ -37,41 +27,60 @@ class PageController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return $this->render($slug, $page);
-    }
-
-    /**
-     * Company section pages: /company, /company/vision-mission, etc.
-     * The slug is stored as the full path ("company", "company/vision-mission").
-     */
-    public function company(?string $path = null): Response
-    {
-        $slug = $path ? "company/{$path}" : 'company';
-
-        if (! array_key_exists($slug, self::REQUIRED_SLUGS)) {
-            return $this->show($slug);
-        }
-
-        $page = Page::query()
-            ->standard()
-            ->published()
-            ->where('slug', $slug)
-            ->first();
-
-        return $this->render($slug, $page);
-    }
-
-    private function render(string $slug, ?Page $page): Response
-    {
-        $page?->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
+        $page->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
 
         return Inertia::render('public/Page', [
             'slug' => $slug,
             'page' => $page,
-            'seo' => $page
-                ? $this->seo->resolve($page, $page->title)
-                : $this->seo->resolveStatic(self::REQUIRED_SLUGS[$slug] ?? $slug),
+            'seo' => $this->seo->resolve($page, $page->title),
             'preview' => false,
+        ]);
+    }
+
+    /**
+     * /company — one long page merging About, Vision & Mission, Facilities,
+     * and Industries into #about/#vision-mission/#facilities/#industries
+     * sections (the nav's "Company" submenu jumps between them instead of
+     * navigating to four separate pages). /company/vision-mission,
+     * /facilities, and /industries redirect here — see routes/web.php.
+     *
+     * Any other slug under company/* (an admin-created custom Page) still
+     * falls through to the generic show() renderer.
+     */
+    public function company(?string $path = null): Response
+    {
+        if ($path !== null) {
+            return $this->show("company/{$path}");
+        }
+
+        $aboutPage = Page::query()->standard()->published()->where('slug', 'company')->first();
+        $aboutPage?->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
+
+        $visionPage = Page::query()->standard()->published()->where('slug', 'company/vision-mission')->first();
+        $visionPage?->load(['sections' => fn ($query) => $query->active()->orderBy('sort_order')]);
+
+        $facilities = Facility::query()
+            ->published()
+            ->with([
+                'category:id,name',
+                'machines' => fn ($q) => $q->active()->orderBy('sort_order'),
+            ])
+            ->orderBy('sort_order')
+            ->get(['id', 'facility_category_id', 'name', 'slug', 'location', 'description', 'image']);
+
+        $industries = Industry::query()
+            ->published()
+            ->orderBy('sort_order')
+            ->get(['id', 'name', 'slug', 'description', 'image']);
+
+        return Inertia::render('public/company/Index', [
+            'aboutPage' => $aboutPage,
+            'visionPage' => $visionPage,
+            'facilities' => $facilities,
+            'industries' => $industries,
+            'seo' => $aboutPage
+                ? $this->seo->resolve($aboutPage, $aboutPage->title)
+                : $this->seo->resolveStatic('Company'),
         ]);
     }
 }

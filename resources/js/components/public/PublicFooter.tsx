@@ -4,8 +4,10 @@ const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[
     {
         heading: 'Company',
         links: [
-            { label: 'About', href: '/company' },
-            { label: 'Vision & Mission', href: '/company/vision-mission' },
+            { label: 'About', href: '/company#about' },
+            { label: 'Vision & Mission', href: '/company#vision-mission' },
+            { label: 'Facilities', href: '/company#facilities' },
+            { label: 'Industries', href: '/company#industries' },
         ],
     },
     {
@@ -13,14 +15,12 @@ const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[
         links: [
             { label: 'Capabilities', href: '/capabilities' },
             { label: 'Products', href: '/products' },
-            { label: 'Facilities', href: '/facilities' },
         ],
     },
     {
         heading: 'Resources',
         links: [
             { label: 'Quality & Certifications', href: '/quality' },
-            { label: 'Industries', href: '/industries' },
             { label: 'News', href: '/news' },
             { label: 'Careers', href: '/careers' },
         ],

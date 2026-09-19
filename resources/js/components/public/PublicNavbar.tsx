@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 
 import {
     createNavbarHiddenUpdater,
@@ -23,10 +23,10 @@ interface NavItem {
 
 const NAV: NavItem[] = [
     { label: 'Company', children: [
-        { label: 'About', href: '/company' },
-        { label: 'Vision & Mission', href: '/company/vision-mission' },
-        { label: 'Facilities', href: '/facilities' },
-        { label: 'Industries', href: '/industries' },
+        { label: 'About', href: '/company#about' },
+        { label: 'Vision & Mission', href: '/company#vision-mission' },
+        { label: 'Facilities', href: '/company#facilities' },
+        { label: 'Industries', href: '/company#industries' },
     ] },
     { label: 'Capabilities', href: '/capabilities' },
     { label: 'Products', href: '/products' },
@@ -41,6 +41,27 @@ const NAV: NavItem[] = [
 
 function isActive(currentUrl: string, href: string): boolean {
     return href === '/' ? currentUrl === '/' : currentUrl.startsWith(href);
+}
+
+/**
+ * A submenu link like "/company#facilities" only needs an Inertia visit when
+ * navigating there from a different page — if we're already on /company,
+ * jump straight to the section instead of round-tripping through a full
+ * page fetch just to change the hash.
+ */
+function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => void) {
+    const hashIndex = href.indexOf('#');
+    if (hashIndex === -1) return;
+
+    const path = href.slice(0, hashIndex);
+    if (typeof window === 'undefined' || window.location.pathname !== path) return;
+
+    e.preventDefault();
+    closeMenu();
+    window.history.replaceState(null, '', href);
+    requestAnimationFrame(() => {
+        document.getElementById(href.slice(hashIndex + 1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
 }
 
 // Keep in sync with the menu overlay's `duration-[320ms]` Tailwind class —
@@ -311,6 +332,7 @@ export function PublicNavbar({
                                                         <li key={child.href}>
                                                             <Link
                                                                 href={child.href}
+                                                                onClick={(e) => handleAnchorLinkClick(e, child.href, () => setDrawerOpen(false))}
                                                                 className={`block py-2 text-small ${
                                                                     isActive(url, child.href) ? 'text-white' : 'text-white/70 hover:text-white'
                                                                 }`}
@@ -359,6 +381,7 @@ export function PublicNavbar({
                                     >
                                         <Link
                                             href={child.href}
+                                            onClick={(e) => handleAnchorLinkClick(e, child.href, () => setDrawerOpen(false))}
                                             className={`block text-h4 font-medium transition-colors duration-200 ${
                                                 isActive(url, child.href)
                                                     ? 'text-navy-900 underline decoration-2 underline-offset-4'

@@ -7,8 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
-use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\JobVacancy;
 use App\Models\Page;
 use App\Models\Product;
@@ -38,10 +36,14 @@ class SitemapController extends Controller
         $homepage = Page::query()->where('page_type', PageType::Homepage)->published()->first();
         $urls->push($this->entry(url('/'), $homepage?->updated_at));
 
+        // /company is now the single merged page (About, Vision & Mission,
+        // Facilities, Industries all live there as sections) — the old
+        // company/vision-mission slug 301-redirects and is never its own
+        // sitemap entry.
         Page::query()
             ->standard()
             ->published()
-            ->where(fn ($q) => $q->where('slug', 'company')->orWhere('slug', 'like', 'company/%'))
+            ->where('slug', 'company')
             ->get(['slug', 'updated_at'])
             ->each(fn (Page $page) => $urls->push($this->entry(url("/{$page->slug}"), $page->updated_at)));
 
@@ -53,17 +55,11 @@ class SitemapController extends Controller
         $urls->push($this->entry(url('/capabilities'), $capabilities->max('updated_at')));
         $capabilities->each(fn (Capability $c) => $urls->push($this->entry(url("/capabilities/{$c->slug}"), $c->updated_at)));
 
-        $facilities = Facility::query()->published()->get(['updated_at']);
-        $urls->push($this->entry(url('/facilities'), $facilities->max('updated_at')));
-
         $quality = QualityContent::query()->published()->get(['updated_at']);
         $urls->push($this->entry(url('/quality'), $quality->max('updated_at')));
 
         $certifications = Certification::query()->published()->get(['updated_at']);
         $urls->push($this->entry(url('/certifications'), $certifications->max('updated_at')));
-
-        $industries = Industry::query()->published()->get(['updated_at']);
-        $urls->push($this->entry(url('/industries'), $industries->max('updated_at')));
 
         $articles = Article::query()->published()->get(['slug', 'updated_at']);
         $urls->push($this->entry(url('/news'), $articles->max('updated_at')));

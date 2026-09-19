@@ -25,15 +25,15 @@ test('admin can create an industry', function () {
     $this->assertDatabaseHas('industries', ['name' => 'Automotive', 'slug' => 'automotive']);
 });
 
-test('published industries are rendered on the public industries page', function () {
+test('published industries are rendered on the merged company page', function () {
     Industry::factory()->published()->create(['name' => 'Aerospace']);
     Industry::factory()->create(['name' => 'Draft Industry', 'status' => ContentStatus::Draft]);
 
-    $response = $this->get('/industries');
+    $response = $this->get('/company');
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('public/industries/Index')
+        ->component('public/company/Index')
         ->has('industries', 1)
         ->where('industries.0.name', 'Aerospace')
     );

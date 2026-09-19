@@ -44,15 +44,15 @@ test('capability listing and detail pages render published capabilities only', f
     $this->get('/capabilities/welding')->assertOk();
 });
 
-test('facilities page renders only published facilities', function () {
+test('the merged company page renders only published facilities', function () {
     Facility::factory()->published()->create(['name' => 'Visible Facility']);
     Facility::factory()->create(['name' => 'Draft Facility']);
 
-    $response = $this->get('/facilities');
+    $response = $this->get('/company');
 
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
-        ->component('public/facilities/Index')
+        ->component('public/company/Index')
         ->has('facilities', 1)
     );
 });

@@ -138,7 +138,7 @@ function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
     return (
         <section className="border-t border-border">
             <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                <SectionHeader eyebrow="Who We Serve" heading="Industries Served" cta={{ label: 'View All Industries', href: '/industries' }} />
+                <SectionHeader eyebrow="Who We Serve" heading="Industries Served" cta={{ label: 'View All Industries', href: '/company#industries' }} />
                 <div className="mt-10">
                     <IndustryGrid items={items} />
                 </div>

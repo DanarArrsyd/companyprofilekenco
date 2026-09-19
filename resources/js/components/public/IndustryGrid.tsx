@@ -23,7 +23,8 @@ export function IndustryGrid({ items, showDescription = false }: { items: Indust
             {items.map((industry, index) => (
                 <a
                     key={industry.id}
-                    href={`/industries#${industry.slug}`}
+                    id={industry.slug}
+                    href={`/company#${industry.slug}`}
                     className="group block transition-all duration-500 ease-out"
                     style={{
                         transitionDelay: inView ? `${Math.min(index, 6) * 60}ms` : '0ms',

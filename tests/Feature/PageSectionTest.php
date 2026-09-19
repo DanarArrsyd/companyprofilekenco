@@ -52,8 +52,8 @@ test('inactive sections are not rendered on the public page', function () {
     $response = $this->get('/company');
 
     $response->assertInertia(fn ($assert) => $assert
-        ->component('public/Page')
-        ->has('page.sections', 1)
-        ->where('page.sections.0.title', 'Visible Section')
+        ->component('public/company/Index')
+        ->has('aboutPage.sections', 1)
+        ->where('aboutPage.sections.0.title', 'Visible Section')
     );
 });
