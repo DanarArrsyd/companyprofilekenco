@@ -270,7 +270,7 @@ export function PublicNavbar({
                     {/* Main menu — always navy/white, full width on mobile. */}
                     <nav
                         aria-label="Primary"
-                        className="scrollbar-hide flex w-full shrink-0 flex-col bg-navy-900 px-6 pb-10 pt-24 text-white sm:px-10 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
+                        className="scrollbar-hide flex w-full shrink-0 flex-col bg-navy-900 px-5 pb-8 pt-20 text-white sm:px-10 sm:pt-24 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
                     >
                         <ul className="flex-1">
                             {NAV.map((item, index) => (
@@ -299,10 +299,10 @@ export function PublicNavbar({
 
                                             {/* Mobile: stacked accordion, no right pane to hover into. */}
                                             <details className="group md:hidden" open={item.children.some((c) => isActive(url, c.href))}>
-                                                <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-h3 font-semibold">
+                                                <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-h4 font-semibold sm:py-4 sm:text-h3">
                                                     {item.label}
                                                     <ChevronDown
-                                                        className="h-5 w-5 text-white/60 transition-transform group-open:rotate-180"
+                                                        className="h-4 w-4 shrink-0 text-white/60 transition-transform group-open:rotate-180 sm:h-5 sm:w-5"
                                                         aria-hidden="true"
                                                     />
                                                 </summary>
@@ -311,7 +311,7 @@ export function PublicNavbar({
                                                         <li key={child.href}>
                                                             <Link
                                                                 href={child.href}
-                                                                className={`block py-2 text-sm ${
+                                                                className={`block py-2 text-small ${
                                                                     isActive(url, child.href) ? 'text-white' : 'text-white/70 hover:text-white'
                                                                 }`}
                                                             >
@@ -327,7 +327,7 @@ export function PublicNavbar({
                                             href={item.href!}
                                             onMouseEnter={() => setPreviewedItem(item)}
                                             onFocus={() => setPreviewedItem(item)}
-                                            className={`block py-4 text-h3 font-semibold transition-colors duration-200 ${
+                                            className={`block py-3 text-h4 font-semibold transition-colors duration-200 sm:py-4 sm:text-h3 ${
                                                 previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
                                             } ${isActive(url, item.href!) ? 'underline decoration-2 underline-offset-4' : ''}`}
                                         >
