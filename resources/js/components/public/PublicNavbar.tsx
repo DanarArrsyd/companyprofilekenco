@@ -231,7 +231,7 @@ export function PublicNavbar({
                             transparentHero && !light ? 'text-white' : 'text-navy-900'
                         }`}
                     >
-                        <img src={logoKmi} alt={companyName} className="h-7 w-auto" />
+                        <img src={logoKmi} alt={companyName} className="h-12 w-auto" />
                     </Link>
 
                     <span className="h-10 w-10" aria-hidden="true" />
