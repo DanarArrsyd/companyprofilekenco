@@ -105,12 +105,21 @@ done
 # 3. Install PHP dependencies (production, no dev tooling)
 # ---------------------------------------------------------------------------
 log "Running composer install..."
+# --no-scripts: this host's PHP CLI has proc_open disabled, which breaks
+# composer's own script runner (post-autoload-dump's "@php artisan
+# package:discover" is spawned as a subprocess via Symfony Process, which
+# needs proc_open). Running artisan directly afterwards, in the same shell
+# rather than as a process composer spawns, sidesteps that restriction.
 "$PHP_BIN" "$COMPOSER_BIN" install \
     --no-dev \
     --prefer-dist \
     --no-interaction \
     --optimize-autoloader \
+    --no-scripts \
     --working-dir="$APP_DIR"
+
+log "Running package discovery (composer's own post-install hook can't, see above)..."
+"$PHP_BIN" "${APP_DIR}/artisan" package:discover --ansi
 
 # ---------------------------------------------------------------------------
 # 4. Sync Laravel's built public assets into public_html — additive/mirrored
