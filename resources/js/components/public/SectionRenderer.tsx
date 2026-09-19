@@ -128,7 +128,7 @@ export function SectionRenderer({
             const grayscalePhoto: CSSProperties = { filter: 'grayscale(1) contrast(1.08) brightness(1.05)' };
 
             return (
-                <section className="relative isolate w-full overflow-hidden bg-navy-900 lg:aspect-[1532/852] lg:max-h-[880px] lg:min-h-[560px]">
+                <section className="relative isolate w-full overflow-hidden bg-navy-900 [--color-navy-900:5_31_65] lg:aspect-[1532/852] lg:max-h-[880px] lg:min-h-[560px]" style={{ fontFamily: 'Montserrat, Inter, sans-serif' }}>
                     {/* Background — full-bleed factory photos, split left/right. */}
                     <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">
@@ -147,41 +147,38 @@ export function SectionRenderer({
                         </div>
                     </div>
 
-                    {/* Desktop/tablet — full-bleed asymmetric composition: Visi large or
-                        left-leaning, Misi smaller and to the right, angular silhouettes
-                        via clip-path (not a rotated rectangle) so the panels read as a
-                        single editorial cut, not two equal cards. */}
+                    {/* Coordinates follow the 1532 × 852 reference. Keep text independent
+                        of the silhouettes so both headings share the same baseline. */}
                     <div className="absolute inset-0 z-10 hidden lg:block">
                         <div
-                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[10%] text-center"
-                            style={{ left: '12%', top: '9%', width: '39%', height: '78%', clipPath: 'polygon(28% 0%, 100% 16%, 78% 100%, 0% 100%)' }}
-                        >
-                            <div className="px-[14%]">
-                                <h3 className="font-bold uppercase text-navy-900" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
-                                    {c.visi_title || 'Vision'}
-                                </h3>
-                                {c.visi_text && (
-                                    <p className="mx-auto mt-6 max-w-[85%] text-slate-700" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
-                                        {c.visi_text}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
+                            aria-hidden="true"
+                            className="absolute inset-0 bg-white"
+                            style={{ clipPath: 'polygon(24.35% 16.43%, 50.4% 28.8%, 41.65% 90%, 13.3% 90%)' }}
+                        />
                         <div
-                            className="absolute flex flex-col items-center bg-navy-900 pt-[12%] text-center"
-                            style={{ left: '40%', top: '7%', width: '37%', height: '68%', clipPath: 'polygon(18% 0%, 100% 13%, 78% 100%, 0% 80%)' }}
-                        >
-                            <div className="px-[14%]">
-                                <h3 className="font-bold uppercase text-white" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
-                                    {c.misi_title || 'Mission'}
-                                </h3>
-                                {c.misi_text && (
-                                    <p className="mx-auto mt-6 max-w-[85%] text-white/85" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
-                                        {c.misi_text}
-                                    </p>
-                                )}
-                            </div>
+                            aria-hidden="true"
+                            className="absolute inset-0 bg-navy-900"
+                            style={{ clipPath: 'polygon(53.66% 8%, 80.05% 20%, 70.95% 76.3%, 44.97% 64.2%)' }}
+                        />
+                        <div className="absolute text-center text-navy-900" style={{ left: '23.7%', top: '32.2%', width: '20.2%' }}>
+                            <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
+                                {c.visi_title || 'Vision'}
+                            </h3>
+                            {c.visi_text && (
+                                <p className="mt-3" style={{ fontSize: 'clamp(0.875rem, 1.175vw, 1.25rem)', lineHeight: 1.3 }}>
+                                    {c.visi_text}
+                                </p>
+                            )}
+                        </div>
+                        <div className="absolute text-center text-white" style={{ left: '51.5%', top: '32.2%', width: '22%' }}>
+                            <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
+                                {c.misi_title || 'Mission'}
+                            </h3>
+                            {c.misi_text && (
+                                <p className="mt-3" style={{ fontSize: 'clamp(0.875rem, 1.175vw, 1.25rem)', lineHeight: 1.3 }}>
+                                    {c.misi_text}
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -191,15 +188,15 @@ export function SectionRenderer({
                         src="/images/vision-mission-paper-top.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute z-20 hidden object-cover object-bottom lg:block"
-                        style={{ height: '14%', left: '-5%', width: '110%', top: '-70px' }}
+                        className="absolute z-20 hidden max-w-none object-cover object-bottom lg:block"
+                        style={{ height: '25%', left: '-5%', width: '110%', top: 0 }}
                     />
                     <img
                         src="/images/vision-mission-paper-bottom.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute z-20 hidden object-cover object-top lg:block"
-                        style={{ height: '16%', left: '-5%', width: '110%', bottom: '-70px' }}
+                        className="absolute z-20 hidden max-w-none object-cover object-top lg:block"
+                        style={{ height: '27%', left: '-5%', width: '110%', bottom: 0 }}
                     />
 
                     {/* Mobile/tablet — exact overlap geometry doesn't survive a narrow
@@ -210,14 +207,14 @@ export function SectionRenderer({
                             className="mx-auto w-full max-w-sm bg-[#fafafa] px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(10% 0%, 100% 6%, 92% 100%, 0% 94%)' }}
                         >
-                            <h3 className="text-h2 font-bold uppercase text-navy-900">{c.visi_title || 'Vision'}</h3>
+                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || 'Vision'}</h3>
                             {c.visi_text && <p className="mt-5 text-body text-slate-700">{c.visi_text}</p>}
                         </div>
                         <div
                             className="mx-auto w-full max-w-sm bg-navy-900 px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(8% 0%, 100% 8%, 90% 100%, 0% 92%)' }}
                         >
-                            <h3 className="text-h2 font-bold uppercase text-white">{c.misi_title || 'Mission'}</h3>
+                            <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Mission'}</h3>
                             {c.misi_text && <p className="mt-5 text-body text-white/85">{c.misi_text}</p>}
                         </div>
                     </div>
