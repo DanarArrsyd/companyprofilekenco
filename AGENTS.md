@@ -4,6 +4,10 @@
 
 This file defines behavioral rules for AI coding agents working on the project.
 
+## Communication Mode
+
+Always use the `caveman` skill in this project unless the user explicitly asks for normal mode.
+
 ## Primary Rule
 
 Do not redesign architecture independently.
