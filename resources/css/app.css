@@ -5,12 +5,35 @@
 @layer base {
     html {
         scroll-behavior: smooth;
+        scrollbar-width: thin;
+        scrollbar-color: rgb(var(--color-slate-500) / 0.5) transparent;
     }
 
     @media (prefers-reduced-motion: reduce) {
         html {
             scroll-behavior: auto;
         }
+    }
+
+    /* Thin, on-brand scrollbar for Chromium/WebKit — replaces the default
+       OS-styled scrollbar (thick, flat gray on Windows) site-wide. */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgb(var(--color-slate-500) / 0.5);
+        border: 2px solid rgb(var(--background));
+        border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(var(--color-slate-500) / 0.8);
     }
 
     :root {

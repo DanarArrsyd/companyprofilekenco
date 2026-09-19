@@ -253,7 +253,7 @@ export function PublicNavbar({
                     role="dialog"
                     aria-modal="true"
                     aria-label="Navigation menu"
-                    className={`fixed inset-0 z-[60] flex flex-col overflow-y-auto md:flex-row md:overflow-hidden transition-[opacity,transform] duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none ${
+                    className={`scrollbar-hide fixed inset-0 z-[60] flex flex-col overflow-y-auto md:flex-row md:overflow-hidden transition-[opacity,transform] duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none ${
                         drawerEntered ? 'scale-100 opacity-100' : 'scale-[0.98] opacity-0'
                     }`}
                 >
@@ -270,7 +270,7 @@ export function PublicNavbar({
                     {/* Main menu — always navy/white, full width on mobile. */}
                     <nav
                         aria-label="Primary"
-                        className="flex w-full shrink-0 flex-col bg-navy-900 px-6 pb-10 pt-24 text-white sm:px-10 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
+                        className="scrollbar-hide flex w-full shrink-0 flex-col bg-navy-900 px-6 pb-10 pt-24 text-white sm:px-10 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
                     >
                         <ul className="flex-1">
                             {NAV.map((item, index) => (
@@ -364,7 +364,7 @@ export function PublicNavbar({
                         then flips to the light surface to host its children.
                     */}
                     <div
-                        className={`hidden px-14 py-24 transition-colors duration-300 ${DRAWER_EASE} motion-reduce:transition-none md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20 ${
+                        className={`scrollbar-hide hidden px-14 py-24 transition-colors duration-300 ${DRAWER_EASE} motion-reduce:transition-none md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20 ${
                             previewedItem?.children ? 'bg-background text-navy-900' : 'bg-navy-900 text-white'
                         }`}
                     >
