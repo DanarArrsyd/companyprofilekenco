@@ -288,6 +288,8 @@ export function PublicNavbar({
                                                 type="button"
                                                 onMouseEnter={() => setPreviewedItem(item)}
                                                 onFocus={() => setPreviewedItem(item)}
+                                                onMouseLeave={() => setPreviewedItem(null)}
+                                                onBlur={() => setPreviewedItem(null)}
                                                 onClick={() => setPreviewedItem(item)}
                                                 className={`hidden w-full items-center justify-between border-b border-white/10 py-4 text-left text-h3 font-semibold transition-colors duration-200 md:flex ${
                                                     previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
@@ -325,11 +327,13 @@ export function PublicNavbar({
                                     ) : (
                                         <Link
                                             href={item.href!}
-                                            onMouseEnter={() => setPreviewedItem(null)}
-                                            onFocus={() => setPreviewedItem(null)}
+                                            onMouseEnter={() => setPreviewedItem(item)}
+                                            onFocus={() => setPreviewedItem(item)}
+                                            onMouseLeave={() => setPreviewedItem(null)}
+                                            onBlur={() => setPreviewedItem(null)}
                                             className={`block border-b border-white/10 py-4 text-h3 font-semibold transition-colors duration-200 ${
-                                                isActive(url, item.href!) ? 'text-white' : 'text-white/90 hover:text-white'
-                                            }`}
+                                                previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
+                                            } ${isActive(url, item.href!) ? 'underline decoration-2 underline-offset-4' : ''}`}
                                         >
                                             {item.label}
                                         </Link>
@@ -361,7 +365,7 @@ export function PublicNavbar({
                     */}
                     <div
                         className={`hidden px-14 py-24 transition-colors duration-300 ${DRAWER_EASE} motion-reduce:transition-none md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20 ${
-                            previewedItem ? 'bg-background text-navy-900' : 'bg-navy-900 text-white'
+                            previewedItem?.children ? 'bg-background text-navy-900' : 'bg-navy-900 text-white'
                         }`}
                     >
                         {previewedItem?.children && (
