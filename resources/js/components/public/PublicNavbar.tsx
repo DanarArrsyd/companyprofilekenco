@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
     ] },
     { label: 'News', href: '/news' },
     { label: 'Career', href: '/careers' },
+    { label: 'Contact Us', href: '/contact' },
 ];
 
 function isActive(currentUrl: string, href: string): boolean {
@@ -336,24 +337,6 @@ export function PublicNavbar({
                                 </li>
                             ))}
                         </ul>
-
-                        <div
-                            className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
-                                drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
-                            }`}
-                            style={{ transitionDelay: drawerEntered ? `${60 + NAV.length * 40}ms` : '0ms' }}
-                        >
-                            <Link
-                                href="/contact"
-                                onMouseEnter={() => setPreviewedItem(null)}
-                                onFocus={() => setPreviewedItem(null)}
-                                className={`block py-4 text-h3 font-semibold text-white transition-colors duration-200 ${
-                                    isActive(url, '/contact') ? 'underline decoration-2 underline-offset-4' : ''
-                                }`}
-                            >
-                                Contact Us
-                            </Link>
-                        </div>
                     </nav>
 
                     {/*
