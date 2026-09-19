@@ -149,10 +149,12 @@ function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
 
 function MilestonesSection({ items }: { items: MilestoneItem[] }) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
     const tickingRef = useRef(false);
     const [progress, setProgress] = useState(0);
     const [showLeftFade, setShowLeftFade] = useState(false);
     const [showRightFade, setShowRightFade] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(0);
 
     const measure = useCallback(() => {
         const el = scrollRef.current;
@@ -164,6 +166,22 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
         setProgress(hasOverflow ? Math.min(1, (el.scrollLeft + el.clientWidth) / el.scrollWidth) : 1);
         setShowLeftFade(hasOverflow && el.scrollLeft > 4);
         setShowRightFade(hasOverflow && el.scrollLeft < maxScroll - 4);
+
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+        cardRefs.current.forEach((card, index) => {
+            if (!card) return;
+            const distance = Math.abs(card.offsetLeft - el.scrollLeft);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = index;
+            }
+        });
+        setActiveIndex(closestIndex);
+    }, []);
+
+    const scrollToItem = useCallback((index: number) => {
+        cardRefs.current[index]?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
     }, []);
 
     const onScroll = useCallback(() => {
@@ -208,13 +226,11 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                             style={{ top: MILESTONE_RAIL_TOP, transform: `scaleX(${progress})` }}
                         />
 
-                        {items.map((item, index) =>
-                            index % 2 === 0 ? (
-                                <MilestoneCardA key={item.id} item={item} />
-                            ) : (
-                                <MilestoneCardB key={item.id} item={item} />
-                            ),
-                        )}
+                        {items.map((item, index) => (
+                            <div key={item.id} ref={(el) => { cardRefs.current[index] = el; }} className="shrink-0">
+                                {index % 2 === 0 ? <MilestoneCardA item={item} /> : <MilestoneCardB item={item} />}
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -228,6 +244,25 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                     className={`pointer-events-none absolute inset-y-0 right-0 z-10 w-14 transition-opacity duration-300 sm:w-20 lg:w-32 ${showRightFade ? 'opacity-100' : 'opacity-0'}`}
                     style={{ background: 'linear-gradient(to left, rgb(var(--background)) 0%, rgb(var(--background) / 0) 100%)' }}
                 />
+            </div>
+
+            <div className="scrollbar-hide mx-auto mt-6 max-w-content overflow-x-auto px-5 sm:px-6 lg:px-8">
+                <div className="flex w-max gap-x-6 sm:gap-x-8">
+                    {items.map((item, index) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => scrollToItem(index)}
+                            aria-current={activeIndex === index ? 'true' : undefined}
+                            className={`shrink-0 text-small transition-colors duration-200 ${
+                                activeIndex === index ? 'font-bold text-navy-900' : 'text-muted-foreground hover:text-navy-700'
+                            }`}
+                            style={{ fontVariantNumeric: 'tabular-nums' }}
+                        >
+                            {item.year}
+                        </button>
+                    ))}
+                </div>
             </div>
         </section>
     );

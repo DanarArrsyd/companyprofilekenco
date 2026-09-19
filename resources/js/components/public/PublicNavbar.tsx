@@ -344,11 +344,7 @@ export function PublicNavbar({
                             }`}
                             style={{ transitionDelay: drawerEntered ? `${60 + NAV.length * 40}ms` : '0ms' }}
                         >
-                            <Button
-                                asChild
-                                variant="secondary"
-                                className="w-full border-white/30 bg-transparent text-white hover:bg-white hover:text-navy-900"
-                            >
+                            <Button asChild variant="secondary" className="w-full border-white/40 text-white hover:bg-white/10">
                                 <Link href="/contact">Contact Us</Link>
                             </Button>
                         </div>
