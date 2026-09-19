@@ -247,7 +247,7 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
             </div>
 
             <div className="scrollbar-hide mx-auto mt-6 max-w-content overflow-x-auto px-5 sm:px-6 lg:px-8">
-                <div className="flex w-max gap-x-6 sm:gap-x-8">
+                <div className="flex w-max min-w-full justify-center gap-x-6 sm:gap-x-8">
                     {items.map((item, index) => (
                         <button
                             key={item.id}

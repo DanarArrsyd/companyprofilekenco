@@ -9,7 +9,6 @@ import {
     getNavbarTransformClass,
     shouldRestoreMenuTriggerFocus,
 } from '@/components/public/navbar-scroll';
-import { Button } from '@/components/ui/button';
 
 interface NavLink {
     label: string;
@@ -339,14 +338,21 @@ export function PublicNavbar({
                         </ul>
 
                         <div
-                            className={`mt-8 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
+                            className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
                                 drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
                             }`}
                             style={{ transitionDelay: drawerEntered ? `${60 + NAV.length * 40}ms` : '0ms' }}
                         >
-                            <Button asChild variant="secondary" className="w-full border-white/40 text-white hover:bg-white/10">
-                                <Link href="/contact">Contact Us</Link>
-                            </Button>
+                            <Link
+                                href="/contact"
+                                onMouseEnter={() => setPreviewedItem(null)}
+                                onFocus={() => setPreviewedItem(null)}
+                                className={`block py-4 text-h3 font-semibold text-white transition-colors duration-200 ${
+                                    isActive(url, '/contact') ? 'underline decoration-2 underline-offset-4' : ''
+                                }`}
+                            >
+                                Contact Us
+                            </Link>
                         </div>
                     </nav>
 
