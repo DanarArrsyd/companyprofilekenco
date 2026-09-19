@@ -153,12 +153,12 @@ export function SectionRenderer({
                         single editorial cut, not two equal cards. */}
                     <div className="absolute inset-0 z-10 hidden lg:block">
                         <div
-                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[20%] text-center"
+                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[10%] text-center"
                             style={{ left: '12%', top: '9%', width: '39%', height: '78%', clipPath: 'polygon(28% 0%, 100% 16%, 78% 100%, 0% 100%)' }}
                         >
                             <div className="px-[14%]">
-                                <h3 className="font-bold text-navy-900" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
-                                    {c.visi_title || 'Visi'}
+                                <h3 className="font-bold uppercase text-navy-900" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
+                                    {c.visi_title || 'Vision'}
                                 </h3>
                                 {c.visi_text && (
                                     <p className="mx-auto mt-6 max-w-[85%] text-slate-700" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
@@ -169,12 +169,12 @@ export function SectionRenderer({
                         </div>
 
                         <div
-                            className="absolute flex flex-col items-center bg-navy-900 pt-[22%] text-center"
+                            className="absolute flex flex-col items-center bg-navy-900 pt-[12%] text-center"
                             style={{ left: '40%', top: '7%', width: '37%', height: '68%', clipPath: 'polygon(18% 0%, 100% 13%, 78% 100%, 0% 80%)' }}
                         >
                             <div className="px-[14%]">
-                                <h3 className="font-bold text-white" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
-                                    {c.misi_title || 'Misi'}
+                                <h3 className="font-bold uppercase text-white" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
+                                    {c.misi_title || 'Mission'}
                                 </h3>
                                 {c.misi_text && (
                                     <p className="mx-auto mt-6 max-w-[85%] text-white/85" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
@@ -191,15 +191,15 @@ export function SectionRenderer({
                         src="/images/vision-mission-paper-top.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-x-0 top-0 z-20 hidden w-full object-cover object-bottom lg:block"
-                        style={{ height: '22%' }}
+                        className="absolute z-20 hidden object-cover object-bottom lg:block"
+                        style={{ height: '14%', left: '-5%', width: '110%', top: '-70px' }}
                     />
                     <img
                         src="/images/vision-mission-paper-bottom.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-x-0 bottom-0 z-20 hidden w-full object-cover object-top lg:block"
-                        style={{ height: '30%' }}
+                        className="absolute z-20 hidden object-cover object-top lg:block"
+                        style={{ height: '16%', left: '-5%', width: '110%', bottom: '-70px' }}
                     />
 
                     {/* Mobile/tablet — exact overlap geometry doesn't survive a narrow
@@ -210,14 +210,14 @@ export function SectionRenderer({
                             className="mx-auto w-full max-w-sm bg-[#fafafa] px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(10% 0%, 100% 6%, 92% 100%, 0% 94%)' }}
                         >
-                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || 'Visi'}</h3>
+                            <h3 className="text-h2 font-bold uppercase text-navy-900">{c.visi_title || 'Vision'}</h3>
                             {c.visi_text && <p className="mt-5 text-body text-slate-700">{c.visi_text}</p>}
                         </div>
                         <div
                             className="mx-auto w-full max-w-sm bg-navy-900 px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(8% 0%, 100% 8%, 90% 100%, 0% 92%)' }}
                         >
-                            <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Misi'}</h3>
+                            <h3 className="text-h2 font-bold uppercase text-white">{c.misi_title || 'Mission'}</h3>
                             {c.misi_text && <p className="mt-5 text-body text-white/85">{c.misi_text}</p>}
                         </div>
                     </div>

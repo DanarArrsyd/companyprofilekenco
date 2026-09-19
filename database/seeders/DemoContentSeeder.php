@@ -445,9 +445,9 @@ class DemoContentSeeder extends Seeder
                 'section_type' => SectionType::VisionMission,
                 'title' => 'Vision & Mission',
                 'content' => [
-                    'visi_title' => 'Visi',
+                    'visi_title' => 'Vision',
                     'visi_text' => 'To be the most trusted precision manufacturing partner for automotive and industrial customers in Southeast Asia.',
-                    'misi_title' => 'Misi',
+                    'misi_title' => 'Mission',
                     'misi_text' => 'We deliver zero-defect components on time, every time, through disciplined process control, continuous improvement, and investment in our people.',
                 ],
                 'sort_order' => 0,
