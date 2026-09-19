@@ -153,8 +153,8 @@ export function SectionRenderer({
                         single editorial cut, not two equal cards. */}
                     <div className="absolute inset-0 z-10 hidden lg:block">
                         <div
-                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[15%] text-center"
-                            style={{ left: '14%', top: '16%', width: '37%', height: '71%', clipPath: 'polygon(28% 0%, 100% 16%, 78% 100%, 0% 100%)' }}
+                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[20%] text-center"
+                            style={{ left: '12%', top: '9%', width: '39%', height: '78%', clipPath: 'polygon(28% 0%, 100% 16%, 78% 100%, 0% 100%)' }}
                         >
                             <div className="px-[14%]">
                                 <h3 className="font-bold text-navy-900" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
@@ -169,8 +169,8 @@ export function SectionRenderer({
                         </div>
 
                         <div
-                            className="absolute flex flex-col items-center bg-navy-900 pt-[14%] text-center"
-                            style={{ left: '44%', top: '17%', width: '35%', height: '62%', clipPath: 'polygon(18% 0%, 100% 13%, 78% 100%, 0% 80%)' }}
+                            className="absolute flex flex-col items-center bg-navy-900 pt-[22%] text-center"
+                            style={{ left: '40%', top: '7%', width: '37%', height: '68%', clipPath: 'polygon(18% 0%, 100% 13%, 78% 100%, 0% 80%)' }}
                         >
                             <div className="px-[14%]">
                                 <h3 className="font-bold text-white" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
