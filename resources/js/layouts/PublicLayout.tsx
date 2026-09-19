@@ -21,7 +21,7 @@ export default function PublicLayout({
 
     return (
         <div className="flex min-h-screen flex-col bg-background text-foreground">
-            <PublicNavbar companyName={companyName} logo={siteSettings?.logo} variant={heroVariant} />
+            <PublicNavbar companyName={companyName} variant={heroVariant} />
             {/* Header is fixed (out of document flow) on every page, so
                 solid-header pages need top padding equal to its height
                 (h-20) to keep content clear of it. Transparent/hero pages

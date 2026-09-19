@@ -2,6 +2,8 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 
+import logoKmi from '../../../img/logo_kmi.png';
+
 import {
     createNavbarHiddenUpdater,
     getBodyScrollLockStyles,
@@ -76,11 +78,9 @@ const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
 
 export function PublicNavbar({
     companyName,
-    logo,
     variant = 'solid',
 }: {
     companyName: string;
-    logo?: string | null;
     /**
      * 'transparent-dark' floats the header (white text/icons) over a dark
      * hero photo. 'transparent-light' floats it (navy text/icons) over a
@@ -231,8 +231,7 @@ export function PublicNavbar({
                             transparentHero && !light ? 'text-white' : 'text-navy-900'
                         }`}
                     >
-                        {logo && <img src={`/storage/${logo}`} alt={companyName} className="h-7 w-auto" />}
-                        {companyName}
+                        <img src={logoKmi} alt={companyName} className="h-7 w-auto" />
                     </Link>
 
                     <span className="h-10 w-10" aria-hidden="true" />
