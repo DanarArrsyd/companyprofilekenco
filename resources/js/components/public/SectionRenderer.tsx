@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { CSSProperties } from 'react';
 
 import { CapabilityFeature, CapabilityFeatureItem } from '@/components/public/CapabilityFeature';
 import { CertificationItem, CertificationItemData } from '@/components/public/CertificationItem';
@@ -124,56 +125,114 @@ export function SectionRenderer({
                 misi_text?: string;
             };
 
+            const grayscalePhoto: CSSProperties = { filter: 'grayscale(1) contrast(1.08) brightness(1.05)' };
+
             return (
-                <section className="relative isolate overflow-hidden bg-navy-900 py-20 sm:py-28">
-                    <div className="absolute inset-0 flex" aria-hidden="true">
+                <section className="relative isolate w-full overflow-hidden bg-navy-900 lg:aspect-[1532/852] lg:max-h-[880px] lg:min-h-[560px]">
+                    {/* Background — full-bleed factory photos, split left/right. */}
+                    <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">
                             {c.left_image ? (
-                                <img src={`/storage/${c.left_image}`} alt="" className="h-full w-full object-cover grayscale" />
+                                <img src={`/storage/${c.left_image}`} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
                         </div>
                         <div className="h-full w-1/2">
                             {c.right_image ? (
-                                <img src={`/storage/${c.right_image}`} alt="" className="h-full w-full object-cover grayscale" />
+                                <img src={`/storage/${c.right_image}`} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
                         </div>
-                        <div className="absolute inset-0 bg-navy-900/25" />
                     </div>
 
+                    {/* Desktop/tablet — full-bleed asymmetric composition: Visi large or
+                        left-leaning, Misi smaller and to the right, angular silhouettes
+                        via clip-path (not a rotated rectangle) so the panels read as a
+                        single editorial cut, not two equal cards. */}
+                    <div className="absolute inset-0 z-10 hidden lg:block">
+                        <div
+                            className="absolute flex flex-col items-center bg-[#fafafa] pt-[15%] text-center"
+                            style={{ left: '14%', top: '16%', width: '37%', height: '71%', clipPath: 'polygon(28% 0%, 100% 16%, 78% 100%, 0% 100%)' }}
+                        >
+                            <div className="px-[14%]">
+                                <h3 className="font-bold text-navy-900" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
+                                    {c.visi_title || 'Visi'}
+                                </h3>
+                                {c.visi_text && (
+                                    <p className="mx-auto mt-6 max-w-[85%] text-slate-700" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
+                                        {c.visi_text}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div
+                            className="absolute flex flex-col items-center bg-navy-900 pt-[14%] text-center"
+                            style={{ left: '44%', top: '17%', width: '35%', height: '62%', clipPath: 'polygon(18% 0%, 100% 13%, 78% 100%, 0% 80%)' }}
+                        >
+                            <div className="px-[14%]">
+                                <h3 className="font-bold text-white" style={{ fontSize: 'clamp(2.25rem, 3.4vw, 4.25rem)' }}>
+                                    {c.misi_title || 'Misi'}
+                                </h3>
+                                {c.misi_text && (
+                                    <p className="mx-auto mt-6 max-w-[85%] text-white/85" style={{ fontSize: 'clamp(1rem, 1.15vw, 1.375rem)', lineHeight: 1.5 }}>
+                                        {c.misi_text}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Torn paper — foreground layer, above the panels, masking their
+                        top/bottom edges (z-20 > panels' z-10) instead of framing behind them. */}
                     <img
                         src="/images/vision-mission-paper-top.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-x-0 top-0 h-20 w-full object-cover object-bottom sm:h-28 lg:h-36"
+                        className="absolute inset-x-0 top-0 z-20 hidden w-full object-cover object-bottom lg:block"
+                        style={{ height: '22%' }}
                     />
                     <img
                         src="/images/vision-mission-paper-bottom.png"
                         alt=""
                         aria-hidden="true"
-                        className="absolute inset-x-0 bottom-0 h-20 w-full object-cover object-top sm:h-28 lg:h-36"
+                        className="absolute inset-x-0 bottom-0 z-20 hidden w-full object-cover object-top lg:block"
+                        style={{ height: '30%' }}
                     />
 
-                    <div className="relative mx-auto flex max-w-content flex-col items-center gap-6 px-5 sm:px-6 lg:flex-row lg:justify-center lg:gap-0 lg:px-8">
-                        <div className="relative z-10 w-full max-w-[300px] sm:max-w-[340px] lg:-mr-8">
-                            <img src="/images/vision-mission-shape-white.png" alt="" aria-hidden="true" className="w-full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center px-10 text-center sm:px-12">
-                                <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || section.title || 'Visi'}</h3>
-                                {c.visi_text && <p className="mt-4 text-small text-slate-700">{c.visi_text}</p>}
-                            </div>
+                    {/* Mobile/tablet — exact overlap geometry doesn't survive a narrow
+                        viewport, so the panels stack instead of overlapping, but keep
+                        the same angular silhouettes, contrast, and torn-paper framing. */}
+                    <div className="relative z-10 flex flex-col gap-8 px-5 py-16 sm:px-6 lg:hidden">
+                        <div
+                            className="mx-auto w-full max-w-sm bg-[#fafafa] px-8 pb-10 pt-12 text-center"
+                            style={{ clipPath: 'polygon(10% 0%, 100% 6%, 92% 100%, 0% 94%)' }}
+                        >
+                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || 'Visi'}</h3>
+                            {c.visi_text && <p className="mt-5 text-body text-slate-700">{c.visi_text}</p>}
                         </div>
-
-                        <div className="relative z-20 w-full max-w-[300px] sm:max-w-[340px] lg:ml-8">
-                            <img src="/images/vision-mission-shape-navy.png" alt="" aria-hidden="true" className="w-full" />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center px-10 text-center sm:px-12">
-                                <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Misi'}</h3>
-                                {c.misi_text && <p className="mt-4 text-small text-white/80">{c.misi_text}</p>}
-                            </div>
+                        <div
+                            className="mx-auto w-full max-w-sm bg-navy-900 px-8 pb-10 pt-12 text-center"
+                            style={{ clipPath: 'polygon(8% 0%, 100% 8%, 90% 100%, 0% 92%)' }}
+                        >
+                            <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Misi'}</h3>
+                            {c.misi_text && <p className="mt-5 text-body text-white/85">{c.misi_text}</p>}
                         </div>
                     </div>
+                    <img
+                        src="/images/vision-mission-paper-top.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 z-20 h-16 w-full object-cover object-bottom sm:h-24 lg:hidden"
+                    />
+                    <img
+                        src="/images/vision-mission-paper-bottom.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-x-0 bottom-0 z-20 h-16 w-full object-cover object-top sm:h-24 lg:hidden"
+                    />
                 </section>
             );
         }
