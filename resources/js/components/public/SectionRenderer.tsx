@@ -114,6 +114,70 @@ export function SectionRenderer({
             );
         }
 
+        case 'vision_mission': {
+            const c = content as {
+                left_image?: string;
+                right_image?: string;
+                visi_title?: string;
+                visi_text?: string;
+                misi_title?: string;
+                misi_text?: string;
+            };
+
+            return (
+                <section className="relative isolate overflow-hidden bg-navy-900 py-20 sm:py-28">
+                    <div className="absolute inset-0 flex" aria-hidden="true">
+                        <div className="h-full w-1/2">
+                            {c.left_image ? (
+                                <img src={`/storage/${c.left_image}`} alt="" className="h-full w-full object-cover grayscale" />
+                            ) : (
+                                <ImagePlaceholder className="h-full" />
+                            )}
+                        </div>
+                        <div className="h-full w-1/2">
+                            {c.right_image ? (
+                                <img src={`/storage/${c.right_image}`} alt="" className="h-full w-full object-cover grayscale" />
+                            ) : (
+                                <ImagePlaceholder className="h-full" />
+                            )}
+                        </div>
+                        <div className="absolute inset-0 bg-navy-900/25" />
+                    </div>
+
+                    <img
+                        src="/images/vision-mission-paper-top.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-0 h-20 w-full object-cover object-bottom sm:h-28 lg:h-36"
+                    />
+                    <img
+                        src="/images/vision-mission-paper-bottom.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-x-0 bottom-0 h-20 w-full object-cover object-top sm:h-28 lg:h-36"
+                    />
+
+                    <div className="relative mx-auto flex max-w-content flex-col items-center gap-6 px-5 sm:px-6 lg:flex-row lg:justify-center lg:gap-0 lg:px-8">
+                        <div className="relative z-10 w-full max-w-[300px] sm:max-w-[340px] lg:-mr-8">
+                            <img src="/images/vision-mission-shape-white.png" alt="" aria-hidden="true" className="w-full" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center px-10 text-center sm:px-12">
+                                <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || section.title || 'Visi'}</h3>
+                                {c.visi_text && <p className="mt-4 text-small text-slate-700">{c.visi_text}</p>}
+                            </div>
+                        </div>
+
+                        <div className="relative z-20 w-full max-w-[300px] sm:max-w-[340px] lg:ml-8">
+                            <img src="/images/vision-mission-shape-navy.png" alt="" aria-hidden="true" className="w-full" />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center px-10 text-center sm:px-12">
+                                <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Misi'}</h3>
+                                {c.misi_text && <p className="mt-4 text-small text-white/80">{c.misi_text}</p>}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
         case 'stats': {
             const c = content as StatsContent;
             return <MetricStrip items={c.items ?? []} />;

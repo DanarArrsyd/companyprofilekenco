@@ -11,6 +11,7 @@ enum SectionType: string
     case Stats = 'stats';
     case Gallery = 'gallery';
     case CallToAction = 'call_to_action';
+    case VisionMission = 'vision_mission';
 
     // Homepage-specific sections
     case CompanyIntro = 'company_intro';
@@ -31,6 +32,7 @@ enum SectionType: string
             self::Stats => 'Statistics',
             self::Gallery => 'Gallery',
             self::CallToAction => 'Call to Action',
+            self::VisionMission => 'Vision & Mission (split cards)',
             self::CompanyIntro => 'Company Introduction',
             self::Capabilities => 'Capabilities',
             self::Products => 'Products',
@@ -49,7 +51,7 @@ enum SectionType: string
      */
     public static function forGenericPage(): array
     {
-        return [self::Text, self::ImageText, self::Hero, self::Stats, self::Gallery, self::CallToAction];
+        return [self::Text, self::ImageText, self::Hero, self::Stats, self::Gallery, self::CallToAction, self::VisionMission];
     }
 
     /**

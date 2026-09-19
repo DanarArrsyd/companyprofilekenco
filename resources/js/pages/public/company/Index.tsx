@@ -81,13 +81,19 @@ export default function CompanyIndex({
             </section>
 
             <section id="vision-mission" className="scroll-mt-20 border-t border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        eyebrow="Our Direction"
-                        heading="Vision & Mission"
-                        description="The principles that guide how we manufacture, and where we aim to be."
-                    />
-                </div>
+                {/* The 'vision_mission' split-card section is a full-bleed visual
+                    with its own Visi/Misi headings — a plain banner above it would
+                    just duplicate that. Only show the generic banner when the page
+                    doesn't have that section (e.g. before an admin has set it up). */}
+                {!visionSections.some((section) => section.section_type === 'vision_mission') && (
+                    <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+                        <SectionHeader
+                            eyebrow="Our Direction"
+                            heading="Vision & Mission"
+                            description="The principles that guide how we manufacture, and where we aim to be."
+                        />
+                    </div>
+                )}
                 {visionSections.map((section) => <SectionRenderer key={section.id} section={section} />)}
             </section>
 

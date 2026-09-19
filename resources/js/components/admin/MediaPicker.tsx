@@ -50,10 +50,16 @@ function Modal({ onClose, onSelectPath }: { onClose: () => void; onSelectPath: (
                 'X-Requested-With': 'XMLHttpRequest',
             },
             body: formData,
-        }).finally(() => {
-            setUploading(false);
-            load(search);
-        });
+        })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((uploaded: { path: string } | null) => {
+                if (uploaded?.path) {
+                    onSelectPath(uploaded.path);
+                    return;
+                }
+                load(search);
+            })
+            .finally(() => setUploading(false));
     };
 
     return (

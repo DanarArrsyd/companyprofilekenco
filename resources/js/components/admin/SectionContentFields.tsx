@@ -1,10 +1,38 @@
 import { Plus, Trash2 } from 'lucide-react';
 
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 type Content = Record<string, unknown>;
+
+/**
+ * Uploads a file straight to the Media Library and resolves its stored
+ * path — used by fields that want a real "pick a file, it's just there"
+ * upload instead of the "upload in Media Library, then paste the path"
+ * convention older section types (hero, gallery, image_text) rely on.
+ */
+async function uploadToMediaLibrary(file: File): Promise<string | null> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(route('admin.media.store'), {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData,
+    });
+
+    if (!response.ok) return null;
+
+    const uploaded: { path: string } = await response.json();
+
+    return uploaded.path;
+}
 
 function TextArea({
     id,
@@ -124,6 +152,51 @@ export function SectionContentFields({
                     <div>
                         <Label htmlFor="body">Body</Label>
                         <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={5} />
+                    </div>
+                </div>
+            );
+
+        case 'vision_mission':
+            return (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div className="space-y-4 rounded border border-border p-4">
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Visi card</p>
+                            <MediaPickerField
+                                label="Background photo"
+                                currentUrl={str(content, 'left_image') ? `/storage/${str(content, 'left_image')}` : null}
+                                onUploadFile={(file) => uploadToMediaLibrary(file).then((path) => path && set('left_image', path))}
+                                onSelectPath={(path) => set('left_image', path)}
+                                onClear={() => set('left_image', '')}
+                            />
+                            <div>
+                                <Label htmlFor="visi_title">Title</Label>
+                                <Input id="visi_title" value={str(content, 'visi_title') || 'Visi'} onChange={(e) => set('visi_title', e.target.value)} className="mt-1.5" />
+                            </div>
+                            <div>
+                                <Label htmlFor="visi_text">Statement</Label>
+                                <TextArea id="visi_text" value={str(content, 'visi_text')} onChange={(v) => set('visi_text', v)} rows={4} />
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 rounded border border-border p-4">
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Misi card</p>
+                            <MediaPickerField
+                                label="Background photo"
+                                currentUrl={str(content, 'right_image') ? `/storage/${str(content, 'right_image')}` : null}
+                                onUploadFile={(file) => uploadToMediaLibrary(file).then((path) => path && set('right_image', path))}
+                                onSelectPath={(path) => set('right_image', path)}
+                                onClear={() => set('right_image', '')}
+                            />
+                            <div>
+                                <Label htmlFor="misi_title">Title</Label>
+                                <Input id="misi_title" value={str(content, 'misi_title') || 'Misi'} onChange={(e) => set('misi_title', e.target.value)} className="mt-1.5" />
+                            </div>
+                            <div>
+                                <Label htmlFor="misi_text">Statement</Label>
+                                <TextArea id="misi_text" value={str(content, 'misi_text')} onChange={(v) => set('misi_text', v)} rows={4} />
+                            </div>
+                        </div>
                     </div>
                 </div>
             );

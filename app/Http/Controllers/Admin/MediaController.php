@@ -49,9 +49,20 @@ class MediaController extends Controller
         return response()->json($media);
     }
 
-    public function store(StoreMediaRequest $request, CreateMedia $action): RedirectResponse
+    public function store(StoreMediaRequest $request, CreateMedia $action): RedirectResponse|JsonResponse
     {
-        $action->handle($request->file('file'), $request->validated('alt_text'));
+        $media = $action->handle($request->file('file'), $request->validated('alt_text'));
+
+        // MediaPickerField's inline "or upload new" uploads via fetch() and
+        // needs the new file's path back immediately to auto-select it,
+        // instead of making the admin re-open the library and click it.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'id' => $media->id,
+                'path' => $media->path,
+                'url' => $media->url(),
+            ]);
+        }
 
         return back()->with('success', 'Media uploaded.');
     }

@@ -442,18 +442,15 @@ class DemoContentSeeder extends Seeder
 
         if ($visionMission->sections()->count() === 0) {
             $visionMission->sections()->create([
-                'section_type' => SectionType::Text,
-                'title' => 'Our Vision',
-                'content' => ['body' => 'To be the most trusted precision manufacturing partner for automotive and industrial customers in Southeast Asia.'],
+                'section_type' => SectionType::VisionMission,
+                'title' => 'Vision & Mission',
+                'content' => [
+                    'visi_title' => 'Visi',
+                    'visi_text' => 'To be the most trusted precision manufacturing partner for automotive and industrial customers in Southeast Asia.',
+                    'misi_title' => 'Misi',
+                    'misi_text' => 'We deliver zero-defect components on time, every time, through disciplined process control, continuous improvement, and investment in our people.',
+                ],
                 'sort_order' => 0,
-                'is_active' => true,
-            ]);
-
-            $visionMission->sections()->create([
-                'section_type' => SectionType::Text,
-                'title' => 'Our Mission',
-                'content' => ['body' => 'We deliver zero-defect components on time, every time, through disciplined process control, continuous improvement, and investment in our people.'],
-                'sort_order' => 1,
                 'is_active' => true,
             ]);
         }
