@@ -288,10 +288,8 @@ export function PublicNavbar({
                                                 type="button"
                                                 onMouseEnter={() => setPreviewedItem(item)}
                                                 onFocus={() => setPreviewedItem(item)}
-                                                onMouseLeave={() => setPreviewedItem(null)}
-                                                onBlur={() => setPreviewedItem(null)}
                                                 onClick={() => setPreviewedItem(item)}
-                                                className={`hidden w-full items-center justify-between border-b border-white/10 py-4 text-left text-h3 font-semibold transition-colors duration-200 md:flex ${
+                                                className={`hidden w-full items-center justify-between py-4 text-left text-h3 font-semibold transition-colors duration-200 md:flex ${
                                                     previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
                                                 }`}
                                             >
@@ -301,7 +299,7 @@ export function PublicNavbar({
 
                                             {/* Mobile: stacked accordion, no right pane to hover into. */}
                                             <details className="group md:hidden" open={item.children.some((c) => isActive(url, c.href))}>
-                                                <summary className="flex cursor-pointer list-none items-center justify-between border-b border-white/10 py-4 text-h3 font-semibold">
+                                                <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-h3 font-semibold">
                                                     {item.label}
                                                     <ChevronDown
                                                         className="h-5 w-5 text-white/60 transition-transform group-open:rotate-180"
@@ -329,9 +327,7 @@ export function PublicNavbar({
                                             href={item.href!}
                                             onMouseEnter={() => setPreviewedItem(item)}
                                             onFocus={() => setPreviewedItem(item)}
-                                            onMouseLeave={() => setPreviewedItem(null)}
-                                            onBlur={() => setPreviewedItem(null)}
-                                            className={`block border-b border-white/10 py-4 text-h3 font-semibold transition-colors duration-200 ${
+                                            className={`block py-4 text-h3 font-semibold transition-colors duration-200 ${
                                                 previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
                                             } ${isActive(url, item.href!) ? 'underline decoration-2 underline-offset-4' : ''}`}
                                         >
