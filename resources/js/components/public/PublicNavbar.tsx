@@ -59,9 +59,14 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
     e.preventDefault();
     closeMenu();
     window.history.replaceState(null, '', href);
-    requestAnimationFrame(() => {
+
+    // Wait out the menu's own close animation first — the page is still
+    // scroll-locked (position: fixed) until then, and its cleanup forces
+    // window.scrollTo back to the position captured when the menu opened,
+    // which would otherwise stomp on this scroll if it ran any earlier.
+    window.setTimeout(() => {
         document.getElementById(href.slice(hashIndex + 1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    }, DRAWER_TRANSITION_MS + 30);
 }
 
 // Keep in sync with the menu overlay's `duration-[320ms]` Tailwind class —
