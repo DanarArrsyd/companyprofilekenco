@@ -158,7 +158,8 @@ export function SectionRenderer({
                         <div
                             aria-hidden="true"
                             className="absolute inset-0 bg-navy-900"
-                            style={{ clipPath: 'polygon(53.66% 8%, 80.05% 20%, 70.95% 76.3%, 44.97% 64.2%)' }}
+                            // Extend both slanted sides behind the paper to hide the top edge.
+                            style={{ clipPath: 'polygon(54.9% 0%, 83.28% 0%, 70.95% 76.3%, 44.97% 64.2%)' }}
                         />
                         <div className="absolute text-center text-navy-900" style={{ left: '23.7%', top: '32.2%', width: '20.2%' }}>
                             <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
