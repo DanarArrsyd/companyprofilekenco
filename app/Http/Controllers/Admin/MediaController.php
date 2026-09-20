@@ -20,10 +20,24 @@ use Inertia\Response;
 
 class MediaController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request, MediaLifecycleService $lifecycle): Response
     {
+        $media = $this->query($request)->paginate(24)->withQueryString();
+
+        $media->getCollection()->transform(function (Media $item) use ($lifecycle) {
+            $usages = $lifecycle->usages($item);
+
+            return [
+                ...$item->toArray(),
+                'url' => $item->url(),
+                'is_image' => $item->isImage(),
+                'usage_count' => count($usages),
+                'usages' => $usages,
+            ];
+        });
+
         return Inertia::render('admin/media/Index', [
-            'media' => $this->query($request)->paginate(24)->withQueryString(),
+            'media' => $media,
             'filters' => $request->only(['search', 'type']),
         ]);
     }
@@ -32,7 +46,7 @@ class MediaController extends Controller
      * Lightweight JSON listing consumed by the MediaPicker component so it
      * can browse the library from inside a modal without a full page visit.
      */
-    public function picker(Request $request): JsonResponse
+    public function picker(Request $request, MediaLifecycleService $lifecycle): JsonResponse
     {
         $media = $this->query($request)->paginate(24)->withQueryString();
 
@@ -45,6 +59,7 @@ class MediaController extends Controller
             'mime_type' => $item->mime_type,
             'alt_text' => $item->alt_text,
             'is_image' => $item->isImage(),
+            'usage_count' => count($lifecycle->usages($item)),
         ]);
 
         return response()->json($media);

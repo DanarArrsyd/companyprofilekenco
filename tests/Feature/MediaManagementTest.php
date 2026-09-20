@@ -98,3 +98,33 @@ test('private CV uploads never appear in the media library', function () {
         ->has('media.data', 1)
     );
 });
+
+test('picker response includes pagination and usage count', function () {
+    $user = createMediaAdmin();
+    $media = Media::factory()->create(['path' => 'library/used.jpg', 'mime_type' => 'image/jpeg']);
+    Article::factory()->create(['featured_image' => $media->path]);
+
+    $this->actingAs($user)
+        ->getJson(route('admin.media.picker', ['type' => 'image']))
+        ->assertOk()
+        ->assertJsonPath('data.0.usage_count', 1)
+        ->assertJsonStructure(['current_page', 'last_page', 'data']);
+});
+
+test('media library response includes asset usages', function () {
+    $user = createMediaAdmin();
+    $media = Media::factory()->create(['path' => 'library/used.jpg']);
+    $article = Article::factory()->create([
+        'title' => 'Shared image article',
+        'featured_image' => $media->path,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('admin.media'))
+        ->assertInertia(fn ($page) => $page
+            ->where('media.data.0.usage_count', 1)
+            ->where('media.data.0.usages.0.type', 'article')
+            ->where('media.data.0.usages.0.id', $article->id)
+            ->where('media.data.0.usages.0.label', 'Shared image article')
+        );
+});
