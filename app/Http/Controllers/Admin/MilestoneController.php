@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\Milestone\StoreMilestoneRequest;
 use App\Http\Requests\Admin\Milestone\UpdateMilestoneRequest;
 use App\Models\Milestone;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ class MilestoneController extends Controller
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
     ) {}
 
     public function index(Request $request): Response
@@ -71,12 +73,15 @@ class MilestoneController extends Controller
         $image = $milestone->image;
 
         if ($request->hasFile('image')) {
-            $this->media->deletePublic($milestone->image);
+            $this->mediaLifecycle->deleteIfUnmanaged($milestone->image);
             $image = $this->media->storePublicImage($request->file('image'), 'milestones');
         } elseif (! empty($request->validated('image_path'))) {
+            if ($request->validated('image_path') !== $milestone->image) {
+                $this->mediaLifecycle->deleteIfUnmanaged($milestone->image);
+            }
             $image = $request->validated('image_path');
         } elseif ($request->boolean('remove_image')) {
-            $this->media->deletePublic($milestone->image);
+            $this->mediaLifecycle->deleteIfUnmanaged($milestone->image);
             $image = null;
         }
 

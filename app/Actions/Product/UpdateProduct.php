@@ -4,6 +4,7 @@ namespace App\Actions\Product;
 
 use App\Models\Product;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Services\SeoService;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class UpdateProduct
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
         private readonly SeoService $seo,
     ) {}
 
@@ -22,11 +24,12 @@ class UpdateProduct
         $featuredImage = $product->featured_image;
 
         if (isset($data['featured_image']) && $data['featured_image'] !== null) {
-            $this->media->deletePublic($product->featured_image);
+            $this->mediaLifecycle->deleteIfUnmanaged($product->featured_image);
             $featuredImage = $this->media->storePublicImage($data['featured_image'], 'products');
         } elseif (! empty($data['featured_image_path'])) {
-            // Picked from the shared Media Library — never delete it here,
-            // other content may reference the same file.
+            if ($data['featured_image_path'] !== $product->featured_image) {
+                $this->mediaLifecycle->deleteIfUnmanaged($product->featured_image);
+            }
             $featuredImage = $data['featured_image_path'];
         }
 

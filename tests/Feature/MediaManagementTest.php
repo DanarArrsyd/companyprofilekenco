@@ -73,7 +73,7 @@ test('media still referenced by content cannot be deleted', function () {
 
     $response = $this->actingAs($user)->delete(route('admin.media.destroy', $media));
 
-    $response->assertRedirect();
+    $response->assertRedirect()->assertSessionHas('error');
     $this->assertDatabaseHas('media', ['id' => $media->id]);
 });
 

@@ -220,6 +220,7 @@ git commit -m "fix(admin): make page section media reliable"
 - Modify: `app/Actions/Media/DeleteMedia.php`
 - Modify: `app/Http/Controllers/Admin/MediaController.php`
 - Modify: `app/Actions/Product/UpdateProduct.php`
+- Modify: `app/Actions/Product/DeleteProductImage.php`
 - Modify: `app/Actions/Article/UpdateArticle.php`
 - Modify: `app/Actions/Capability/UpdateCapability.php`
 - Modify: `app/Http/Controllers/Admin/MilestoneController.php`
@@ -231,7 +232,7 @@ git commit -m "fix(admin): make page section media reliable"
 - Produces: `MediaLifecycleService::deleteIfUnmanaged(?string $path): void`
 - Consumes: existing `MediaUploadService::deletePublic()`
 
-- [ ] **Step 1: Write failing lifecycle tests**
+- [x] **Step 1: Write failing lifecycle tests**
 
 Cover these exact cases:
 
@@ -262,25 +263,25 @@ test('replacing a product image preserves its previous library file', function (
 });
 ```
 
-- [ ] **Step 2: Run focused lifecycle tests and confirm failure**
+- [x] **Step 2: Run focused lifecycle tests and confirm failure**
 
 Run: `php artisan test tests/Feature/MediaLifecycleTest.php tests/Feature/MediaManagementTest.php`
 
 Expected: page-section deletion and shared-file preservation assertions fail against current logic.
 
-- [ ] **Step 3: Implement usage discovery**
+- [x] **Step 3: Implement usage discovery**
 
-`usages()` returns arrays with `type`, `id`, and `label`. Inspect direct columns for Product, Article, Capability, Facility, Machine, Industry, Milestone, QualityContent, SeoMetadata, Certification, and SiteSetting. Inspect `PageSection::content` recursively for an exact path value so SQLite tests and MySQL production behave consistently.
+`usages()` returns arrays with `type`, `id`, and `label`. Inspect direct columns for Product, Article, Capability, Facility, Machine, Industry, Milestone, QualityContent, SeoMetadata, Certification, SiteSetting, ProductImage, and Customer. Inspect `PageSection::content` recursively for an exact path value so SQLite tests and MySQL production behave consistently.
 
-- [ ] **Step 4: Implement managed/unmanaged deletion**
+- [x] **Step 4: Implement managed/unmanaged deletion**
 
 `deleteIfUnmanaged()` must return without deletion when the path is empty or a `Media` row owns that path. It delegates to `MediaUploadService::deletePublic()` only when no Media row exists.
 
-- [ ] **Step 5: Route destructive operations through the lifecycle service**
+- [x] **Step 5: Route destructive operations through the lifecycle service**
 
-Replace `DeleteMedia::isInUse()` with the centralized service. Replace direct old-image deletion in Product, Article, Capability, and Milestone update flows with `deleteIfUnmanaged()`.
+Replace `DeleteMedia::isInUse()` with the centralized service. Replace direct old-image deletion in Product, Article, Capability, Milestone, and product-gallery deletion flows with `deleteIfUnmanaged()`.
 
-- [ ] **Step 6: Complete Stage 2 verification**
+- [x] **Step 6: Complete Stage 2 verification**
 
 Run:
 
@@ -290,10 +291,10 @@ npm run build
 php artisan test
 ```
 
-- [ ] **Step 7: Commit Stage 2**
+- [x] **Step 7: Commit Stage 2**
 
 ```bash
-git add app/Services/MediaLifecycleService.php app/Actions/Media/DeleteMedia.php app/Http/Controllers/Admin/MediaController.php app/Actions/Product/UpdateProduct.php app/Actions/Article/UpdateArticle.php app/Actions/Capability/UpdateCapability.php app/Http/Controllers/Admin/MilestoneController.php tests/Feature/MediaLifecycleTest.php tests/Feature/MediaManagementTest.php
+git add app/Services/MediaLifecycleService.php app/Actions/Media/DeleteMedia.php app/Http/Controllers/Admin/MediaController.php app/Actions/Product/UpdateProduct.php app/Actions/Product/DeleteProductImage.php app/Actions/Article/UpdateArticle.php app/Actions/Capability/UpdateCapability.php app/Http/Controllers/Admin/MilestoneController.php tests/Feature/MediaLifecycleTest.php tests/Feature/MediaManagementTest.php
 git commit -m "fix(media): protect shared asset references"
 ```
 

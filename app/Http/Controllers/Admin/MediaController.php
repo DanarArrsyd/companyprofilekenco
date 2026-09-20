@@ -11,6 +11,7 @@ use App\Http\Requests\Admin\Media\ReplaceMediaFileRequest;
 use App\Http\Requests\Admin\Media\StoreMediaRequest;
 use App\Http\Requests\Admin\Media\UpdateMediaAltTextRequest;
 use App\Models\Media;
+use App\Services\MediaLifecycleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -81,10 +82,10 @@ class MediaController extends Controller
         return back()->with('success', 'File replaced.');
     }
 
-    public function destroy(Media $media, DeleteMedia $action): RedirectResponse
+    public function destroy(Media $media, DeleteMedia $action, MediaLifecycleService $lifecycle): RedirectResponse
     {
-        if ($action->isInUse($media)) {
-            return back()->with('error', 'This file is still used by published content and cannot be deleted.');
+        if ($lifecycle->isInUse($media)) {
+            return back()->with('error', 'This file is still used by content and cannot be deleted.');
         }
 
         $action->handle($media);

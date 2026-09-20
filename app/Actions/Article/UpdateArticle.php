@@ -4,6 +4,7 @@ namespace App\Actions\Article;
 
 use App\Models\Article;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Services\SeoService;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,7 @@ class UpdateArticle
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
         private readonly SeoService $seo,
     ) {}
 
@@ -22,9 +24,12 @@ class UpdateArticle
         $featuredImage = $article->featured_image;
 
         if (isset($data['featured_image']) && $data['featured_image'] !== null) {
-            $this->media->deletePublic($article->featured_image);
+            $this->mediaLifecycle->deleteIfUnmanaged($article->featured_image);
             $featuredImage = $this->media->storePublicImage($data['featured_image'], 'articles');
         } elseif (! empty($data['featured_image_path'])) {
+            if ($data['featured_image_path'] !== $article->featured_image) {
+                $this->mediaLifecycle->deleteIfUnmanaged($article->featured_image);
+            }
             $featuredImage = $data['featured_image_path'];
         }
 
