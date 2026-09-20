@@ -61,7 +61,7 @@ class MediaController extends Controller
                 'id' => $media->id,
                 'path' => $media->path,
                 'url' => $media->url(),
-            ]);
+            ], 201);
         }
 
         return back()->with('success', 'Media uploaded.');

@@ -11,6 +11,7 @@ import { MetricStrip } from '@/components/public/MetricStrip';
 import { ProductShowcase, ProductShowcaseItem } from '@/components/public/ProductShowcase';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { Button } from '@/components/ui/button';
+import { mediaUrl } from '@/lib/media';
 import { PageSection } from '@/types/cms';
 
 interface CtaContent {
@@ -68,7 +69,7 @@ export function SectionRenderer({
                             </div>
                             <div className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
                                 {c.image ? (
-                                    <img src={`/storage/${c.image}`} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
+                                    <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
                                 ) : (
                                     <ImagePlaceholder />
                                 )}
@@ -104,7 +105,7 @@ export function SectionRenderer({
                             )}
                         </div>
                         {c.image ? (
-                            <img src={c.image} alt={section.title ?? ''} className="w-full rounded" />
+                            <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
                             <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
                                 No image set
@@ -133,14 +134,14 @@ export function SectionRenderer({
                     <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">
                             {c.left_image ? (
-                                <img src={`/storage/${c.left_image}`} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
+                                <img src={mediaUrl(c.left_image) ?? undefined} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
                         </div>
                         <div className="h-full w-1/2">
                             {c.right_image ? (
-                                <img src={`/storage/${c.right_image}`} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
+                                <img src={mediaUrl(c.right_image) ?? undefined} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
@@ -250,7 +251,7 @@ export function SectionRenderer({
                     ) : (
                         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
                             {images.map((src, index) => (
-                                <img key={index} src={src} alt="" loading="lazy" className="aspect-square w-full rounded object-cover" />
+                                <img key={index} src={mediaUrl(src) ?? undefined} alt="" loading="lazy" className="aspect-square w-full rounded object-cover" />
                             ))}
                         </div>
                     )}

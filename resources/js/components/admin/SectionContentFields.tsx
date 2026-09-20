@@ -4,35 +4,9 @@ import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { mediaUrl } from '@/lib/media';
 
 type Content = Record<string, unknown>;
-
-/**
- * Uploads a file straight to the Media Library and resolves its stored
- * path — used by fields that want a real "pick a file, it's just there"
- * upload instead of the "upload in Media Library, then paste the path"
- * convention older section types (hero, gallery, image_text) rely on.
- */
-async function uploadToMediaLibrary(file: File): Promise<string | null> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch(route('admin.media.store'), {
-        method: 'POST',
-        headers: {
-            Accept: 'application/json',
-            'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
-            'X-Requested-With': 'XMLHttpRequest',
-        },
-        body: formData,
-    });
-
-    if (!response.ok) return null;
-
-    const uploaded: { path: string } = await response.json();
-
-    return uploaded.path;
-}
 
 function TextArea({
     id,
@@ -94,11 +68,13 @@ export function SectionContentFields({
                         <Label htmlFor="description">Description</Label>
                         <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
                     </div>
-                    <div>
-                        <Label htmlFor="image">Image URL</Label>
-                        <Input id="image" value={str(content, 'image')} onChange={(e) => set('image', e.target.value)} className="mt-1.5" />
-                        <p className="mt-1.5 text-xs text-slate-500">Upload the photo in Media Library, then paste its path here (e.g. library/filename.jpg).</p>
-                    </div>
+                    <MediaPickerField
+                        label="Background image"
+                        currentUrl={mediaUrl(str(content, 'image'))}
+                        uploadToLibrary
+                        onSelectPath={(path) => set('image', path)}
+                        onClear={() => set('image', '')}
+                    />
                     <div>
                         <Label htmlFor="highlight">Highlight statement</Label>
                         <TextArea id="highlight" value={str(content, 'highlight')} onChange={(v) => set('highlight', v)} rows={2} />
@@ -127,9 +103,14 @@ export function SectionContentFields({
 
         case 'company_intro':
             return (
-                <div>
-                    <Label htmlFor="image">Supporting Image URL</Label>
-                    <Input id="image" value={str(content, 'image')} onChange={(e) => set('image', e.target.value)} className="mt-1.5" />
+                <div className="space-y-2">
+                    <MediaPickerField
+                        label="Supporting image"
+                        currentUrl={mediaUrl(str(content, 'image'))}
+                        uploadToLibrary
+                        onSelectPath={(path) => set('image', path)}
+                        onClear={() => set('image', '')}
+                    />
                     <p className="mt-1.5 text-xs text-slate-500">Title/Subtitle above are used as the heading and body copy.</p>
                 </div>
             );
@@ -145,10 +126,13 @@ export function SectionContentFields({
         case 'image_text':
             return (
                 <div className="space-y-4">
-                    <div>
-                        <Label htmlFor="image">Image URL</Label>
-                        <Input id="image" value={str(content, 'image')} onChange={(e) => set('image', e.target.value)} className="mt-1.5" />
-                    </div>
+                    <MediaPickerField
+                        label="Image"
+                        currentUrl={mediaUrl(str(content, 'image'))}
+                        uploadToLibrary
+                        onSelectPath={(path) => set('image', path)}
+                        onClear={() => set('image', '')}
+                    />
                     <div>
                         <Label htmlFor="body">Body</Label>
                         <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={5} />
@@ -164,8 +148,8 @@ export function SectionContentFields({
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Visi card</p>
                             <MediaPickerField
                                 label="Background photo"
-                                currentUrl={str(content, 'left_image') ? `/storage/${str(content, 'left_image')}` : null}
-                                onUploadFile={(file) => uploadToMediaLibrary(file).then((path) => path && set('left_image', path))}
+                                currentUrl={mediaUrl(str(content, 'left_image'))}
+                                uploadToLibrary
                                 onSelectPath={(path) => set('left_image', path)}
                                 onClear={() => set('left_image', '')}
                             />
@@ -183,8 +167,8 @@ export function SectionContentFields({
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Misi card</p>
                             <MediaPickerField
                                 label="Background photo"
-                                currentUrl={str(content, 'right_image') ? `/storage/${str(content, 'right_image')}` : null}
-                                onUploadFile={(file) => uploadToMediaLibrary(file).then((path) => path && set('right_image', path))}
+                                currentUrl={mediaUrl(str(content, 'right_image'))}
+                                uploadToLibrary
                                 onSelectPath={(path) => set('right_image', path)}
                                 onClear={() => set('right_image', '')}
                             />
@@ -282,26 +266,30 @@ export function SectionContentFields({
 
             return (
                 <div className="space-y-3">
-                    <Label>Image URLs</Label>
+                    <Label>Gallery images</Label>
                     {images.map((image, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                            <Input
-                                value={image}
-                                onChange={(e) => {
+                        <div key={index} className="space-y-2">
+                            <MediaPickerField
+                                label={`Image ${index + 1}`}
+                                currentUrl={mediaUrl(image)}
+                                uploadToLibrary
+                                onSelectPath={(path) => {
                                     const next = [...images];
-                                    next[index] = e.target.value;
+                                    next[index] = path;
                                     set('images', next);
                                 }}
+                                onClear={() => set('images', images.filter((_, imageIndex) => imageIndex !== index))}
                             />
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => set('images', images.filter((_, i) => i !== index))}
-                                aria-label="Remove image"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {!image && (
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => set('images', images.filter((_, imageIndex) => imageIndex !== index))}
+                                >
+                                    <Trash2 className="mr-2 h-4 w-4" /> Remove empty image
+                                </Button>
+                            )}
                         </div>
                     ))}
                     <Button type="button" variant="secondary" size="sm" onClick={() => set('images', [...images, ''])}>

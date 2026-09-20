@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "tsc && vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:js": "node --experimental-strip-types --test tests/js/*.test.ts"
     },
     "devDependencies": {
         "@headlessui/react": "^2.0.0",

@@ -33,7 +33,7 @@ export function PageSectionEditor({
     label?: string;
 }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const { data, setData, put, processing } = useForm<{
+    const { data, setData, put, processing, isDirty, wasSuccessful, errors, setDefaults } = useForm<{
         section_type: string;
         title: string;
         subtitle: string;
@@ -48,8 +48,13 @@ export function PageSectionEditor({
     });
 
     const save = () => {
-        put(route('admin.pages.sections.update', [pageId, section.id]), { preserveScroll: true });
+        put(route('admin.pages.sections.update', [pageId, section.id]), {
+            preserveScroll: true,
+            onSuccess: () => setDefaults(),
+        });
     };
+
+    const saveError = Object.values(errors)[0];
 
     return (
         <div className="rounded border border-border bg-surface">
@@ -127,7 +132,7 @@ export function PageSectionEditor({
                     pickerOptions={pickerOptions}
                 />
 
-                <div className="flex items-center justify-between border-t border-border pt-4">
+                <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                     <label className="flex items-center gap-2 text-sm text-slate-700">
                         <input
                             type="checkbox"
@@ -138,9 +143,22 @@ export function PageSectionEditor({
                         Active (visible on the public page)
                     </label>
 
-                    <Button type="button" size="sm" onClick={save} disabled={processing}>
-                        Save Section
-                    </Button>
+                    <div className="flex items-center justify-between gap-3 sm:justify-end">
+                        <span className={`text-xs ${saveError ? 'text-danger' : isDirty ? 'text-warning' : wasSuccessful ? 'text-success' : 'text-slate-500'}`}>
+                            {saveError
+                                ? saveError
+                                : processing
+                                    ? 'Saving…'
+                                    : isDirty
+                                        ? 'Unsaved changes'
+                                        : wasSuccessful
+                                            ? 'Saved'
+                                            : 'No pending changes'}
+                        </span>
+                        <Button type="button" size="sm" onClick={save} disabled={processing || !isDirty}>
+                            {processing ? 'Saving…' : 'Save Section'}
+                        </Button>
+                    </div>
                 </div>
             </div>
 

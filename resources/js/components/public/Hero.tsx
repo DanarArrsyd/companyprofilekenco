@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { Button } from '@/components/ui/button';
+import { mediaUrl } from '@/lib/media';
 
 export interface HeroContent {
     eyebrow?: string;
@@ -41,7 +42,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
             <div className="absolute inset-0">
                 {content.image ? (
                     <img
-                        src={`/storage/${content.image}`}
+                        src={mediaUrl(content.image) ?? undefined}
                         alt=""
                         className="h-full w-full object-cover"
                         loading="eager"

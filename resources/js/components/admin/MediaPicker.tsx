@@ -1,9 +1,10 @@
-import { FileText, Upload, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { CheckCircle2, FileText, Upload, X } from 'lucide-react';
+import { ChangeEvent, useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MediaUploadError, uploadMedia } from '@/lib/media';
 
 interface PickerItem {
     id: number;
@@ -16,18 +17,21 @@ interface PickerItem {
     is_image: boolean;
 }
 
+type UploadState = 'idle' | 'uploading' | 'success' | 'error';
+
 function Modal({ onClose, onSelectPath }: { onClose: () => void; onSelectPath: (path: string) => void }) {
     const [items, setItems] = useState<PickerItem[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
     const load = (q: string) => {
         setLoading(true);
         fetch(`${route('admin.media.picker')}?search=${encodeURIComponent(q)}&type=image`, {
             headers: { Accept: 'application/json' },
         })
-            .then((r) => r.json())
+            .then((response) => response.json())
             .then((data) => setItems(data.data ?? []))
             .finally(() => setLoading(false));
     };
@@ -37,55 +41,57 @@ function Modal({ onClose, onSelectPath }: { onClose: () => void; onSelectPath: (
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const uploadFile = (file: File) => {
+    const uploadFile = async (file: File) => {
         setUploading(true);
-        const formData = new FormData();
-        formData.append('file', file);
+        setUploadError(null);
 
-        fetch(route('admin.media.store'), {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'X-CSRF-TOKEN': document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: formData,
-        })
-            .then((r) => (r.ok ? r.json() : null))
-            .then((uploaded: { path: string } | null) => {
-                if (uploaded?.path) {
-                    onSelectPath(uploaded.path);
-                    return;
-                }
-                load(search);
-            })
-            .finally(() => setUploading(false));
+        try {
+            const uploaded = await uploadMedia(file);
+            onSelectPath(uploaded.path);
+        } catch (error) {
+            setUploadError(error instanceof MediaUploadError ? error.message : 'Upload failed. Please try again.');
+        } finally {
+            setUploading(false);
+        }
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-            <div className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded border border-border bg-surface p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex max-h-[80vh] w-full max-w-3xl flex-col rounded border border-border bg-surface p-6" onClick={(event) => event.stopPropagation()}>
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-semibold text-foreground">Select from Media Library</h2>
                     <button type="button" onClick={onClose} aria-label="Close"><X className="h-5 w-5 text-slate-500" /></button>
                 </div>
 
-                <div className="mt-4 flex items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                     <Input
                         value={search}
-                        onChange={(e) => { setSearch(e.target.value); load(e.target.value); }}
+                        onChange={(event) => { setSearch(event.target.value); load(event.target.value); }}
                         placeholder="Search media…"
                         className="max-w-sm"
                     />
                     <Label className="flex cursor-pointer items-center gap-2 rounded border border-border px-3 py-2 text-sm text-slate-700 hover:bg-muted">
                         <Upload className="h-4 w-4" />
                         {uploading ? 'Uploading…' : 'Upload new'}
-                        <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) uploadFile(file);
-                        }} />
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={uploading}
+                            className="hidden"
+                            onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                if (file) void uploadFile(file);
+                                event.target.value = '';
+                            }}
+                        />
                     </Label>
                 </div>
+
+                {uploadError && (
+                    <div role="alert" className="mt-3 rounded border border-danger/30 bg-danger/5 px-3 py-2 text-sm text-danger">
+                        {uploadError}
+                    </div>
+                )}
 
                 <div className="mt-4 flex-1 overflow-y-auto">
                     {loading ? (
@@ -99,7 +105,7 @@ function Modal({ onClose, onSelectPath }: { onClose: () => void; onSelectPath: (
                                     key={item.id}
                                     type="button"
                                     onClick={() => onSelectPath(item.path)}
-                                    className="overflow-hidden rounded border border-border text-left hover:border-navy-700"
+                                    className="overflow-hidden rounded border border-border text-left hover:border-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 >
                                     <div className="flex aspect-square items-center justify-center bg-muted">
                                         {item.is_image && item.url ? (
@@ -119,61 +125,112 @@ function Modal({ onClose, onSelectPath }: { onClose: () => void; onSelectPath: (
     );
 }
 
+interface MediaPickerFieldProps {
+    label: string;
+    currentUrl?: string | null;
+    onUploadFile?: (file: File) => void;
+    onSelectPath: (path: string) => void;
+    uploadToLibrary?: boolean;
+    onClear?: () => void;
+    error?: string;
+}
+
 /**
- * Drop-in image field: lets the admin pick an existing file from the Media
- * Library or upload a brand new one. `currentUrl` previews whatever is
- * already selected; `onUploadFile` receives a fresh File (validated and
- * stored the same way the field always has), `onSelectPath` receives the
- * chosen library file's stored path string.
+ * Existing entity forms can defer a fresh file to their parent form through
+ * `onUploadFile`; structured CMS sections upload immediately to the library.
  */
 export function MediaPickerField({
     label,
     currentUrl,
     onUploadFile,
     onSelectPath,
+    uploadToLibrary = false,
     onClear,
     error,
-}: {
-    label: string;
-    currentUrl?: string | null;
-    onUploadFile: (file: File) => void;
-    onSelectPath: (path: string) => void;
-    onClear?: () => void;
-    error?: string;
-}) {
+}: MediaPickerFieldProps) {
     const [open, setOpen] = useState(false);
+    const [uploadState, setUploadState] = useState<UploadState>('idle');
+    const [uploadError, setUploadError] = useState<string | null>(null);
+
+    const handleUpload = async (file: File) => {
+        setUploadState('uploading');
+        setUploadError(null);
+
+        try {
+            if (uploadToLibrary) {
+                const uploaded = await uploadMedia(file);
+                onSelectPath(uploaded.path);
+            } else if (onUploadFile) {
+                onUploadFile(file);
+            } else {
+                throw new MediaUploadError('This field is not configured for direct uploads.');
+            }
+
+            setUploadState('success');
+        } catch (uploadFailure) {
+            setUploadState('error');
+            setUploadError(uploadFailure instanceof MediaUploadError ? uploadFailure.message : 'Upload failed. Please try again.');
+        }
+    };
+
+    const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) void handleUpload(file);
+        event.target.value = '';
+    };
+
+    const visibleError = uploadError ?? error;
 
     return (
         <div>
             <Label>{label}</Label>
-            <div className="mt-1.5 flex items-center gap-4">
+            <div className="mt-1.5 flex flex-col gap-4 rounded border border-border bg-surface p-4 sm:flex-row sm:items-center">
                 {currentUrl ? (
-                    <img src={currentUrl} alt="" className="h-16 w-16 rounded border border-border object-cover" />
+                    <img src={currentUrl} alt="" className="h-24 w-full rounded border border-border object-cover sm:w-32" />
                 ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded border border-dashed border-border text-xs text-slate-400">None</div>
+                    <div className="flex h-24 w-full items-center justify-center rounded border border-dashed border-border text-xs text-slate-400 sm:w-32">No image</div>
                 )}
-                <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(true)}>Choose from Library</Button>
+
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(true)}>
+                            Choose from Library
+                        </Button>
                         {currentUrl && onClear && (
                             <Button type="button" size="sm" variant="secondary" onClick={onClear}>Remove</Button>
                         )}
                     </div>
-                    <label className="text-xs text-slate-500">
-                        or upload new: <input type="file" accept="image/jpeg,image/png,image/webp" className="text-xs" onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) onUploadFile(file);
-                        }} />
+
+                    <label className={`inline-flex w-fit items-center gap-2 text-xs text-slate-600 ${uploadState === 'uploading' ? 'cursor-wait opacity-60' : 'cursor-pointer'}`}>
+                        <Upload className="h-3.5 w-3.5" />
+                        <span>{uploadState === 'uploading' ? 'Uploading…' : 'Upload new image'}</span>
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={uploadState === 'uploading'}
+                            className="sr-only"
+                            onChange={onFileChange}
+                        />
                     </label>
+
+                    <p className="text-xs text-slate-500">JPG, PNG, or WebP. Maximum {uploadToLibrary ? '10' : '5'} MB.</p>
+                    {uploadState === 'success' && !visibleError && (
+                        <p className="flex items-center gap-1 text-xs text-success">
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            {uploadToLibrary ? 'Upload complete. Save this section to publish it.' : 'Image selected. Save this form to upload it.'}
+                        </p>
+                    )}
+                    {visibleError && <p role="alert" className="text-sm text-danger">{visibleError}</p>}
                 </div>
             </div>
-            {error && <p className="mt-1 text-sm text-danger">{error}</p>}
 
             {open && (
                 <Modal
                     onClose={() => setOpen(false)}
                     onSelectPath={(path) => {
                         onSelectPath(path);
+                        setUploadState('success');
+                        setUploadError(null);
                         setOpen(false);
                     }}
                 />
