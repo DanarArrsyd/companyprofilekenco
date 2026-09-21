@@ -111,3 +111,33 @@ test('a section cta url rejects a malformed value', function () {
         'is_active' => true,
     ])->assertSessionHasErrors('content.primary_cta_url');
 });
+
+test('saving a section keeps content keys that have no dedicated validation rule', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('pages.update');
+
+    $page = Page::factory()->create();
+    $section = PageSection::factory()->create(['page_id' => $page->id]);
+
+    $this->actingAs($user)->put(route('admin.pages.sections.update', [$page, $section]), [
+        'section_type' => $section->section_type->value,
+        'content' => [
+            'eyebrow' => 'Since 2005',
+            'heading' => 'Precision Manufacturing, Built to Last',
+            'description' => 'We engineer and manufacture stamped metal parts.',
+            'image' => 'media/hero.png',
+            'primary_cta_label' => 'Our Capabilities',
+            'primary_cta_url' => '/capabilities',
+        ],
+        'is_active' => true,
+    ])->assertRedirect();
+
+    $content = $section->fresh()->content;
+
+    expect($content['eyebrow'])->toBe('Since 2005')
+        ->and($content['heading'])->toBe('Precision Manufacturing, Built to Last')
+        ->and($content['description'])->toBe('We engineer and manufacture stamped metal parts.')
+        ->and($content['image'])->toBe('media/hero.png')
+        ->and($content['primary_cta_label'])->toBe('Our Capabilities')
+        ->and($content['primary_cta_url'])->toBe('/capabilities');
+});

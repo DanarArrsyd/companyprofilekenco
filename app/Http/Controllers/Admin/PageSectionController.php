@@ -17,16 +17,30 @@ class PageSectionController extends Controller
 {
     public function store(StorePageSectionRequest $request, Page $page, SavePageSection $action): RedirectResponse
     {
-        $action->handle($page, $request->validated());
+        $action->handle($page, $this->data($request));
 
         return back()->with('success', 'Section added.');
     }
 
     public function update(UpdatePageSectionRequest $request, Page $page, PageSection $section, SavePageSection $action): RedirectResponse
     {
-        $action->handle($page, $request->validated(), $section);
+        $action->handle($page, $this->data($request), $section);
 
         return back()->with('success', 'Section updated.');
+    }
+
+    /**
+     * `content` only declares rules for its CTA url keys, so validated()
+     * prunes every other key (eyebrow, heading, image, ...) out of it. Those
+     * keys already passed validation as part of the request, so it's safe
+     * to keep the full array rather than the pruned one.
+     */
+    private function data(StorePageSectionRequest|UpdatePageSectionRequest $request): array
+    {
+        $data = $request->validated();
+        $data['content'] = $request->input('content', []);
+
+        return $data;
     }
 
     public function destroy(Page $page, PageSection $section, DeletePageSection $action): RedirectResponse
