@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Capability;
 use App\Models\Facility;
 use App\Models\FacilityCategory;
 use App\Models\Machine;
@@ -44,6 +45,30 @@ test('admin can create a machine assigned to a facility', function () {
     $machine = Machine::where('name', 'CNC Lathe')->firstOrFail();
     expect($machine->facility->is($facility))->toBeTrue()
         ->and($machine->quantity)->toBe(2);
+});
+
+test('machine create and edit forms load published facility options', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['facilities.create', 'facilities.update']);
+    $facility = Facility::factory()->published()->create();
+    Capability::factory()->published()->create();
+    $machine = Machine::factory()->create(['facility_id' => $facility->id]);
+
+    $this->actingAs($user)
+        ->get(route('admin.machines.create'))
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/machines/Create')
+            ->has('facilities', 1)
+            ->has('capabilities', 1)
+        );
+
+    $this->actingAs($user)
+        ->get(route('admin.machines.edit', $machine))
+        ->assertInertia(fn ($page) => $page
+            ->component('admin/machines/Edit')
+            ->has('facilities', 1)
+            ->has('capabilities', 1)
+        );
 });
 
 test('facility list can be filtered by category', function () {

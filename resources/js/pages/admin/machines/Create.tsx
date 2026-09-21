@@ -3,11 +3,13 @@ import { FormEventHandler } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 export default function Create({
     facilities, capabilities, statusOptions,
@@ -18,11 +20,11 @@ export default function Create({
 }) {
     const { data, setData, post, processing, errors } = useForm<{
         facility_id: string; name: string; brand: string; model: string; quantity: number;
-        capacity: string; description: string; specification: string; image: File | null;
+        capacity: string; description: string; specification: string; image: File | null; image_path: string;
         sort_order: number; status: string; capability_ids: number[];
     }>({
         facility_id: '', name: '', brand: '', model: '', quantity: 1,
-        capacity: '', description: '', specification: '', image: null,
+        capacity: '', description: '', specification: '', image: null, image_path: '',
         sort_order: 0, status: 'published', capability_ids: [],
     });
 
@@ -84,10 +86,15 @@ export default function Create({
                 </FormSection>
 
                 <FormSection title="Media">
-                    <div>
-                        <Label htmlFor="image">Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Machine Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                 </FormSection>
 
                 <FormSection title="Capabilities" description="Manufacturing capabilities this machine supports.">

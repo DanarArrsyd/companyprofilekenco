@@ -3,11 +3,13 @@ import { FormEventHandler } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface Item {
     id: number; title: string; slug: string; summary: string | null; content: string | null;
@@ -16,7 +18,7 @@ interface Item {
 
 export default function Edit({ item, statusOptions }: { item: Item; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; title: string; summary: string; content: string; image: File | null;
+        _method: string; title: string; summary: string; content: string; image: File | null; image_path: string;
         sort_order: number; status: string; published_at: string;
     }>({
         _method: 'put',
@@ -24,6 +26,7 @@ export default function Edit({ item, statusOptions }: { item: Item; statusOption
         summary: item.summary ?? '',
         content: item.content ?? '',
         image: null,
+        image_path: item.image ?? '',
         sort_order: item.sort_order,
         status: item.status,
         published_at: item.published_at ? item.published_at.slice(0, 16) : '',
@@ -61,11 +64,15 @@ export default function Edit({ item, statusOptions }: { item: Item; statusOption
                 </FormSection>
 
                 <FormSection title="Media">
-                    <div>
-                        {item.image && <img src={`/storage/${item.image}`} alt="" className="mb-3 h-32 w-32 rounded border border-border object-cover" />}
-                        <Label htmlFor="image">Replace Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Quality Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                 </FormSection>
 
                 <FormSection title="Publishing">

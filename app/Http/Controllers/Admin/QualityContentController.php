@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\QualityContent\StoreQualityContentRequest;
 use App\Http\Requests\Admin\QualityContent\UpdateQualityContentRequest;
 use App\Models\QualityContent;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Support\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
@@ -18,6 +19,7 @@ class QualityContentController extends Controller
 {
     public function __construct(
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
     ) {}
 
     public function index(Request $request): Response
@@ -45,11 +47,13 @@ class QualityContentController extends Controller
 
     public function store(StoreQualityContentRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except('image');
+        $data = $request->safe()->except(['image', 'image_path']);
         $data['slug'] = trim($data['slug'] ?? '') !== '' ? $data['slug'] : SlugGenerator::unique('quality_contents', $data['title']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->media->storePublicImage($request->file('image'), 'quality');
+        } elseif ($request->filled('image_path')) {
+            $data['image'] = $request->validated('image_path');
         }
 
         QualityContent::create($data);
@@ -67,11 +71,18 @@ class QualityContentController extends Controller
 
     public function update(UpdateQualityContentRequest $request, QualityContent $qualityContent): RedirectResponse
     {
-        $data = $request->safe()->except('image');
+        $data = $request->safe()->except(['image', 'image_path']);
+        $nextImage = $qualityContent->image;
 
         if ($request->hasFile('image')) {
-            $this->media->deletePublic($qualityContent->image);
-            $data['image'] = $this->media->storePublicImage($request->file('image'), 'quality');
+            $nextImage = $this->media->storePublicImage($request->file('image'), 'quality');
+        } elseif ($request->exists('image_path')) {
+            $nextImage = $request->validated('image_path');
+        }
+
+        if ($nextImage !== $qualityContent->image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($qualityContent->image);
+            $data['image'] = $nextImage;
         }
 
         $qualityContent->update($data);

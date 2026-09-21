@@ -21,6 +21,7 @@ class UpdateSettingsRequest extends FormRequest
             'company_description' => ['nullable', 'string', 'max:2000'],
 
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'logo_path' => ['nullable', 'string', 'max:255'],
             'favicon' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,ico', 'max:512'],
 
             'address' => ['nullable', 'string', 'max:1000'],
@@ -36,6 +37,7 @@ class UpdateSettingsRequest extends FormRequest
             'seo_default_meta_title' => ['nullable', 'string', 'max:70'],
             'seo_default_meta_description' => ['nullable', 'string', 'max:160'],
             'seo_default_og_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'seo_default_og_image_path' => ['nullable', 'string', 'max:255'],
             'seo_title_separator' => ['nullable', 'string', 'max:5'],
             'seo_default_robots' => ['nullable', Rule::in(['index,follow', 'noindex,follow', 'noindex,nofollow'])],
             'seo_twitter_card_type' => ['nullable', Rule::in(['summary_large_image', 'summary'])],

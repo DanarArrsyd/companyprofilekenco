@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 export default function Create({
     categories,
@@ -105,9 +106,10 @@ export default function Create({
                 </FormSection>
 
                 <FormSection title="Media" description="Featured image. Product gallery can be managed after creating the product.">
-                    <MediaPickerField
-                        label="Featured Image"
-                        currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : null)}
+                        <MediaPickerField
+                            label="Featured Image"
+                            currentFile={data.featured_image}
+                            currentUrl={mediaUrl(data.featured_image_path)}
                         onUploadFile={(file) => { setData('featured_image', file); setData('featured_image_path', ''); }}
                         onSelectPath={(path) => { setData('featured_image_path', path); setData('featured_image', null); }}
                         onClear={() => { setData('featured_image', null); setData('featured_image_path', ''); }}

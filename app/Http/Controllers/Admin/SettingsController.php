@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateSettingsRequest;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Services\SettingsService;
 use Illuminate\Http\RedirectResponse;
@@ -15,9 +16,15 @@ class SettingsController extends Controller
 {
     private const IMAGE_KEYS = ['logo', 'favicon', 'seo_default_og_image'];
 
+    private const IMAGE_PATH_KEYS = [
+        'logo' => 'logo_path',
+        'seo_default_og_image' => 'seo_default_og_image_path',
+    ];
+
     public function __construct(
         private readonly SettingsService $settings,
         private readonly MediaUploadService $uploader,
+        private readonly MediaLifecycleService $mediaLifecycle,
         private readonly ActivityLogService $activityLog,
     ) {}
 
@@ -31,14 +38,24 @@ class SettingsController extends Controller
     public function update(UpdateSettingsRequest $request): RedirectResponse
     {
         $before = $this->settings->all();
-        $data = $request->safe()->except(self::IMAGE_KEYS);
+        $data = $request->safe()->except([
+            ...self::IMAGE_KEYS,
+            ...array_values(self::IMAGE_PATH_KEYS),
+        ]);
 
         foreach (self::IMAGE_KEYS as $key) {
+            $oldPath = $before[$key] ?? null;
+            $nextPath = $oldPath;
+
             if ($request->hasFile($key)) {
-                if (! empty($before[$key])) {
-                    $this->uploader->deletePublic($before[$key]);
-                }
-                $data[$key] = $this->uploader->storePublicImage($request->file($key), 'settings');
+                $nextPath = $this->uploader->storePublicImage($request->file($key), 'settings');
+            } elseif (isset(self::IMAGE_PATH_KEYS[$key]) && $request->exists(self::IMAGE_PATH_KEYS[$key])) {
+                $nextPath = $request->validated(self::IMAGE_PATH_KEYS[$key]);
+            }
+
+            if ($nextPath !== $oldPath) {
+                $this->mediaLifecycle->deleteIfUnmanaged($oldPath);
+                $data[$key] = $nextPath;
             }
         }
 

@@ -1,21 +1,24 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useRef } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 export default function Create({ statusOptions }: { statusOptions: string[] }) {
+    const documentInputRef = useRef<HTMLInputElement>(null);
     const { data, setData, post, processing, errors } = useForm<{
         name: string; issuer: string; certificate_number: string; issued_at: string; expires_at: string;
-        image: File | null; document: File | null; sort_order: number; status: string; published_at: string;
+        image: File | null; image_path: string; document: File | null; sort_order: number; status: string; published_at: string;
     }>({
         name: '', issuer: '', certificate_number: '', issued_at: '', expires_at: '',
-        image: null, document: null, sort_order: 0, status: 'draft', published_at: '',
+        image: null, image_path: '', document: null, sort_order: 0, status: 'draft', published_at: '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -57,13 +60,25 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 </FormSection>
 
                 <FormSection title="Media" description="Certificate badge image and the official PDF document.">
-                    <div>
-                        <Label htmlFor="image">Certificate Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Certificate Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                     <div>
                         <Label htmlFor="document">Certificate Document (PDF)</Label>
-                        <input id="document" type="file" accept="application/pdf" onChange={(e) => setData('document', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
+                        <input ref={documentInputRef} id="document" type="file" accept="application/pdf" disabled={processing} onChange={(e) => setData('document', e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm" />
+                        <p className="mt-1 text-xs text-slate-500">PDF only. Maximum 10 MB. Stored privately.</p>
+                        {data.document && (
+                            <div className="mt-2 flex items-center justify-between gap-3 rounded border border-border bg-muted/40 px-3 py-2 text-sm">
+                                <span className="truncate text-foreground">Selected: {data.document.name}</span>
+                                <Button type="button" size="sm" variant="ghost" onClick={() => { setData('document', null); if (documentInputRef.current) documentInputRef.current.value = ''; }}>Clear</Button>
+                            </div>
+                        )}
                         {errors.document && <p className="mt-1 text-sm text-danger">{errors.document}</p>}
                     </div>
                 </FormSection>
@@ -86,7 +101,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 </FormSection>
 
                 <FormActions>
-                    <Button type="submit" disabled={processing}>Create Certification</Button>
+                    <Button type="submit" disabled={processing}>{processing ? 'Creating…' : 'Create Certification'}</Button>
                 </FormActions>
             </form>
         </AdminLayout>

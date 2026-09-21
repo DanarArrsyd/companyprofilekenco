@@ -24,13 +24,13 @@ class UpdateProduct
         $featuredImage = $product->featured_image;
 
         if (isset($data['featured_image']) && $data['featured_image'] !== null) {
-            $this->mediaLifecycle->deleteIfUnmanaged($product->featured_image);
             $featuredImage = $this->media->storePublicImage($data['featured_image'], 'products');
-        } elseif (! empty($data['featured_image_path'])) {
-            if ($data['featured_image_path'] !== $product->featured_image) {
-                $this->mediaLifecycle->deleteIfUnmanaged($product->featured_image);
-            }
+        } elseif (array_key_exists('featured_image_path', $data)) {
             $featuredImage = $data['featured_image_path'];
+        }
+
+        if ($featuredImage !== $product->featured_image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($product->featured_image);
         }
 
         return DB::transaction(function () use ($product, $data, $featuredImage) {

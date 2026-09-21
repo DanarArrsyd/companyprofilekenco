@@ -5,7 +5,7 @@ import { FormEventHandler, useRef, useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
-import { MediaPickerField } from '@/components/admin/MediaPicker';
+import { MediaLibraryButton, MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface ProductImage {
     id: number;
@@ -55,6 +56,8 @@ export default function Edit({
 }) {
     const { can } = usePermissions();
     const [imageToDelete, setImageToDelete] = useState<ProductImage | null>(null);
+    const [galleryProcessing, setGalleryProcessing] = useState(false);
+    const [galleryError, setGalleryError] = useState<string | null>(null);
     const galleryInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm<{
@@ -82,7 +85,7 @@ export default function Edit({
         application: product.application ?? '',
         manufacturing_process: product.manufacturing_process ?? '',
         featured_image: null,
-        featured_image_path: '',
+        featured_image_path: product.featured_image ?? '',
         is_featured: product.is_featured,
         status: product.status,
         published_at: product.published_at ? product.published_at.slice(0, 16) : '',
@@ -104,8 +107,23 @@ export default function Edit({
         post(route('admin.products.update', product.id), { forceFormData: true });
     };
 
-    const uploadGalleryImage = (file: File) => {
-        router.post(route('admin.products.images.store', product.id), { image: file }, { forceFormData: true, preserveScroll: true });
+    const addGalleryImage = (payload: { image?: File; media_path?: string }) => {
+        if (galleryProcessing) return;
+
+        setGalleryProcessing(true);
+        setGalleryError(null);
+        router.post(route('admin.products.images.store', product.id), payload, {
+            forceFormData: true,
+            preserveScroll: true,
+            onError: (requestErrors) => {
+                setGalleryError(
+                    requestErrors.image
+                    ?? requestErrors.media_path
+                    ?? 'Image could not be added. Please try again.',
+                );
+            },
+            onFinish: () => setGalleryProcessing(false),
+        });
     };
 
     return (
@@ -178,10 +196,12 @@ export default function Edit({
                     <FormSection title="Media" description="Featured image shown on listings and detail page.">
                         <MediaPickerField
                             label="Featured Image"
-                            currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : (product.featured_image ? `/storage/${product.featured_image}` : null))}
+                            currentFile={data.featured_image}
+                            currentUrl={mediaUrl(data.featured_image_path)}
                             onUploadFile={(file) => { setData('featured_image', file); setData('featured_image_path', ''); }}
                             onSelectPath={(path) => { setData('featured_image_path', path); setData('featured_image', null); }}
-                            error={errors.featured_image}
+                            onClear={() => { setData('featured_image', null); setData('featured_image_path', ''); }}
+                            error={errors.featured_image ?? errors.featured_image_path}
                         />
                     </FormSection>
 
@@ -224,7 +244,7 @@ export default function Edit({
                     <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
                         {product.images.map((image) => (
                             <div key={image.id} className="group relative overflow-hidden rounded border border-border">
-                                <img src={`/storage/${image.path}`} alt={image.alt_text ?? ''} className="aspect-square w-full object-cover" />
+                                <img src={mediaUrl(image.path) ?? ''} alt={image.alt_text ?? ''} className="aspect-square w-full object-cover" />
                                 {image.is_primary && (
                                     <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
                                         <Star className="h-3 w-3" />
@@ -244,7 +264,9 @@ export default function Edit({
                         <button
                             type="button"
                             onClick={() => galleryInputRef.current?.click()}
+                            disabled={galleryProcessing}
                             className="flex aspect-square items-center justify-center rounded border border-dashed border-border text-muted-foreground hover:border-navy-700 hover:text-navy-700"
+                            aria-label="Upload gallery image"
                         >
                             <Plus className="h-6 w-6" />
                         </button>
@@ -255,11 +277,24 @@ export default function Edit({
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) uploadGalleryImage(file);
+                                if (file) addGalleryImage({ image: file });
                                 e.target.value = '';
                             }}
                         />
                     </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <MediaLibraryButton
+                            disabled={galleryProcessing}
+                            onSelectPath={(path) => addGalleryImage({ media_path: path })}
+                        />
+                        <p className="text-xs text-slate-500">
+                            {galleryProcessing
+                                ? 'Adding image…'
+                                : 'Upload a new image or reuse one from the Media Library.'}
+                        </p>
+                    </div>
+                    {galleryError && <p role="alert" className="mt-2 text-sm text-danger">{galleryError}</p>}
                 </div>
             </div>
 

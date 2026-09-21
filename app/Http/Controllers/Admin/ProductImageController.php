@@ -14,7 +14,12 @@ class ProductImageController extends Controller
 {
     public function store(StoreProductImageRequest $request, Product $product, AddProductImage $action): RedirectResponse
     {
-        $action->handle($product, $request->file('image'), $request->validated('alt_text'));
+        $action->handle(
+            $product,
+            $request->file('image'),
+            $request->validated('media_path'),
+            $request->validated('alt_text'),
+        );
 
         return back()->with('success', 'Image added.');
     }

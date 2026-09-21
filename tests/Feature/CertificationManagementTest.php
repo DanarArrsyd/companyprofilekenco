@@ -1,7 +1,10 @@
 <?php
 
 use App\Models\Certification;
+use App\Models\Media;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -24,6 +27,26 @@ test('admin can create a certification', function () {
 
     $response->assertRedirect();
     $this->assertDatabaseHas('certifications', ['name' => 'ISO 9001:2015']);
+});
+
+test('uploaded certification image becomes a reusable media library asset', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $user->givePermissionTo('certifications.create');
+
+    $this->actingAs($user)->post(route('admin.certifications.store'), [
+        'name' => 'Reusable Certificate',
+        'status' => 'draft',
+        'image' => UploadedFile::fake()->image('certificate.png'),
+    ])->assertRedirect();
+
+    $certification = Certification::where('name', 'Reusable Certificate')->firstOrFail();
+    $media = Media::findOrFail($certification->media_id);
+
+    expect($media->original_name)->toBe('certificate.png')
+        ->and($media->mime_type)->toStartWith('image/')
+        ->and($media->uploaded_by)->toBe($user->id);
+    Storage::disk('public')->assertExists($media->path);
 });
 
 test('certification expiry date must be after or equal to issue date', function () {

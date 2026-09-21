@@ -1,14 +1,16 @@
 import { Head, useForm } from '@inertiajs/react';
 import { AlertTriangle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useRef } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface Certification {
     id: number; name: string; issuer: string | null; certificate_number: string | null;
@@ -22,9 +24,10 @@ function isExpired(expiresAt: string | null): boolean {
 }
 
 export default function Edit({ certification, statusOptions }: { certification: Certification; statusOptions: string[] }) {
+    const documentInputRef = useRef<HTMLInputElement>(null);
     const { data, setData, post, processing, errors } = useForm<{
         _method: string; name: string; issuer: string; certificate_number: string; issued_at: string; expires_at: string;
-        image: File | null; document: File | null; sort_order: number; status: string; published_at: string;
+        image: File | null; image_path: string; document: File | null; sort_order: number; status: string; published_at: string;
     }>({
         _method: 'put',
         name: certification.name,
@@ -33,6 +36,7 @@ export default function Edit({ certification, statusOptions }: { certification: 
         issued_at: certification.issued_at ?? '',
         expires_at: certification.expires_at ?? '',
         image: null,
+        image_path: certification.media?.path ?? '',
         document: null,
         sort_order: certification.sort_order,
         status: certification.status,
@@ -85,11 +89,15 @@ export default function Edit({ certification, statusOptions }: { certification: 
                 </FormSection>
 
                 <FormSection title="Media">
-                    <div>
-                        {certification.media && <img src={`/storage/${certification.media.path}`} alt="" className="mb-3 h-32 w-32 rounded border border-border object-cover" />}
-                        <Label htmlFor="image">Replace Certificate Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Certificate Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                     <div>
                         {certification.document_path && (
                             <a href={route('admin.certifications.document', certification.id)} className="text-sm text-primary hover:underline">
@@ -97,7 +105,14 @@ export default function Edit({ certification, statusOptions }: { certification: 
                             </a>
                         )}
                         <Label htmlFor="document" className="mt-2 block">Replace Document (PDF)</Label>
-                        <input id="document" type="file" accept="application/pdf" onChange={(e) => setData('document', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
+                        <input ref={documentInputRef} id="document" type="file" accept="application/pdf" disabled={processing} onChange={(e) => setData('document', e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm" />
+                        <p className="mt-1 text-xs text-slate-500">PDF only. Maximum 10 MB. Stored privately.</p>
+                        {data.document && (
+                            <div className="mt-2 flex items-center justify-between gap-3 rounded border border-border bg-muted/40 px-3 py-2 text-sm">
+                                <span className="truncate text-foreground">Selected: {data.document.name}</span>
+                                <Button type="button" size="sm" variant="ghost" onClick={() => { setData('document', null); if (documentInputRef.current) documentInputRef.current.value = ''; }}>Clear</Button>
+                            </div>
+                        )}
                         {errors.document && <p className="mt-1 text-sm text-danger">{errors.document}</p>}
                     </div>
                 </FormSection>
@@ -120,7 +135,7 @@ export default function Edit({ certification, statusOptions }: { certification: 
                 </FormSection>
 
                 <FormActions>
-                    <Button type="submit" disabled={processing}>Save Changes</Button>
+                    <Button type="submit" disabled={processing}>{processing ? 'Saving…' : 'Save Changes'}</Button>
                 </FormActions>
             </form>
         </AdminLayout>

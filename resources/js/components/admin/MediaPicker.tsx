@@ -11,6 +11,7 @@ import {
 import {
     ChangeEvent,
     DragEvent,
+    ReactNode,
     useCallback,
     useEffect,
     useRef,
@@ -319,12 +320,60 @@ function Modal({
     );
 }
 
+export function MediaLibraryButton({
+    children = 'Choose from Library',
+    currentUrl,
+    disabled = false,
+    onSelectPath,
+}: {
+    children?: ReactNode;
+    currentUrl?: string | null;
+    disabled?: boolean;
+    onSelectPath: (path: string) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const opener = useRef<HTMLButtonElement>(null);
+
+    const closeModal = useCallback(() => {
+        setOpen(false);
+        window.requestAnimationFrame(() => opener.current?.focus());
+    }, []);
+
+    return (
+        <>
+            <Button
+                ref={opener}
+                type="button"
+                size="sm"
+                variant="secondary"
+                disabled={disabled}
+                onClick={() => setOpen(true)}
+            >
+                {children}
+            </Button>
+
+            {open && (
+                <Modal
+                    currentUrl={currentUrl}
+                    onClose={closeModal}
+                    onSelectPath={(path) => {
+                        onSelectPath(path);
+                        closeModal();
+                    }}
+                />
+            )}
+        </>
+    );
+}
+
 interface MediaPickerFieldProps {
     label: string;
     currentUrl?: string | null;
+    currentFile?: File | null;
     onUploadFile?: (file: File) => void;
     onSelectPath: (path: string) => void;
     uploadToLibrary?: boolean;
+    maxSizeMb?: number;
     onClear?: () => void;
     error?: string;
 }
@@ -336,16 +385,31 @@ interface MediaPickerFieldProps {
 export function MediaPickerField({
     label,
     currentUrl,
+    currentFile,
     onUploadFile,
     onSelectPath,
     uploadToLibrary = false,
+    maxSizeMb,
     onClear,
     error,
 }: MediaPickerFieldProps) {
     const [open, setOpen] = useState(false);
     const [uploadState, setUploadState] = useState<UploadState>('idle');
     const [uploadError, setUploadError] = useState<string | null>(null);
+    const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
     const opener = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => {
+        if (!currentFile) {
+            setFilePreviewUrl(null);
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(currentFile);
+        setFilePreviewUrl(objectUrl);
+
+        return () => URL.revokeObjectURL(objectUrl);
+    }, [currentFile]);
 
     const closeModal = useCallback(() => {
         setOpen(false);
@@ -384,13 +448,14 @@ export function MediaPickerField({
     };
 
     const visibleError = uploadError ?? error;
+    const previewUrl = filePreviewUrl ?? currentUrl;
 
     return (
         <div>
             <Label>{label}</Label>
             <div className="mt-1.5 flex flex-col gap-4 rounded border border-border bg-surface p-4 sm:flex-row sm:items-center">
-                {currentUrl ? (
-                    <img src={currentUrl} alt="" className="h-24 w-full rounded border border-border object-cover sm:w-32" />
+                {previewUrl ? (
+                    <img src={previewUrl} alt="" className="h-24 w-full rounded border border-border object-cover sm:w-32" />
                 ) : (
                     <div className="flex h-24 w-full items-center justify-center rounded border border-dashed border-border text-xs text-slate-400 sm:w-32">
                         No image
@@ -402,7 +467,7 @@ export function MediaPickerField({
                         <Button ref={opener} type="button" size="sm" variant="secondary" onClick={() => setOpen(true)}>
                             Choose from Library
                         </Button>
-                        {currentUrl && onClear && (
+                        {previewUrl && onClear && (
                             <Button type="button" size="sm" variant="secondary" onClick={onClear}>Remove</Button>
                         )}
                     </div>
@@ -422,7 +487,9 @@ export function MediaPickerField({
                         />
                     </label>
 
-                    <p className="text-xs text-slate-500">JPG, PNG, or WebP. Maximum {uploadToLibrary ? '10' : '5'} MB.</p>
+                    <p className="text-xs text-slate-500">
+                        JPG, PNG, or WebP. Maximum {maxSizeMb ?? (uploadToLibrary ? 10 : 5)} MB.
+                    </p>
                     {uploadState === 'success' && !visibleError && (
                         <p className="flex items-center gap-1 text-xs text-success">
                             <CheckCircle2 className="h-3.5 w-3.5" />

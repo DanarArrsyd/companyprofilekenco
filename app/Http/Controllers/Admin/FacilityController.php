@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Facility\UpdateFacilityRequest;
 use App\Models\Facility;
 use App\Models\FacilityCategory;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Support\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
@@ -22,6 +23,7 @@ class FacilityController extends Controller
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
     ) {}
 
     public function index(Request $request): Response
@@ -53,11 +55,13 @@ class FacilityController extends Controller
 
     public function store(StoreFacilityRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image', 'image_path']);
         $data['slug'] = trim($data['slug'] ?? '') !== '' ? $data['slug'] : SlugGenerator::unique('facilities', $data['name']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->media->storePublicImage($request->file('image'), 'facilities');
+        } elseif ($request->filled('image_path')) {
+            $data['image'] = $request->validated('image_path');
         }
 
         $data['created_by'] = Auth::id();
@@ -81,11 +85,18 @@ class FacilityController extends Controller
 
     public function update(UpdateFacilityRequest $request, Facility $facility): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image', 'image_path']);
+        $nextImage = $facility->image;
 
         if ($request->hasFile('image')) {
-            $this->media->deletePublic($facility->image);
-            $data['image'] = $this->media->storePublicImage($request->file('image'), 'facilities');
+            $nextImage = $this->media->storePublicImage($request->file('image'), 'facilities');
+        } elseif ($request->exists('image_path')) {
+            $nextImage = $request->validated('image_path');
+        }
+
+        if ($nextImage !== $facility->image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($facility->image);
+            $data['image'] = $nextImage;
         }
 
         $data['updated_by'] = Auth::id();

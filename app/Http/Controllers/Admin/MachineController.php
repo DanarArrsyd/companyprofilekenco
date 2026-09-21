@@ -10,6 +10,7 @@ use App\Models\Capability;
 use App\Models\Facility;
 use App\Models\Machine;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class MachineController extends Controller
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
     ) {}
 
     public function index(Request $request): Response
@@ -45,18 +47,20 @@ class MachineController extends Controller
     public function create(): Response
     {
         return Inertia::render('admin/machines/Create', [
-            'facilities' => Facility::active()->orderBy('name')->get(['id', 'name']),
-            'capabilities' => Capability::active()->orderBy('name')->get(['id', 'name']),
+            'facilities' => Facility::published()->orderBy('name')->get(['id', 'name']),
+            'capabilities' => Capability::published()->orderBy('name')->get(['id', 'name']),
             'statusOptions' => array_map(fn ($c) => $c->value, ContentStatus::cases()),
         ]);
     }
 
     public function store(StoreMachineRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image', 'image_path']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->media->storePublicImage($request->file('image'), 'machines');
+        } elseif ($request->filled('image_path')) {
+            $data['image'] = $request->validated('image_path');
         }
 
         $capabilityIds = $data['capability_ids'] ?? [];
@@ -76,19 +80,26 @@ class MachineController extends Controller
 
         return Inertia::render('admin/machines/Edit', [
             'machine' => $machine,
-            'facilities' => Facility::active()->orderBy('name')->get(['id', 'name']),
-            'capabilities' => Capability::active()->orderBy('name')->get(['id', 'name']),
+            'facilities' => Facility::published()->orderBy('name')->get(['id', 'name']),
+            'capabilities' => Capability::published()->orderBy('name')->get(['id', 'name']),
             'statusOptions' => array_map(fn ($c) => $c->value, ContentStatus::cases()),
         ]);
     }
 
     public function update(UpdateMachineRequest $request, Machine $machine): RedirectResponse
     {
-        $data = $request->validated();
+        $data = $request->safe()->except(['image', 'image_path']);
+        $nextImage = $machine->image;
 
         if ($request->hasFile('image')) {
-            $this->media->deletePublic($machine->image);
-            $data['image'] = $this->media->storePublicImage($request->file('image'), 'machines');
+            $nextImage = $this->media->storePublicImage($request->file('image'), 'machines');
+        } elseif ($request->exists('image_path')) {
+            $nextImage = $request->validated('image_path');
+        }
+
+        if ($nextImage !== $machine->image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($machine->image);
+            $data['image'] = $nextImage;
         }
 
         $capabilityIds = $data['capability_ids'] ?? [];

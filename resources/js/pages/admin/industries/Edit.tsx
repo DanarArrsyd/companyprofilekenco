@@ -3,11 +3,13 @@ import { FormEventHandler } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface Industry {
     id: number; name: string; slug: string; description: string | null; image: string | null;
@@ -16,13 +18,14 @@ interface Industry {
 
 export default function Edit({ industry, statusOptions }: { industry: Industry; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; name: string; description: string; image: File | null;
+        _method: string; name: string; description: string; image: File | null; image_path: string;
         sort_order: number; status: string; published_at: string;
     }>({
         _method: 'put',
         name: industry.name,
         description: industry.description ?? '',
         image: null,
+        image_path: industry.image ?? '',
         sort_order: industry.sort_order,
         status: industry.status,
         published_at: industry.published_at ? industry.published_at.slice(0, 16) : '',
@@ -56,11 +59,15 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
                 </FormSection>
 
                 <FormSection title="Media">
-                    <div>
-                        {industry.image && <img src={`/storage/${industry.image}`} alt="" className="mb-3 h-32 w-32 rounded border border-border object-cover" />}
-                        <Label htmlFor="image">Replace Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Industry Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                 </FormSection>
 
                 <FormSection title="Publishing">

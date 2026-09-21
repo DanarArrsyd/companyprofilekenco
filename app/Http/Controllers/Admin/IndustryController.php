@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\Industry\StoreIndustryRequest;
 use App\Http\Requests\Admin\Industry\UpdateIndustryRequest;
 use App\Models\Industry;
 use App\Services\ActivityLogService;
+use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Support\SlugGenerator;
 use Illuminate\Http\RedirectResponse;
@@ -20,6 +21,7 @@ class IndustryController extends Controller
     public function __construct(
         private readonly ActivityLogService $activityLog,
         private readonly MediaUploadService $media,
+        private readonly MediaLifecycleService $mediaLifecycle,
     ) {}
 
     public function index(Request $request): Response
@@ -47,11 +49,13 @@ class IndustryController extends Controller
 
     public function store(StoreIndustryRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except('image');
+        $data = $request->safe()->except(['image', 'image_path']);
         $data['slug'] = trim($data['slug'] ?? '') !== '' ? $data['slug'] : SlugGenerator::unique('industries', $data['name']);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->media->storePublicImage($request->file('image'), 'industries');
+        } elseif ($request->filled('image_path')) {
+            $data['image'] = $request->validated('image_path');
         }
 
         $industry = Industry::create($data);
@@ -71,11 +75,18 @@ class IndustryController extends Controller
 
     public function update(UpdateIndustryRequest $request, Industry $industry): RedirectResponse
     {
-        $data = $request->safe()->except('image');
+        $data = $request->safe()->except(['image', 'image_path']);
+        $nextImage = $industry->image;
 
         if ($request->hasFile('image')) {
-            $this->media->deletePublic($industry->image);
-            $data['image'] = $this->media->storePublicImage($request->file('image'), 'industries');
+            $nextImage = $this->media->storePublicImage($request->file('image'), 'industries');
+        } elseif ($request->exists('image_path')) {
+            $nextImage = $request->validated('image_path');
+        }
+
+        if ($nextImage !== $industry->image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($industry->image);
+            $data['image'] = $nextImage;
         }
 
         $industry->update($data);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Media\CreateMedia;
 use App\Enums\ContentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Certification\StoreCertificationRequest;
@@ -46,17 +47,15 @@ class CertificationController extends Controller
         ]);
     }
 
-    public function store(StoreCertificationRequest $request): RedirectResponse
+    public function store(StoreCertificationRequest $request, CreateMedia $createMedia): RedirectResponse
     {
-        $data = $request->safe()->except(['image', 'document']);
+        $data = $request->safe()->except(['image', 'image_path', 'document']);
 
         if ($request->hasFile('image')) {
-            $media = Media::create([
-                'disk' => 'public',
-                'path' => $this->media->storePublicImage($request->file('image'), 'certifications'),
-                'filename' => $request->file('image')->getClientOriginalName(),
-            ]);
+            $media = $createMedia->handle($request->file('image'));
             $data['media_id'] = $media->id;
+        } elseif ($request->filled('image_path')) {
+            $data['media_id'] = Media::where('path', $request->validated('image_path'))->value('id');
         }
 
         if ($request->hasFile('document')) {
@@ -80,17 +79,20 @@ class CertificationController extends Controller
         ]);
     }
 
-    public function update(UpdateCertificationRequest $request, Certification $certification): RedirectResponse
-    {
-        $data = $request->safe()->except(['image', 'document']);
+    public function update(
+        UpdateCertificationRequest $request,
+        Certification $certification,
+        CreateMedia $createMedia,
+    ): RedirectResponse {
+        $data = $request->safe()->except(['image', 'image_path', 'document']);
 
         if ($request->hasFile('image')) {
-            $media = Media::create([
-                'disk' => 'public',
-                'path' => $this->media->storePublicImage($request->file('image'), 'certifications'),
-                'filename' => $request->file('image')->getClientOriginalName(),
-            ]);
+            $media = $createMedia->handle($request->file('image'));
             $data['media_id'] = $media->id;
+        } elseif ($request->exists('image_path')) {
+            $data['media_id'] = $request->filled('image_path')
+                ? Media::where('path', $request->validated('image_path'))->value('id')
+                : null;
         }
 
         if ($request->hasFile('document')) {

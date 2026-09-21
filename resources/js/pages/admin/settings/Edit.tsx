@@ -1,13 +1,15 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useRef, useState } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface Settings {
     company_name: string | null; legal_name: string | null; tagline: string | null; company_description: string | null;
@@ -25,14 +27,15 @@ type Tab = (typeof TABS)[number];
 
 export default function Edit({ settings }: { settings: Settings }) {
     const [tab, setTab] = useState<Tab>('General');
+    const faviconInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm<{
         _method: string;
         company_name: string; legal_name: string; tagline: string; company_description: string;
-        logo: File | null; favicon: File | null;
+        logo: File | null; logo_path: string; favicon: File | null;
         address: string; phone: string; email: string; operating_hours: string; map_embed_url: string;
         social_linkedin: string; social_youtube: string; social_instagram: string;
-        seo_default_meta_title: string; seo_default_meta_description: string; seo_default_og_image: File | null;
+        seo_default_meta_title: string; seo_default_meta_description: string; seo_default_og_image: File | null; seo_default_og_image_path: string;
         seo_title_separator: string; seo_default_robots: string;
         seo_twitter_card_type: string; seo_twitter_username: string;
         maintenance_mode: boolean;
@@ -43,6 +46,7 @@ export default function Edit({ settings }: { settings: Settings }) {
         tagline: settings.tagline ?? '',
         company_description: settings.company_description ?? '',
         logo: null,
+        logo_path: settings.logo ?? '',
         favicon: null,
         address: settings.address ?? '',
         phone: settings.phone ?? '',
@@ -55,6 +59,7 @@ export default function Edit({ settings }: { settings: Settings }) {
         seo_default_meta_title: settings.seo_default_meta_title ?? '',
         seo_default_meta_description: settings.seo_default_meta_description ?? '',
         seo_default_og_image: null,
+        seo_default_og_image_path: settings.seo_default_og_image ?? '',
         seo_title_separator: settings.seo_title_separator ?? '|',
         seo_default_robots: settings.seo_default_robots ?? 'index,follow',
         seo_twitter_card_type: settings.seo_twitter_card_type ?? 'summary_large_image',
@@ -110,16 +115,27 @@ export default function Edit({ settings }: { settings: Settings }) {
 
                 {tab === 'Branding' && (
                     <FormSection title="Branding">
+                        <MediaPickerField
+                            label="Company Logo"
+                            maxSizeMb={2}
+                            currentFile={data.logo}
+                            currentUrl={mediaUrl(data.logo_path)}
+                            onUploadFile={(file) => { setData('logo', file); setData('logo_path', ''); }}
+                            onSelectPath={(path) => { setData('logo_path', path); setData('logo', null); }}
+                            onClear={() => { setData('logo', null); setData('logo_path', ''); }}
+                            error={errors.logo ?? errors.logo_path}
+                        />
                         <div>
-                            {settings.logo && <img src={`/storage/${settings.logo}`} alt="Logo" className="mb-2 h-12 rounded border border-border object-contain" />}
-                            <Label htmlFor="logo">Logo</Label>
-                            <input id="logo" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('logo', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                            {errors.logo && <p className="mt-1 text-sm text-danger">{errors.logo}</p>}
-                        </div>
-                        <div>
-                            {settings.favicon && <img src={`/storage/${settings.favicon}`} alt="Favicon" className="mb-2 h-8 w-8 rounded border border-border object-contain" />}
+                            {settings.favicon && <img src={mediaUrl(settings.favicon) ?? ''} alt="Current favicon" className="mb-3 h-10 w-10 rounded border border-border object-contain" />}
                             <Label htmlFor="favicon">Favicon</Label>
-                            <input id="favicon" type="file" accept="image/jpeg,image/png,image/webp,image/x-icon" onChange={(e) => setData('favicon', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
+                            <input ref={faviconInputRef} id="favicon" type="file" accept="image/jpeg,image/png,image/webp,image/x-icon" disabled={processing} onChange={(e) => setData('favicon', e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm" />
+                            <p className="mt-1 text-xs text-slate-500">ICO, JPG, PNG, or WebP. Maximum 512 KB.</p>
+                            {data.favicon && (
+                                <div className="mt-2 flex items-center justify-between gap-3 rounded border border-border bg-muted/40 px-3 py-2 text-sm">
+                                    <span className="truncate text-foreground">Selected: {data.favicon.name}</span>
+                                    <Button type="button" size="sm" variant="ghost" onClick={() => { setData('favicon', null); if (faviconInputRef.current) faviconInputRef.current.value = ''; }}>Clear</Button>
+                                </div>
+                            )}
                             {errors.favicon && <p className="mt-1 text-sm text-danger">{errors.favicon}</p>}
                         </div>
                     </FormSection>
@@ -182,12 +198,16 @@ export default function Edit({ settings }: { settings: Settings }) {
                             <Label htmlFor="seo_default_meta_description">Default Meta Description</Label>
                             <textarea id="seo_default_meta_description" value={data.seo_default_meta_description} onChange={(e) => setData('seo_default_meta_description', e.target.value)} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                         </div>
-                        <div>
-                            {settings.seo_default_og_image && <img src={`/storage/${settings.seo_default_og_image}`} alt="" className="mb-2 h-24 rounded border border-border object-cover" />}
-                            <Label htmlFor="seo_default_og_image">Default OG Image</Label>
-                            <input id="seo_default_og_image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('seo_default_og_image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                            <p className="mt-1 text-xs text-slate-500">Used when a page has no page-specific OG image.</p>
-                        </div>
+                        <MediaPickerField
+                            label="Default OG Image"
+                            maxSizeMb={2}
+                            currentFile={data.seo_default_og_image}
+                            currentUrl={mediaUrl(data.seo_default_og_image_path)}
+                            onUploadFile={(file) => { setData('seo_default_og_image', file); setData('seo_default_og_image_path', ''); }}
+                            onSelectPath={(path) => { setData('seo_default_og_image_path', path); setData('seo_default_og_image', null); }}
+                            onClear={() => { setData('seo_default_og_image', null); setData('seo_default_og_image_path', ''); }}
+                            error={errors.seo_default_og_image ?? errors.seo_default_og_image_path}
+                        />
                         <div>
                             <Label htmlFor="seo_title_separator">Title Separator</Label>
                             <Input id="seo_title_separator" value={data.seo_title_separator} onChange={(e) => setData('seo_title_separator', e.target.value)} className="mt-1.5 max-w-[6rem]" />
@@ -226,7 +246,7 @@ export default function Edit({ settings }: { settings: Settings }) {
                 )}
 
                 <FormActions>
-                    <Button type="submit" disabled={processing}>Save Settings</Button>
+                    <Button type="submit" disabled={processing}>{processing ? 'Saving…' : 'Save Settings'}</Button>
                 </FormActions>
             </form>
         </AdminLayout>

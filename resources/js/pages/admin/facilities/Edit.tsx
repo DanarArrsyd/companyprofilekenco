@@ -3,11 +3,13 @@ import { FormEventHandler } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
+import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { mediaUrl } from '@/lib/media';
 
 interface Facility {
     id: number; name: string; slug: string; facility_category_id: number | null;
@@ -18,7 +20,7 @@ interface Facility {
 export default function Edit({ facility, categories, statusOptions }: { facility: Facility; categories: { id: number; name: string }[]; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
         _method: string; facility_category_id: string; name: string; location: string; description: string;
-        image: File | null; sort_order: number; status: string; published_at: string;
+        image: File | null; image_path: string; sort_order: number; status: string; published_at: string;
     }>({
         _method: 'put',
         facility_category_id: facility.facility_category_id ? String(facility.facility_category_id) : '',
@@ -26,6 +28,7 @@ export default function Edit({ facility, categories, statusOptions }: { facility
         location: facility.location ?? '',
         description: facility.description ?? '',
         image: null,
+        image_path: facility.image ?? '',
         sort_order: facility.sort_order,
         status: facility.status,
         published_at: facility.published_at ? facility.published_at.slice(0, 16) : '',
@@ -70,11 +73,15 @@ export default function Edit({ facility, categories, statusOptions }: { facility
                 </FormSection>
 
                 <FormSection title="Media">
-                    <div>
-                        {facility.image && <img src={`/storage/${facility.image}`} alt="" className="mb-3 h-32 w-32 rounded border border-border object-cover" />}
-                        <Label htmlFor="image">Replace Image</Label>
-                        <input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => setData('image', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                    </div>
+                    <MediaPickerField
+                        label="Facility Image"
+                        currentFile={data.image}
+                        currentUrl={mediaUrl(data.image_path)}
+                        onUploadFile={(file) => { setData('image', file); setData('image_path', ''); }}
+                        onSelectPath={(path) => { setData('image_path', path); setData('image', null); }}
+                        onClear={() => { setData('image', null); setData('image_path', ''); }}
+                        error={errors.image ?? errors.image_path}
+                    />
                 </FormSection>
 
                 <FormSection title="Publishing">

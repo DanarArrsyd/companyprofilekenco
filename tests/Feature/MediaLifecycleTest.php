@@ -225,6 +225,22 @@ test('reselecting the current unmanaged product path does not delete its file', 
     Storage::disk('public')->assertExists($path);
 });
 
+test('clearing an unmanaged product image removes its file and reference', function () {
+    $path = 'products/current.jpg';
+    Storage::disk('public')->put($path, 'current');
+    $product = Product::factory()->create(['featured_image' => $path]);
+
+    app(UpdateProduct::class)->handle($product, [
+        'name' => $product->name,
+        'status' => 'draft',
+        'featured_image_path' => null,
+        'seo' => [],
+    ]);
+
+    Storage::disk('public')->assertMissing($path);
+    expect($product->fresh()->featured_image)->toBeNull();
+});
+
 test('deleting a product gallery reference preserves its media library file', function () {
     $media = Media::factory()->create(['path' => 'library/gallery.jpg']);
     Storage::disk('public')->put($media->path, 'shared');
