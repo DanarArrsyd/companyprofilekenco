@@ -22,14 +22,14 @@ class ReplaceMediaFile
     public function handle(Media $media, UploadedFile $file): Media
     {
         $this->uploader->replacePublicFile($media->path, $file);
-        $dimensions = $this->uploader->dimensionsOf($file);
+        $meta = $this->uploader->metadataOf($media->path);
 
         $media->update([
             'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'width' => $dimensions['width'] ?? null,
-            'height' => $dimensions['height'] ?? null,
+            'mime_type' => $meta['mime_type'] ?? $file->getMimeType(),
+            'size' => $meta['size'] ?? $file->getSize(),
+            'width' => $meta['width'] ?? null,
+            'height' => $meta['height'] ?? null,
         ]);
 
         $this->activityLog->record('media.replaced', $media, ['original_name' => $media->original_name]);

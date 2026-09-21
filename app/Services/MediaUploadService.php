@@ -15,15 +15,21 @@ use Illuminate\Support\Str;
 class MediaUploadService
 {
     /**
+     * Longest side, in pixels, an optimized image is constrained to.
+     * Public pages never display an image larger than this, and raw
+     * camera/phone uploads routinely arrive several times over it.
+     */
+    private const MAX_DIMENSION = 2000;
+
+    /**
      * Store a public image (jpg/jpeg/png/webp) and return its relative path.
+     * The path may end in .webp even if the upload didn't — see optimizeNewUpload().
      */
     public function storePublicImage(UploadedFile $file, string $directory): string
     {
         $path = $file->storeAs($directory, $this->safeFilename($file), 'public');
 
-        $this->optimizeToWebp($path);
-
-        return $path;
+        return $this->optimizeNewUpload($path) ?? $path;
     }
 
     /**
@@ -44,7 +50,7 @@ class MediaUploadService
         $path = $file->storeAs($directory, $this->safeFilename($file), 'public');
 
         if (str_starts_with($file->getMimeType() ?: '', 'image/')) {
-            $this->optimizeToWebp($path);
+            return $this->optimizeNewUpload($path) ?? $path;
         }
 
         return $path;
@@ -53,29 +59,33 @@ class MediaUploadService
     /**
      * Replace the file at an existing Media Library path in place, so any
      * stored reference to that path keeps resolving to the new content.
+     * Unlike a new upload, the path (and its extension) can't change here.
      */
     public function replacePublicFile(string $existingPath, UploadedFile $file): void
     {
         Storage::disk('public')->put($existingPath, file_get_contents($file->getRealPath()));
 
         if (str_starts_with($file->getMimeType() ?: '', 'image/')) {
-            $this->optimizeToWebp($existingPath);
+            $this->resizeInPlace($existingPath);
         }
     }
 
     /**
-     * Pixel dimensions for an image upload, or null for non-images /
-     * unreadable files. Best-effort — never throws.
+     * Actual size/dimensions/mime of a stored public file, read from disk
+     * so it reflects optimization (resize, WebP conversion) rather than
+     * whatever the original upload looked like before it was processed.
      */
-    public function dimensionsOf(UploadedFile $file): ?array
+    public function metadataOf(string $path): array
     {
-        if (! str_starts_with($file->getMimeType() ?: '', 'image/')) {
-            return null;
-        }
+        $fullPath = Storage::disk('public')->path($path);
+        $imageInfo = @getimagesize($fullPath);
 
-        $size = @getimagesize($file->getRealPath());
-
-        return $size ? ['width' => $size[0], 'height' => $size[1]] : null;
+        return [
+            'size' => @filesize($fullPath) ?: null,
+            'width' => $imageInfo[0] ?? null,
+            'height' => $imageInfo[1] ?? null,
+            'mime_type' => $imageInfo['mime'] ?? null,
+        ];
     }
 
     public function deletePublic(?string $path): void
@@ -100,14 +110,78 @@ class MediaUploadService
     }
 
     /**
-     * Best-effort WebP copy alongside the original. Silently skipped when
-     * the GD extension or WebP support isn't available in this environment
-     * — the original upload remains the source of truth either way.
+     * Convert a freshly stored image to a size-constrained WebP file and
+     * return its (renamed) path, deleting the original. Safe to rename
+     * here because nothing references this path yet. Returns null (keep
+     * the original path/format untouched) when GD or WebP isn't available.
      */
-    private function optimizeToWebp(string $path): void
+    private function optimizeNewUpload(string $path): ?string
+    {
+        $image = $this->readImage($path);
+
+        if (! $image) {
+            return null;
+        }
+
+        $image = $this->constrainDimensions($image);
+
+        $disk = Storage::disk('public');
+        $webpPath = preg_replace('/\.[^.]+$/', '.webp', $path);
+
+        try {
+            imagewebp($image, $disk->path($webpPath), 82);
+        } finally {
+            imagedestroy($image);
+        }
+
+        if ($webpPath !== $path) {
+            $disk->delete($path);
+        }
+
+        return $webpPath;
+    }
+
+    /**
+     * Re-encode an image at its existing path/format, downscaling it if
+     * it's larger than MAX_DIMENSION. Used for in-place replacement, where
+     * the path (and therefore the format) must stay exactly as it was.
+     */
+    private function resizeInPlace(string $path): void
+    {
+        $image = $this->readImage($path);
+
+        if (! $image) {
+            return;
+        }
+
+        $image = $this->constrainDimensions($image);
+
+        $disk = Storage::disk('public');
+        $fullPath = $disk->path($path);
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        try {
+            match ($extension) {
+                'jpg', 'jpeg' => imagejpeg($image, $fullPath, 85),
+                'png' => imagepng($image, $fullPath),
+                'webp' => imagewebp($image, $fullPath, 82),
+                default => null,
+            };
+        } finally {
+            imagedestroy($image);
+        }
+    }
+
+    /**
+     * Best-effort image read. Returns null (caller keeps the file
+     * untouched) when GD/WebP support is missing or the file isn't a
+     * format we know how to decode — optimization must never block or
+     * corrupt an upload.
+     */
+    private function readImage(string $path): ?\GdImage
     {
         if (! extension_loaded('gd') || ! function_exists('imagewebp')) {
-            return;
+            return null;
         }
 
         try {
@@ -117,18 +191,43 @@ class MediaUploadService
             $image = match ($extension) {
                 'jpg', 'jpeg' => @imagecreatefromjpeg($fullPath),
                 'png' => @imagecreatefrompng($fullPath),
+                'webp' => @imagecreatefromwebp($fullPath),
                 default => null,
             };
 
-            if (! $image) {
-                return;
+            if (! $image instanceof \GdImage) {
+                return null;
             }
 
-            $webpPath = preg_replace('/\.[^.]+$/', '.webp', $fullPath);
-            imagewebp($image, $webpPath, 82);
-            imagedestroy($image);
+            imagepalettetotruecolor($image);
+            imagealphablending($image, true);
+            imagesavealpha($image, true);
+
+            return $image;
         } catch (\Throwable) {
-            // Optimization is best-effort; never block the upload on failure.
+            return null;
         }
+    }
+
+    private function constrainDimensions(\GdImage $image): \GdImage
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        if ($width <= self::MAX_DIMENSION && $height <= self::MAX_DIMENSION) {
+            return $image;
+        }
+
+        $scale = self::MAX_DIMENSION / max($width, $height);
+        $newWidth = max(1, (int) round($width * $scale));
+        $newHeight = max(1, (int) round($height * $scale));
+
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+
+        return $resized;
     }
 }

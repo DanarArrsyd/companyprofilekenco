@@ -18,17 +18,17 @@ class CreateMedia
     public function handle(UploadedFile $file, ?string $altText = null): Media
     {
         $path = $this->uploader->storePublicFile($file, 'library');
-        $dimensions = $this->uploader->dimensionsOf($file);
+        $meta = $this->uploader->metadataOf($path);
 
         $media = Media::create([
             'disk' => 'public',
             'path' => $path,
             'filename' => basename($path),
             'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'size' => $file->getSize(),
-            'width' => $dimensions['width'] ?? null,
-            'height' => $dimensions['height'] ?? null,
+            'mime_type' => $meta['mime_type'] ?? $file->getMimeType(),
+            'size' => $meta['size'] ?? $file->getSize(),
+            'width' => $meta['width'] ?? null,
+            'height' => $meta['height'] ?? null,
             'alt_text' => $altText,
             'uploaded_by' => Auth::id(),
         ]);
