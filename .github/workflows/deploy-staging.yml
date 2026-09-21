@@ -70,7 +70,7 @@ jobs:
       - name: Run remote deploy script
         run: |
           ssh -p "${{ secrets.STAGING_PORT }}" "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" \
-            "bash ${{ secrets.STAGING_PATH }}/incoming/scripts/deploy-staging.sh"
+            "DEFER_PUBLIC_HEALTH_CHECK=1 bash ${{ secrets.STAGING_PATH }}/incoming/scripts/deploy-staging.sh"
 
       - name: Smoke test
         run: |

@@ -199,10 +199,17 @@ MAINTENANCE_ENABLED=0
 
 # ---------------------------------------------------------------------------
 # 9. Health check — fail visibly (non-zero exit) if this doesn't succeed.
+# GitHub Actions defers this public request to its following smoke-test step.
+# The Hostinger server cannot reliably negotiate TLS with its own CDN edge,
+# while an external runner exercises the same public route successfully.
 # ---------------------------------------------------------------------------
-log "Health-checking ${HEALTH_URL}..."
-if ! curl -fsS --max-time 15 "$HEALTH_URL" > /dev/null; then
-    fail "Health check failed: ${HEALTH_URL} did not return a successful response."
-fi
+if [[ "${DEFER_PUBLIC_HEALTH_CHECK:-0}" == "1" ]]; then
+    log "Public health check deferred to the external deployment runner."
+else
+    log "Health-checking ${HEALTH_URL}..."
+    if ! curl -fsS --max-time 15 "$HEALTH_URL" > /dev/null; then
+        fail "Health check failed: ${HEALTH_URL} did not return a successful response."
+    fi
 
-log "Deploy complete. ${HEALTH_URL} is healthy."
+    log "Deploy complete. ${HEALTH_URL} is healthy."
+fi
