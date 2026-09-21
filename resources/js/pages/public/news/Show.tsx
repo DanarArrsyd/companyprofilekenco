@@ -65,7 +65,7 @@ export default function Show({
                     <div className="mx-auto mt-20 max-w-content border-t border-border pt-12">
                         <p className="text-caption uppercase text-muted-foreground">Keep Reading</p>
                         <h2 className="mt-2 text-h3 text-navy-900">Related Articles</h2>
-                        <div className="mt-8 grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-3">
+                        <div data-reveal-group className="mt-8 grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-3">
                             {relatedArticles.map((related) => <ArticlePreview key={related.id} article={related} />)}
                         </div>
                     </div>

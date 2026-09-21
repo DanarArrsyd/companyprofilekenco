@@ -61,13 +61,13 @@ export function SectionRenderer({
                 <section className="border-t border-border">
                     <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
-                            <div className="order-2 lg:order-1">
+                            <div data-reveal="left" className="order-2 lg:order-1">
                                 {section.title && <h2 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{section.title}</h2>}
                                 {(section.subtitle || c.body) && (
                                     <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
                                 )}
                             </div>
-                            <div className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
+                            <div data-reveal="right" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
                                 {c.image ? (
                                     <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
                                 ) : (
@@ -98,14 +98,14 @@ export function SectionRenderer({
             return (
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-                        <div>
+                        <div data-reveal="left">
                             {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
                             {(section.subtitle || c.body) && (
                                 <p className="mt-4 text-slate-700">{section.subtitle ?? c.body}</p>
                             )}
                         </div>
                         {c.image ? (
-                            <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
+                            <img data-reveal="right" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
                             <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
                                 No image set
@@ -249,7 +249,7 @@ export function SectionRenderer({
                     {images.length === 0 ? (
                         <p className="mt-4 text-sm text-slate-500">Gallery coming soon.</p>
                     ) : (
-                        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                        <div data-reveal-group className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
                             {images.map((src, index) => (
                                 <img key={index} src={mediaUrl(src) ?? undefined} alt="" loading="lazy" className="aspect-square w-full rounded object-cover" />
                             ))}
@@ -342,7 +342,7 @@ export function SectionRenderer({
                 <section className="border-t border-border">
                     <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
-                            <div>
+                            <div data-reveal="left">
                                 <p className="text-caption uppercase text-muted-foreground">Quality</p>
                                 <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
                                 {(c.description || section.subtitle) && (
@@ -350,7 +350,7 @@ export function SectionRenderer({
                                 )}
                             </div>
                             {certs.length > 0 && (
-                                <div className="flex items-start">
+                                <div data-reveal="right" className="flex items-start">
                                     <CertificationItem items={certs} />
                                 </div>
                             )}

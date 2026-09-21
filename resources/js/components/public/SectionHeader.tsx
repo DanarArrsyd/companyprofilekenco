@@ -1,6 +1,8 @@
 import { Link } from '@inertiajs/react';
 import { ReactNode } from 'react';
 
+import { ScrollReveal } from '@/components/public/ScrollReveal';
+
 export function SectionHeader({
     eyebrow,
     heading,
@@ -26,7 +28,7 @@ export function SectionHeader({
     const headingSize = as === 'h1' ? 'text-h1' : 'text-h2';
 
     return (
-        <div className={`flex flex-col gap-4 ${centered ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between'} ${className}`}>
+        <ScrollReveal className={`flex flex-col gap-4 ${centered ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between'} ${className}`}>
             <div className={centered ? 'max-w-2xl' : 'max-w-2xl'}>
                 {eyebrow && <p className="text-caption uppercase text-muted-foreground">{eyebrow}</p>}
                 {heading && <Heading className={`mt-2 ${headingSize} text-navy-900`} style={{ textWrap: 'balance' }}>{heading}</Heading>}
@@ -38,6 +40,6 @@ export function SectionHeader({
                     {cta.label} &rarr;
                 </Link>
             )}
-        </div>
+        </ScrollReveal>
     );
 }

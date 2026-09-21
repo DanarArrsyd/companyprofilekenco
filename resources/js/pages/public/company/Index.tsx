@@ -111,7 +111,7 @@ export default function CompanyIndex({
                         No facilities published yet.
                     </p>
                 ) : (
-                    <div className="mx-auto max-w-content space-y-16 px-5 pb-16 sm:px-6 lg:px-8">
+                    <div data-reveal-group className="mx-auto max-w-content space-y-16 px-5 pb-16 sm:px-6 lg:px-8">
                         {facilities.map((facility) => <FacilityRow key={facility.id} facility={facility} />)}
                     </div>
                 )}

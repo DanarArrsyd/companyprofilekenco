@@ -92,14 +92,14 @@ export function CertificationItem({
 
     if (variant === 'detailed') {
         return (
-            <div className="divide-y divide-border border-t border-border">
+            <div data-reveal-group className="divide-y divide-border border-t border-border">
                 {items.map((cert) => <Row key={cert.id} cert={cert} />)}
             </div>
         );
     }
 
     return (
-        <div className="-mx-5 flex gap-8 overflow-x-auto px-5 sm:mx-0 sm:flex-wrap sm:gap-10 sm:overflow-visible sm:px-0">
+        <div data-reveal-group className="-mx-5 flex gap-8 overflow-x-auto px-5 sm:mx-0 sm:flex-wrap sm:gap-10 sm:overflow-visible sm:px-0">
             {items.map((cert) => <Plate key={cert.id} cert={cert} />)}
         </div>
     );

@@ -41,12 +41,12 @@ export default function Show({
                 <Breadcrumb items={breadcrumb} />
 
                 <div className="mt-8 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                    <div>
+                    <div data-reveal="left">
                         <h1 className="text-h1 text-navy-900" style={{ textWrap: 'balance' }}>{capability.name}</h1>
                         {capability.summary && <p className="mt-4 text-body-lg text-slate-700">{capability.summary}</p>}
                         {capability.description && <p className="mt-6 text-body text-slate-700">{capability.description}</p>}
                     </div>
-                    <div className="aspect-[4/3] w-full bg-muted">
+                    <div data-reveal="right" className="aspect-[4/3] w-full bg-muted">
                         {capability.featured_image ? (
                             <img src={`/storage/${capability.featured_image}`} alt={capability.name} className="h-full w-full object-cover" loading="eager" />
                         ) : (
@@ -58,7 +58,7 @@ export default function Show({
                 {capability.steps.length > 0 && (
                     <div className="mt-16 border-t border-border pt-12">
                         <h2 className="text-h3 text-navy-900">Process</h2>
-                        <ol className="mt-6 space-y-6">
+                        <ol data-reveal-group className="mt-6 space-y-6">
                             {capability.steps.map((step, index) => (
                                 <li key={step.id} className="flex gap-5">
                                     <span className="text-caption font-semibold text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -77,7 +77,7 @@ export default function Show({
                 {capability.machines.length > 0 && (
                     <div className="mt-16 border-t border-border pt-12">
                         <h2 className="text-h3 text-navy-900">Equipment</h2>
-                        <dl className="mt-6 divide-y divide-border">
+                        <dl data-reveal-group className="mt-6 divide-y divide-border">
                             {capability.machines.map((machine) => (
                                 <div key={machine.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
                                     <dt className="text-small text-foreground">

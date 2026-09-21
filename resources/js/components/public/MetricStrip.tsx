@@ -57,7 +57,7 @@ export function MetricStrip({ items }: { items: Metric[] }) {
     return (
         <section className="border-y border-border bg-navy-900" ref={ref}>
             <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-2 divide-y divide-white/15 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
+                <div data-reveal-group className="grid grid-cols-2 divide-y divide-white/15 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
                     {items.map((item, index) => (
                         <div key={index} className="px-2 py-6 text-center first:pl-0 last:pr-0 lg:py-4">
                             <p className="text-h2 text-white">

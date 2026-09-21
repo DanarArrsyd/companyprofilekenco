@@ -274,7 +274,7 @@ function NewsSection({ articles }: { articles: ArticlePreviewItem[] }) {
     return (
         <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
             <SectionHeader eyebrow="Newsroom" heading="Latest News" cta={{ label: 'View All News', href: '/news' }} />
-            <div className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-3">
+            <div data-reveal-group className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-3">
                 {articles.map((article) => <ArticlePreview key={article.id} article={article} />)}
             </div>
         </section>

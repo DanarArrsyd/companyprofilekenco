@@ -88,7 +88,7 @@ export default function Index({
                 {vacancies.data.length === 0 ? (
                     <p className="py-8 text-small text-muted-foreground">No open positions at the moment.</p>
                 ) : (
-                    <div className="divide-y divide-border border-t border-border">
+                    <div data-reveal-group className="divide-y divide-border border-t border-border">
                         {vacancies.data.map((vacancy) => <VacancyRowItem key={vacancy.id} vacancy={vacancy} />)}
                     </div>
                 )}

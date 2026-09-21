@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
+import { RevealGroup } from '@/components/public/ScrollReveal';
 
 export interface ProductShowcaseItem {
     id: number;
@@ -47,17 +48,17 @@ export function ProductShowcase({ items }: { items: ProductShowcaseItem[] }) {
 
     if (items.length === 1) {
         return (
-            <div className="max-w-md">
+            <RevealGroup className="max-w-md">
                 <Unit item={items[0]} large />
-            </div>
+            </RevealGroup>
         );
     }
 
     const gridCols = items.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3';
 
     return (
-        <div className={`-mx-5 flex snap-x snap-mandatory gap-8 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:overflow-visible sm:px-0 ${gridCols}`}>
+        <RevealGroup className={`-mx-5 flex snap-x snap-mandatory gap-8 overflow-x-auto px-5 pb-2 sm:mx-0 sm:grid sm:overflow-visible sm:px-0 ${gridCols}`}>
             {items.map((item) => <Unit key={item.id} item={item} />)}
-        </div>
+        </RevealGroup>
     );
 }

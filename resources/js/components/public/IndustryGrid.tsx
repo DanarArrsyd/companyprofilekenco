@@ -19,7 +19,7 @@ export function IndustryGrid({ items, showDescription = false }: { items: Indust
     if (items.length === 0) return null;
 
     return (
-        <div ref={ref} className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+        <div ref={ref} data-reveal-group className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
             {items.map((industry, index) => (
                 <a
                     key={industry.id}

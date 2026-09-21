@@ -38,7 +38,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
         : 'opacity-0 translate-y-3';
 
     return (
-        <section className="relative isolate min-h-[560px] w-full overflow-hidden bg-navy-900 sm:min-h-[640px] lg:min-h-[760px]">
+        <section data-reveal-skip className="relative isolate min-h-[560px] w-full overflow-hidden bg-navy-900 sm:min-h-[640px] lg:min-h-[760px]">
             <div className="absolute inset-0">
                 {content.image ? (
                     <img

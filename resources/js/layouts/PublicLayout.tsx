@@ -1,8 +1,10 @@
 import { usePage } from '@inertiajs/react';
-import { PropsWithChildren } from 'react';
+import { useRef } from 'react';
+import type { PropsWithChildren } from 'react';
 
 import { PublicFooter } from '@/components/public/PublicFooter';
 import { PublicNavbar } from '@/components/public/PublicNavbar';
+import { useScrollRevealBoundary } from '@/hooks/use-in-view';
 
 export default function PublicLayout({
     children,
@@ -16,8 +18,12 @@ export default function PublicLayout({
      */
     heroVariant?: 'transparent-dark' | 'transparent-light' | 'solid';
 }>) {
-    const { siteSettings } = usePage().props;
+    const { props, url } = usePage();
+    const { siteSettings } = props;
+    const mainRef = useRef<HTMLElement>(null);
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
+
+    useScrollRevealBoundary(mainRef, url);
 
     return (
         <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -27,7 +33,7 @@ export default function PublicLayout({
                 (h-20) to keep content clear of it. Transparent/hero pages
                 skip this — Hero already reserves that space itself so the
                 image can bleed under the header. */}
-            <main className={`flex-1 ${heroVariant === 'solid' ? 'pt-20' : ''}`}>{children}</main>
+            <main ref={mainRef} className={`flex-1 ${heroVariant === 'solid' ? 'pt-20' : ''}`}>{children}</main>
             <PublicFooter />
         </div>
     );

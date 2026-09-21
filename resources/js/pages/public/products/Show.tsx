@@ -56,7 +56,7 @@ export default function Show({
                 <Breadcrumb items={breadcrumb} />
 
                 <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-2">
-                    <div>
+                    <div data-reveal="left">
                         <div className="aspect-square w-full bg-muted">
                             {activeImage ? (
                                 <img
@@ -71,7 +71,7 @@ export default function Show({
                         </div>
 
                         {gallery.length > 1 && (
-                            <div className="mt-4 grid grid-cols-5 gap-3">
+                            <div data-reveal-group className="mt-4 grid grid-cols-5 gap-3">
                                 {gallery.map((image, index) => (
                                     <button
                                         key={image.id}
@@ -88,14 +88,14 @@ export default function Show({
                         )}
                     </div>
 
-                    <div>
+                    <div data-reveal="right">
                         {product.category && <p className="text-caption uppercase text-muted-foreground">{product.category.name}</p>}
                         <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{product.name}</h1>
                         {product.short_description && <p className="mt-4 text-body-lg text-slate-700">{product.short_description}</p>}
                         {product.description && <p className="mt-6 text-body text-slate-700">{product.description}</p>}
 
                         {specs.length > 0 && (
-                            <dl className="mt-10 divide-y divide-border border-t border-border">
+                            <dl data-reveal-group className="mt-10 divide-y divide-border border-t border-border">
                                 {specs.map(([label, value]) => (
                                     <div key={label} className="flex justify-between gap-4 py-3">
                                         <dt className="text-small text-muted-foreground">{label}</dt>

@@ -76,6 +76,44 @@
 }
 
 @layer components {
+    /* Shared reveal-once motion for public pages. The restrained distance,
+       capped stagger, and single industrial easing curve keep movement
+       deliberate instead of decorative. */
+    .scroll-reveal {
+        --reveal-delay: 0ms;
+        opacity: 0;
+        transition:
+            opacity 620ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
+            transform 680ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay);
+        will-change: opacity, transform;
+    }
+
+    .scroll-reveal--up {
+        transform: translate3d(0, 24px, 0);
+    }
+
+    .scroll-reveal--left {
+        transform: translate3d(-28px, 0, 0);
+    }
+
+    .scroll-reveal--right {
+        transform: translate3d(28px, 0, 0);
+    }
+
+    .scroll-reveal--scale {
+        transform: scale(0.975);
+    }
+
+    .scroll-reveal--fade {
+        transform: none;
+    }
+
+    .scroll-reveal.is-revealed {
+        opacity: 1;
+        transform: none;
+        will-change: auto;
+    }
+
     /* Entrance for the full-page nav menu's right-pane submenu links —
        replays on every hover/focus switch since the list remounts via `key`. */
     @keyframes submenu-item-enter {
@@ -94,6 +132,13 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+        .scroll-reveal,
+        .scroll-reveal.is-revealed {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+
         .submenu-item-enter {
             animation: none;
         }

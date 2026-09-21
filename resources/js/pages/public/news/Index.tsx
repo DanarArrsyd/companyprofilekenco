@@ -115,7 +115,7 @@ export default function Index({
                         )}
 
                         {articles.data.length > 0 && (
-                            <div className="grid grid-cols-1 gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+                            <div data-reveal-group className="grid grid-cols-1 gap-x-10 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
                                 {articles.data.map((article) => <ArticleRow key={article.id} article={article} />)}
                             </div>
                         )}
