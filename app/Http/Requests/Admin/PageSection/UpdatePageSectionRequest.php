@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\PageSection;
 
 use App\Enums\SectionType;
+use App\Rules\RelativeOrAbsoluteUrl;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -20,9 +21,9 @@ class UpdatePageSectionRequest extends FormRequest
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'array'],
-            'content.primary_cta_url' => ['nullable', 'url', 'max:255'],
-            'content.secondary_cta_url' => ['nullable', 'url', 'max:255'],
-            'content.cta_url' => ['nullable', 'url', 'max:255'],
+            'content.primary_cta_url' => ['nullable', 'string', 'max:255', new RelativeOrAbsoluteUrl],
+            'content.secondary_cta_url' => ['nullable', 'string', 'max:255', new RelativeOrAbsoluteUrl],
+            'content.cta_url' => ['nullable', 'string', 'max:255', new RelativeOrAbsoluteUrl],
             'settings_json' => ['nullable', 'array'],
             'is_active' => ['boolean'],
         ];

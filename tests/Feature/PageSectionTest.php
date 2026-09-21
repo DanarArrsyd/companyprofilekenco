@@ -57,3 +57,57 @@ test('inactive sections are not rendered on the public page', function () {
         ->where('aboutPage.sections.0.title', 'Visible Section')
     );
 });
+
+test('a section cta url accepts an internal relative path', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('pages.update');
+
+    $page = Page::factory()->create();
+    $section = PageSection::factory()->create(['page_id' => $page->id]);
+
+    $this->actingAs($user)->put(route('admin.pages.sections.update', [$page, $section]), [
+        'section_type' => $section->section_type->value,
+        'content' => [
+            'primary_cta_url' => '/capabilities',
+            'secondary_cta_url' => '/contact',
+        ],
+        'is_active' => true,
+    ])->assertRedirect();
+
+    expect($section->fresh()->content['primary_cta_url'])->toBe('/capabilities')
+        ->and($section->fresh()->content['secondary_cta_url'])->toBe('/contact');
+});
+
+test('a section cta url still accepts a full external url', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('pages.update');
+
+    $page = Page::factory()->create();
+    $section = PageSection::factory()->create(['page_id' => $page->id]);
+
+    $this->actingAs($user)->put(route('admin.pages.sections.update', [$page, $section]), [
+        'section_type' => $section->section_type->value,
+        'content' => [
+            'primary_cta_url' => 'https://example.com/partners',
+        ],
+        'is_active' => true,
+    ])->assertRedirect();
+
+    expect($section->fresh()->content['primary_cta_url'])->toBe('https://example.com/partners');
+});
+
+test('a section cta url rejects a malformed value', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('pages.update');
+
+    $page = Page::factory()->create();
+    $section = PageSection::factory()->create(['page_id' => $page->id]);
+
+    $this->actingAs($user)->put(route('admin.pages.sections.update', [$page, $section]), [
+        'section_type' => $section->section_type->value,
+        'content' => [
+            'primary_cta_url' => 'not a url',
+        ],
+        'is_active' => true,
+    ])->assertSessionHasErrors('content.primary_cta_url');
+});

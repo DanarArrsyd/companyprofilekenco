@@ -20,6 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Vite::prefetch(concurrency: 3);
+        // Public visitors never need the admin CMS bundle (RichTextEditor,
+        // DataTable, every CRUD page, ...). Prefetching it unconditionally
+        // made every homepage visit silently download the entire admin
+        // panel, so scope it to admin traffic where the instant-navigation
+        // benefit is actually intended.
+        if (! $this->app->runningInConsole() && request()->is('admin*')) {
+            Vite::prefetch(concurrency: 3);
+        }
     }
 }
