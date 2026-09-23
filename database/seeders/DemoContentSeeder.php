@@ -412,6 +412,7 @@ class DemoContentSeeder extends Seeder
                 'title' => 'Who We Are',
                 'subtitle' => null,
                 'content' => ['body' => 'PT. Kenco Manufactur Indonesia is a precision manufacturing partner serving automotive, electronics, and industrial customers. We combine metal stamping, injection molding, and CNC machining under one roof to deliver components on schedule and to print.'],
+                'settings_json' => ['heading_font' => 'caveat'],
                 'sort_order' => 1,
                 'is_active' => true,
             ]);

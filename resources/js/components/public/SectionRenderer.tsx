@@ -10,6 +10,7 @@ import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { MetricStrip } from '@/components/public/MetricStrip';
 import { ProductShowcase, ProductShowcaseItem } from '@/components/public/ProductShowcase';
 import { SectionHeader } from '@/components/public/SectionHeader';
+import { getSectionHeadingClass } from '@/components/public/section-heading';
 import { Button } from '@/components/ui/button';
 import { mediaUrl } from '@/lib/media';
 import { PageSection } from '@/types/cms';
@@ -85,7 +86,7 @@ export function SectionRenderer({
             const body = (content as { body?: string }).body;
             return (
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                    {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
+                    {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
                     {(section.subtitle || body) && (
                         <p className="mt-4 max-w-2xl text-slate-700">{section.subtitle ?? body}</p>
                     )}

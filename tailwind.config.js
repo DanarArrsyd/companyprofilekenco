@@ -23,6 +23,7 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                caveat: ['Caveat', 'cursive'],
             },
             colors: {
                 background: 'rgb(var(--background) / <alpha-value>)',
