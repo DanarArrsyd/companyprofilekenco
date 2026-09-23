@@ -10,6 +10,16 @@ export default {
         './resources/views/**/*.blade.php',
         './resources/js/**/*.{ts,tsx}',
     ],
+    // Reveal classes are assembled at runtime by revealClass(). Keep every
+    // variant in production CSS instead of relying on source extraction.
+    safelist: [
+        'scroll-reveal--up',
+        'scroll-reveal--left',
+        'scroll-reveal--right',
+        'scroll-reveal--scale',
+        'scroll-reveal--fade',
+        'scroll-reveal--image',
+    ],
 
     theme: {
         container: {

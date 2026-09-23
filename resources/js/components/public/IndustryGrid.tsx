@@ -1,5 +1,4 @@
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
-import { useInView } from '@/hooks/use-in-view';
 
 export interface IndustryGridItem {
     id: number;
@@ -15,22 +14,16 @@ export interface IndustryGridItem {
  * Image + caption only: no border, no surface box.
  */
 export function IndustryGrid({ items, showDescription = false }: { items: IndustryGridItem[]; showDescription?: boolean }) {
-    const { ref, inView } = useInView<HTMLDivElement>();
     if (items.length === 0) return null;
 
     return (
-        <div ref={ref} data-reveal-group className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-            {items.map((industry, index) => (
+        <div data-reveal-group className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+            {items.map((industry) => (
                 <a
                     key={industry.id}
                     id={industry.slug}
                     href={`/company#${industry.slug}`}
-                    className="group block transition-all duration-500 ease-out"
-                    style={{
-                        transitionDelay: inView ? `${Math.min(index, 6) * 60}ms` : '0ms',
-                        opacity: inView ? 1 : 0,
-                        transform: inView ? 'translateY(0)' : 'translateY(12px)',
-                    }}
+                    className="group block"
                 >
                     <div className="aspect-square w-full bg-muted">
                         {industry.image ? (

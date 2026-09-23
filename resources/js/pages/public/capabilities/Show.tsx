@@ -46,7 +46,7 @@ export default function Show({
                         {capability.summary && <p className="mt-4 text-body-lg text-slate-700">{capability.summary}</p>}
                         {capability.description && <p className="mt-6 text-body text-slate-700">{capability.description}</p>}
                     </div>
-                    <div data-reveal="right" className="aspect-[4/3] w-full bg-muted">
+                    <div data-reveal="image" className="aspect-[4/3] w-full bg-muted">
                         {capability.featured_image ? (
                             <img src={`/storage/${capability.featured_image}`} alt={capability.name} className="h-full w-full object-cover" loading="eager" />
                         ) : (

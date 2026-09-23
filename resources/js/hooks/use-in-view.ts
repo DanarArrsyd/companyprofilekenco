@@ -38,7 +38,7 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(threshold = 0.
     return { ref, inView };
 }
 
-export type RevealVariant = 'up' | 'left' | 'right' | 'scale' | 'fade';
+export type RevealVariant = 'up' | 'left' | 'right' | 'scale' | 'fade' | 'image';
 
 /** Class pair to spread onto a reveal-once element. */
 export function revealClass(inView: boolean, variant: RevealVariant = 'up'): string {
@@ -46,7 +46,7 @@ export function revealClass(inView: boolean, variant: RevealVariant = 'up'): str
 }
 
 /** Keep collection entrances sequenced without making long lists feel slow. */
-export function revealDelay(index: number, step = 80, maximum = 320): string {
+export function revealDelay(index: number, step = 90, maximum = 360): string {
     const normalizedIndex = Number.isFinite(index) ? Math.max(0, index) : 0;
 
     return `${Math.min(normalizedIndex * step, maximum)}ms`;
@@ -70,10 +70,36 @@ const AUTO_REVEAL_SELECTOR = [
     '[data-reveal-group] > *',
 ].join(',');
 
+export const scrollRevealObserverOptions = {
+    // A clipped image exposes almost no painted area before reveal. The low
+    // threshold lets the viewport position trigger it without showing early.
+    threshold: 0,
+    rootMargin: '0px 0px -8% 0px',
+} as const;
+
+function isExplicitRevealTarget(target: unknown): boolean {
+    const element = target as HTMLElement;
+
+    return element.hasAttribute('data-reveal') || Boolean(element.parentElement?.hasAttribute('data-reveal-group'));
+}
+
+/** Prefer deliberate component-level motion over an automatic wrapper reveal. */
+export function preferExplicitRevealTargets<T>(targets: T[]): T[] {
+    const explicitTargets = targets.filter(isExplicitRevealTarget);
+
+    return targets.filter((target) => (
+        isExplicitRevealTarget(target)
+        || !explicitTargets.some((explicitTarget) => (
+            explicitTarget !== target
+            && (target as HTMLElement).contains(explicitTarget as Node)
+        ))
+    ));
+}
+
 function revealVariant(element: HTMLElement): RevealVariant {
     const requested = element.dataset.reveal;
 
-    if (requested === 'left' || requested === 'right' || requested === 'scale' || requested === 'fade') {
+    if (requested === 'left' || requested === 'right' || requested === 'scale' || requested === 'fade' || requested === 'image') {
         return requested;
     }
 
@@ -98,9 +124,10 @@ export function useScrollRevealBoundary<T extends HTMLElement>(
         }
 
         const siblingIndexes = new Map<Element, number>();
-        const targets = Array.from(root.querySelectorAll<HTMLElement>(AUTO_REVEAL_SELECTOR))
+        const candidates = Array.from(root.querySelectorAll<HTMLElement>(AUTO_REVEAL_SELECTOR))
             .filter((element) => !element.closest('[data-reveal-skip]'))
             .filter((element) => !element.classList.contains('scroll-reveal'));
+        const targets = preferExplicitRevealTargets(candidates);
 
         const observer = new IntersectionObserver(
             (entries) => {
@@ -111,10 +138,7 @@ export function useScrollRevealBoundary<T extends HTMLElement>(
                     observer.unobserve(entry.target);
                 });
             },
-            {
-                threshold: 0.12,
-                rootMargin: '0px 0px -8% 0px',
-            },
+            scrollRevealObserverOptions,
         );
 
         targets.forEach((element) => {

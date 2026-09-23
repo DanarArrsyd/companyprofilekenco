@@ -14,6 +14,9 @@ import { getSectionHeadingClass } from '@/components/public/section-heading';
 import { Button } from '@/components/ui/button';
 import { mediaUrl } from '@/lib/media';
 import { PageSection } from '@/types/cms';
+import paperTape1 from '../../../img/paper_tape1.png';
+import paperTape2 from '../../../img/paper_tape2.png';
+import { getTextSectionPresentation } from './text-section-presentation';
 
 interface CtaContent {
     heading?: string;
@@ -68,7 +71,7 @@ export function SectionRenderer({
                                     <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
                                 )}
                             </div>
-                            <div data-reveal="right" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
+                            <div data-reveal="image" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
                                 {c.image ? (
                                     <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
                                 ) : (
@@ -81,14 +84,57 @@ export function SectionRenderer({
             );
         }
 
-        // Generic-page primitives — unchanged from prior implementation.
+        // Generic-page primitives.
         case 'text': {
-            const body = (content as { body?: string }).body;
+            const presentation = getTextSectionPresentation(content, section.settings_json);
+
+            if (presentation.variant === 'taped_image') {
+                return (
+                    <section className="overflow-hidden bg-background">
+                        <div className="mx-auto grid max-w-content grid-cols-1 items-center gap-12 px-5 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:gap-20 lg:px-8 lg:py-24">
+                            <div data-reveal="left" className="relative z-10 text-navy-900">
+                                {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
+                                {(section.subtitle || presentation.body) && (
+                                    <p className="mt-5 max-w-3xl text-body-lg leading-relaxed text-slate-700">
+                                        {section.subtitle ?? presentation.body}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div data-reveal="image" className="relative mx-auto w-[min(86%,32rem)] py-8 sm:w-[min(78%,34rem)] lg:w-full lg:py-10">
+                                <div className="relative -rotate-[5deg] transform-gpu">
+                                    <div className="relative aspect-[4/3] overflow-hidden border border-navy-900/70 bg-muted shadow-sm">
+                                        <img
+                                            src={mediaUrl(presentation.image) ?? undefined}
+                                            alt={section.title ?? 'Company manufacturing'}
+                                            loading="lazy"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                    <img
+                                        src={paperTape1}
+                                        alt=""
+                                        aria-hidden="true"
+                                        className="pointer-events-none absolute -right-[10%] -top-[17%] z-20 w-[36%] rotate-[17deg] select-none opacity-90"
+                                    />
+                                    <img
+                                        src={paperTape2}
+                                        alt=""
+                                        aria-hidden="true"
+                                        className="pointer-events-none absolute -bottom-[18%] -left-[10%] z-20 w-[36%] -rotate-[12deg] select-none opacity-90"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                );
+            }
+
             return (
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                     {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
-                    {(section.subtitle || body) && (
-                        <p className="mt-4 max-w-2xl text-slate-700">{section.subtitle ?? body}</p>
+                    {(section.subtitle || presentation.body) && (
+                        <p className="mt-4 max-w-2xl text-slate-700">{section.subtitle ?? presentation.body}</p>
                     )}
                 </section>
             );
@@ -106,7 +152,7 @@ export function SectionRenderer({
                             )}
                         </div>
                         {c.image ? (
-                            <img data-reveal="right" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
+                            <img data-reveal="image" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
                             <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
                                 No image set

@@ -56,8 +56,8 @@ export default function Show({
                 <Breadcrumb items={breadcrumb} />
 
                 <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-2">
-                    <div data-reveal="left">
-                        <div className="aspect-square w-full bg-muted">
+                    <div>
+                        <div data-reveal="image" className="aspect-square w-full bg-muted">
                             {activeImage ? (
                                 <img
                                     src={`/storage/${activeImage.path}`}

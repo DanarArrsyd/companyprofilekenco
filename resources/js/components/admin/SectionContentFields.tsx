@@ -117,9 +117,21 @@ export function SectionContentFields({
 
         case 'text':
             return (
-                <div>
-                    <Label htmlFor="body">Body</Label>
-                    <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={6} />
+                <div className="space-y-4">
+                    <div>
+                        <Label htmlFor="body">Body</Label>
+                        <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={6} />
+                    </div>
+                    <div>
+                        <MediaPickerField
+                            label="Section image"
+                            currentUrl={mediaUrl(str(content, 'image'))}
+                            uploadToLibrary
+                            onSelectPath={(path) => set('image', path)}
+                            onClear={() => set('image', '')}
+                        />
+                        <p className="mt-1.5 text-xs text-slate-500">Recommended ratio: 4:3.</p>
+                    </div>
                 </div>
             );
 

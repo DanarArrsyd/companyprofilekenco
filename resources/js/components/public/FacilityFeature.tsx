@@ -43,7 +43,7 @@ export function FacilityFeature({
 
     return (
         <div className="relative">
-            <div className="aspect-[16/9] w-full bg-muted lg:aspect-[21/9]">
+            <div data-reveal="image" className="aspect-[16/9] w-full bg-muted lg:aspect-[21/9]">
                 {facility.image ? (
                     <img
                         src={`/storage/${facility.image}`}
@@ -56,7 +56,7 @@ export function FacilityFeature({
                 )}
             </div>
 
-            <div className="bg-navy-900 p-6 text-white sm:p-8 lg:absolute lg:bottom-6 lg:left-6 lg:max-w-xl lg:p-8">
+            <div data-reveal="up" className="bg-navy-900 p-6 text-white sm:p-8 lg:absolute lg:bottom-6 lg:left-6 lg:max-w-xl lg:p-8">
                 {facility.category && <p className="text-caption uppercase text-white/50">{facility.category.name}</p>}
                 <p className="mt-1 text-h3 text-white">{facility.name}</p>
                 {facility.location && <p className="mt-1 text-small text-white/70">{facility.location}</p>}
