@@ -381,7 +381,7 @@ A feature is finished only if:
 - Public navigation follows astra.co.id: floating white logo tab (top-left, rounded bottom-right), EN/ID pill + white pill hamburger (morphs to X) top-right, and a right-side menu panel (68% width, 40 px left radius, full-screen on mobile) with accordion submenus, the 2 latest published news (`menuNews` shared prop, public requests only) and a contact footer. Lives in `resources/js/components/public/PublicNavbar.tsx`; helpers in `navbar-scroll.ts`.
 - The EN/ID switcher is preview-only (no i18n yet): shown only when the CMS setting `show_language_switcher` (Settings → System) is on, with ID disabled.
 - Security baseline: `SecurityHeaders` middleware sets a nonce CSP (Vite + Ziggy `@routes` carry the nonce; add new third-party origins to its allowlist), nosniff, SAMEORIGIN framing, Referrer/Permissions policies and HTTPS-only HSTS. Article HTML is sanitized on write by `RichTextSanitizer` (Article `content` mutator). Uploads are stored with the content-sniffed extension, never the client one. Guests get only the `public` Ziggy route group. The app sits behind Hostinger's CDN without `trustProxies`, so do not add global per-IP throttles until proxies are configured.
-- Latest staging release for this work is commit `50b2bbf` (`feat(public): add premium company motion`); GitHub Actions run `35931850444` passed build, deploy, and smoke tests.
+- Latest staging release is commit `914624a` (`fix(public): keep both menu news cards on short desktop viewports`); GitHub Actions run `35976272031` passed build, deploy, and smoke tests. User confirmed Astra-style motion, navbar/menu, admin spacing, security hardening and responsive menu on MacBook and Windows as the project UI/UX standard.
 
 ## Companion Specifications
 
