@@ -373,6 +373,11 @@ A feature is finished only if:
 - Vision–Mission uses Montserrat with Inter fallback; font loading is configured in `resources/views/app.blade.php`.
 - Verify visual changes at 1532 px desktop and 390 px mobile, then run `npm run build` and `php artisan test`.
 - Deploy staging manually with `gh workflow run deploy-staging.yml --ref main`, then verify `https://staging.kencomanufactur.co.id/company#vision-mission`.
+- Company `Who We Are` uses CMS settings `heading_font: caveat` and `layout: taped_image`; its editable 4:3 image remains in section content rather than hardcoded markup.
+- The taped-image presentation lives in `resources/js/components/public/SectionRenderer.tsx`; tape assets live in `resources/img/paper_tape1.png` and `resources/img/paper_tape2.png`.
+- Public scroll reveals use the shared IntersectionObserver implementation in `resources/js/hooks/use-in-view.ts` and motion styles in `resources/css/app.css`; keep motion restrained, reveal once, and honor `prefers-reduced-motion`.
+- Explicit `data-reveal` elements take priority over automatic ancestor reveals to prevent compounded motion; stagger delays use 90 ms steps capped at 360 ms.
+- Latest staging release for this work is commit `50b2bbf` (`feat(public): add premium company motion`); GitHub Actions run `35931850444` passed build, deploy, and smoke tests.
 
 ## Companion Specifications
 
