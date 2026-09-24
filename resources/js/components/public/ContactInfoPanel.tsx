@@ -2,6 +2,8 @@ import { usePage } from '@inertiajs/react';
 import { ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
 import { ReactNode } from 'react';
 
+import { useLocale } from '@/hooks/use-locale';
+
 /** A Google Maps "embed" URL is iframe-safe; a plain maps.google.com link is not — link out instead. */
 function isEmbeddableMapUrl(url: string): boolean {
     return url.includes('/maps/embed') || url.includes('output=embed');
@@ -27,6 +29,7 @@ function InfoRow({ icon: Icon, label, children }: { icon: typeof MapPin; label: 
  * rules or map, sized for sitting inside a colored CTA section.
  */
 export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
+    const { t } = useLocale();
     const { siteSettings } = usePage().props;
     const hasAny = siteSettings.address || siteSettings.phone || siteSettings.email || siteSettings.operating_hours;
 
@@ -50,22 +53,22 @@ export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
         <div>
             <dl className="divide-y divide-border border-t border-border">
                 {siteSettings.address && (
-                    <InfoRow icon={MapPin} label="Address">
+                    <InfoRow icon={MapPin} label={t('Address')}>
                         <span className="whitespace-pre-line">{siteSettings.address}</span>
                     </InfoRow>
                 )}
                 {siteSettings.phone && (
-                    <InfoRow icon={Phone} label="Phone">
+                    <InfoRow icon={Phone} label={t('Phone')}>
                         <a href={`tel:${siteSettings.phone}`} className="hover:text-navy-900">{siteSettings.phone}</a>
                     </InfoRow>
                 )}
                 {siteSettings.email && (
-                    <InfoRow icon={Mail} label="Email">
+                    <InfoRow icon={Mail} label={t('Email')}>
                         <a href={`mailto:${siteSettings.email}`} className="hover:text-navy-900">{siteSettings.email}</a>
                     </InfoRow>
                 )}
                 {siteSettings.operating_hours && (
-                    <InfoRow icon={Phone} label="Operating Hours">
+                    <InfoRow icon={Phone} label={t('Operating Hours')}>
                         <span className="whitespace-pre-line">{siteSettings.operating_hours}</span>
                     </InfoRow>
                 )}
@@ -76,7 +79,7 @@ export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
                     {isEmbeddableMapUrl(siteSettings.map_embed_url) ? (
                         <iframe
                             src={siteSettings.map_embed_url}
-                            title="Location map"
+                            title={t('Location map')}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
                             className="aspect-[4/3] w-full border border-border"
@@ -88,7 +91,7 @@ export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
                             rel="noreferrer"
                             className="inline-flex items-center gap-1.5 text-sm font-medium text-navy-700 hover:text-navy-900"
                         >
-                            View on Map
+                            {t('View on Map')}
                             <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                         </a>
                     )}

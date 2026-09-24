@@ -52,7 +52,7 @@ export function SectionRenderer({
     certifications?: CertificationItemData[];
     openJobCount?: number;
 }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     const content = section.content ?? {};
 
     switch (section.section_type) {
@@ -111,7 +111,7 @@ export function SectionRenderer({
                                     <div className="relative aspect-[4/3] overflow-hidden border border-navy-900/70 bg-muted shadow-sm">
                                         <img
                                             src={mediaUrl(presentation.image) ?? undefined}
-                                            alt={section.title ?? 'Company manufacturing'}
+                                            alt={section.title ?? t('Company manufacturing')}
                                             loading="lazy"
                                             className="h-full w-full object-cover"
                                         />
@@ -160,7 +160,7 @@ export function SectionRenderer({
                             <img data-reveal="image" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
                             <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
-                                No image set
+                                {t('No image set')}
                             </div>
                         )}
                     </div>
@@ -216,7 +216,7 @@ export function SectionRenderer({
                         />
                         <div className="absolute text-center text-navy-900" style={{ left: '23.7%', top: '32.2%', width: '20.2%' }}>
                             <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
-                                {c.visi_title || 'Vision'}
+                                {c.visi_title || t('Vision')}
                             </h3>
                             {c.visi_text && (
                                 <p className="mt-3" style={{ fontSize: 'clamp(0.875rem, 1.175vw, 1.25rem)', lineHeight: 1.3 }}>
@@ -226,7 +226,7 @@ export function SectionRenderer({
                         </div>
                         <div className="absolute text-center text-white" style={{ left: '51.5%', top: '32.2%', width: '22%' }}>
                             <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
-                                {c.misi_title || 'Mission'}
+                                {c.misi_title || t('Mission')}
                             </h3>
                             {c.misi_text && (
                                 <p className="mt-3" style={{ fontSize: 'clamp(0.875rem, 1.175vw, 1.25rem)', lineHeight: 1.3 }}>
@@ -261,14 +261,14 @@ export function SectionRenderer({
                             className="mx-auto w-full max-w-sm bg-[#fafafa] px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(10% 0%, 100% 6%, 92% 100%, 0% 94%)' }}
                         >
-                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || 'Vision'}</h3>
+                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || t('Vision')}</h3>
                             {c.visi_text && <p className="mt-5 text-body text-slate-700">{c.visi_text}</p>}
                         </div>
                         <div
                             className="mx-auto w-full max-w-sm bg-navy-900 px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(8% 0%, 100% 8%, 90% 100%, 0% 92%)' }}
                         >
-                            <h3 className="text-h2 font-bold text-white">{c.misi_title || 'Mission'}</h3>
+                            <h3 className="text-h2 font-bold text-white">{c.misi_title || t('Mission')}</h3>
                             {c.misi_text && <p className="mt-5 text-body text-white/85">{c.misi_text}</p>}
                         </div>
                     </div>
@@ -299,7 +299,7 @@ export function SectionRenderer({
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                     {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
                     {images.length === 0 ? (
-                        <p className="mt-4 text-sm text-slate-500">Gallery coming soon.</p>
+                        <p className="mt-4 text-sm text-slate-500">{t('Gallery coming soon.')}</p>
                     ) : (
                         <div data-reveal-group className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
                             {images.map((src, index) => (
@@ -339,10 +339,10 @@ export function SectionRenderer({
             return (
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                     <SectionHeader
-                        eyebrow="What We Do"
+                        eyebrow={t('What We Do')}
                         heading={c.heading ?? section.title}
                         description={c.description ?? section.subtitle ?? undefined}
-                        cta={{ label: 'View All Capabilities', href: '/capabilities' }}
+                        cta={{ label: t('View All Capabilities'), href: '/capabilities' }}
                     />
                     <div className="mt-4">
                         <CapabilityFeature items={items} />
@@ -361,7 +361,7 @@ export function SectionRenderer({
                     <SectionHeader
                         heading={c.heading ?? section.title}
                         description={c.description ?? section.subtitle ?? undefined}
-                        cta={{ label: 'View All Products', href: '/products' }}
+                        cta={{ label: t('View All Products'), href: '/products' }}
                     />
                     <div className="mt-10">
                         <ProductShowcase items={items} />
@@ -395,7 +395,7 @@ export function SectionRenderer({
                     <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
                             <div data-reveal="auto">
-                                <p className="text-caption uppercase text-muted-foreground">Quality</p>
+                                <p className="text-caption uppercase text-muted-foreground">{t('Quality')}</p>
                                 <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
                                 {(c.description || section.subtitle) && (
                                     <p className="mt-4 text-body text-slate-700">{c.description ?? section.subtitle}</p>
@@ -422,11 +422,11 @@ export function SectionRenderer({
                         <div>
                             <h2 className="text-h3 text-white">{c.heading ?? section.title}</h2>
                             {typeof openJobCount === 'number' && openJobCount > 0 && (
-                                <p className="mt-2 text-body text-white/70">{openJobCount} open position{openJobCount === 1 ? '' : 's'} right now.</p>
+                                <p className="mt-2 text-body text-white/70">{openJobCount === 1 ? t(':count open position right now.', { count: openJobCount }) : t(':count open positions right now.', { count: openJobCount })}</p>
                             )}
                         </div>
                         <Button asChild variant="secondary" className="border-white/30 text-white hover:bg-white/10">
-                            <Link href={localize('/careers')}>{c.cta_label ?? 'View Openings'}</Link>
+                            <Link href={localize('/careers')}>{c.cta_label ?? t('View Openings')}</Link>
                         </Button>
                     </div>
                 </section>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
+import { intlLocale } from '@/lib/i18n';
 
 interface Metric {
     label: string;
@@ -8,6 +10,7 @@ interface Metric {
 }
 
 function Figure({ value, animate }: { value: string; animate: boolean }) {
+    const { locale } = useLocale();
     const numeric = parseInt(value.replace(/[^\d]/g, ''), 10);
     const suffix = value.replace(/^[\d,.\s]+/, '');
     const prefix = value.match(/^[^\d]*/)?.[0] ?? '';
@@ -40,7 +43,7 @@ function Figure({ value, animate }: { value: string; animate: boolean }) {
 
     return (
         <span style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {prefix}{display.toLocaleString()}{suffix}
+            {prefix}{display.toLocaleString(intlLocale(locale), { useGrouping: numeric >= 10000 })}{suffix}
         </span>
     );
 }

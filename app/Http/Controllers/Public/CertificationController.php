@@ -34,7 +34,7 @@ class CertificationController extends Controller
 
         return Inertia::render('public/certifications/Index', [
             'certifications' => $certifications,
-            'seo' => $this->seo->resolveStatic('Certifications', 'Our quality certifications and accreditations.'),
+            'seo' => $this->seo->resolveStatic(__('Certifications'), __('Our quality certifications and accreditations.')),
         ]);
     }
 }

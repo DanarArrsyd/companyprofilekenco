@@ -12,7 +12,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
 export default function Index({ seo }: { seo: ResolvedSeo }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t } = useLocale();
     const [submitted, setSubmitted] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -37,9 +37,9 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
                         as="h1"
-                        eyebrow="Get In Touch"
-                        heading="Contact Us"
-                        description="Send us a message and our team will get back to you."
+                        eyebrow={t('Get In Touch')}
+                        heading={t('Contact Us')}
+                        description={t('Send us a message and our team will get back to you.')}
                     />
                 </div>
             </section>
@@ -49,7 +49,7 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                     <div data-reveal="auto">
                         {submitted ? (
                             <p className="border-t border-success/30 pt-6 text-small font-medium text-success">
-                                Your message has been sent. We will get back to you soon.
+                                {t('Your message has been sent. We will get back to you soon.')}
                             </p>
                         ) : (
                             <form onSubmit={submit} className="space-y-4">
@@ -67,36 +67,36 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
 
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <Label htmlFor="name">Name</Label>
+                                        <Label htmlFor="name">{t('Name')}</Label>
                                         <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
                                         {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                                     </div>
                                     <div>
-                                        <Label htmlFor="company">Company</Label>
+                                        <Label htmlFor="company">{t('Company')}</Label>
                                         <Input id="company" value={data.company} onChange={(e) => setData('company', e.target.value)} className="mt-1.5" />
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div>
-                                        <Label htmlFor="email">Email</Label>
+                                        <Label htmlFor="email">{t('Email')}</Label>
                                         <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
                                         {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
                                     </div>
                                     <div>
-                                        <Label htmlFor="phone">Phone</Label>
+                                        <Label htmlFor="phone">{t('Phone')}</Label>
                                         <Input id="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} className="mt-1.5" />
                                     </div>
                                 </div>
                                 <div>
-                                    <Label htmlFor="subject">Subject</Label>
+                                    <Label htmlFor="subject">{t('Subject')}</Label>
                                     <Input id="subject" value={data.subject} onChange={(e) => setData('subject', e.target.value)} className="mt-1.5" />
                                 </div>
                                 <div>
-                                    <Label htmlFor="message">Message</Label>
+                                    <Label htmlFor="message">{t('Message')}</Label>
                                     <textarea id="message" value={data.message} onChange={(e) => setData('message', e.target.value)} rows={6} className="mt-1.5 w-full border border-border bg-surface px-3 py-2 text-sm" />
                                     {errors.message && <p className="mt-1 text-sm text-danger">{errors.message}</p>}
                                 </div>
-                                <Button type="submit" disabled={processing}>Send Message</Button>
+                                <Button type="submit" disabled={processing}>{t('Send Message')}</Button>
                             </form>
                         )}
                     </div>

@@ -1,3 +1,5 @@
+import { useLocale } from '@/hooks/use-locale';
+
 export interface CertificationItemData {
     id: number;
     name: string;
@@ -16,19 +18,20 @@ export interface CertificationItemData {
  * footer rather than a shop tile.
  */
 function Plate({ cert }: { cert: CertificationItemData }) {
+    const { t, formatDate } = useLocale();
     return (
         <div className="w-40 shrink-0 border-t-2 border-navy-900 pt-4 text-center sm:w-44">
             {cert.image ? (
                 <img src={`/storage/${cert.image}`} alt={cert.name} loading="lazy" className="mx-auto h-16 w-16 object-contain" />
             ) : (
                 <div className="mx-auto flex h-16 w-16 items-center justify-center text-caption uppercase text-muted-foreground">
-                    Mark
+                    {t('Mark')}
                 </div>
             )}
             <p className="mt-3 text-small font-medium text-foreground">{cert.name}</p>
             {cert.issuer && <p className="mt-0.5 text-caption text-muted-foreground">{cert.issuer}</p>}
             {cert.expires_at && (
-                <p className="mt-1 text-caption text-muted-foreground">Valid until {new Date(cert.expires_at).toLocaleDateString()}</p>
+                <p className="mt-1 text-caption text-muted-foreground">{t('Valid until :date', { date: formatDate(cert.expires_at) })}</p>
             )}
         </div>
     );
@@ -40,6 +43,7 @@ function Plate({ cert }: { cert: CertificationItemData }) {
  * left; issue/expiry dates and a plain status label on the right.
  */
 function Row({ cert }: { cert: CertificationItemData }) {
+    const { t, formatDate } = useLocale();
     return (
         <div className="flex flex-col gap-4 py-6 sm:grid sm:grid-cols-[64px_1fr_auto] sm:items-center sm:gap-8">
             <div className="flex items-start gap-4 sm:contents">
@@ -47,14 +51,14 @@ function Row({ cert }: { cert: CertificationItemData }) {
                     {cert.image ? (
                         <img src={`/storage/${cert.image}`} alt={cert.name} loading="lazy" className="h-10 w-10 object-contain" />
                     ) : (
-                        <span className="text-caption uppercase text-muted-foreground">Mark</span>
+                        <span className="text-caption uppercase text-muted-foreground">{t('Mark')}</span>
                     )}
                 </div>
 
                 <div>
                     <p className="text-body font-medium text-foreground">{cert.name}</p>
                     <p className="mt-1 text-small text-muted-foreground">
-                        {[cert.issuer, cert.certificate_number ? `No. ${cert.certificate_number}` : null].filter(Boolean).join(' · ') || '—'}
+                        {[cert.issuer, cert.certificate_number ? t('No. :number', { number: cert.certificate_number }) : null].filter(Boolean).join(' · ') || '—'}
                     </p>
                 </div>
             </div>
@@ -63,18 +67,18 @@ function Row({ cert }: { cert: CertificationItemData }) {
                 <dl className="text-small text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {cert.issued_at && (
                         <div className="flex gap-2 sm:justify-end">
-                            <dt>Issued</dt><dd className="text-foreground">{new Date(cert.issued_at).toLocaleDateString()}</dd>
+                            <dt>{t('Issued')}</dt><dd className="text-foreground">{formatDate(cert.issued_at)}</dd>
                         </div>
                     )}
                     {cert.expires_at && (
                         <div className="flex gap-2 sm:justify-end">
-                            <dt>Expires</dt><dd className="text-foreground">{new Date(cert.expires_at).toLocaleDateString()}</dd>
+                            <dt>{t('Expires')}</dt><dd className="text-foreground">{formatDate(cert.expires_at)}</dd>
                         </div>
                     )}
                 </dl>
 
                 <span className={`shrink-0 text-caption uppercase ${cert.is_expired ? 'text-danger' : 'text-success'}`}>
-                    {cert.is_expired ? 'Expired' : 'Active'}
+                    {cert.is_expired ? t('Expired') : t('Active')}
                 </span>
             </div>
         </div>

@@ -38,9 +38,17 @@ test('product detail exposes a breadcrumbList schema matching the visible breadc
 
         expect($schema['@type'])->toBe('BreadcrumbList')
             ->and(count($schema['itemListElement']))->toBe(count($breadcrumb))
-            ->and($schema['itemListElement'][0]['name'])->toBe('Products')
+            ->and($schema['itemListElement'][0]['name'])->toBe('Produk')
+            ->and($schema['itemListElement'][0]['item'])->toBe(url('/products'))
             ->and($schema['itemListElement'][0]['position'])->toBe(1)
             ->and(last($schema['itemListElement']))->not->toHaveKey('item');
+    });
+
+    $this->get('/en/products/flange-coupling')->assertInertia(function ($page) {
+        $item = $page->toArray()['props']['schema']['itemListElement'][0];
+
+        expect($item['name'])->toBe('Products')
+            ->and($item['item'])->toBe(url('/en/products'));
     });
 });
 
@@ -56,7 +64,7 @@ test('article detail exposes a valid NewsArticle schema shape with real fields o
 
     $response = $this->get('/news/plant-expansion');
 
-    $response->assertInertia(function ($page) use ($article) {
+    $response->assertInertia(function ($page) {
         $schemas = $page->toArray()['props']['schema'];
         $articleSchema = collect($schemas)->firstWhere('@type', 'NewsArticle');
 

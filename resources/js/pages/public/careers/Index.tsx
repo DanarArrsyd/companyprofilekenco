@@ -15,7 +15,7 @@ interface VacancyRow {
 }
 
 function VacancyRowItem({ vacancy }: { vacancy: VacancyRow }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t, formatDate } = useLocale();
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
@@ -30,12 +30,12 @@ function VacancyRowItem({ vacancy }: { vacancy: VacancyRow }) {
                         {vacancy.department && <span>{vacancy.department}</span>}
                         {vacancy.location && <span>{vacancy.location}</span>}
                         {vacancy.employment_type && <span>{vacancy.employment_type}</span>}
-                        {vacancy.closes_at && <span>Closes {new Date(vacancy.closes_at).toLocaleDateString()}</span>}
+                        {vacancy.closes_at && <span>{t('Closes :date', { date: formatDate(vacancy.closes_at) })}</span>}
                     </div>
                 </div>
 
                 <span className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-navy-700 group-hover:text-navy-900">
-                    View position
+                    {t('View position')}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </span>
             </Link>
@@ -51,7 +51,7 @@ export default function Index({
     filters: { department?: string; employment_type?: string };
     seo: ResolvedSeo;
 }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} />
@@ -60,9 +60,9 @@ export default function Index({
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
                         as="h1"
-                        eyebrow="Join Our Team"
-                        heading="Careers"
-                        description="Open positions across our manufacturing operations."
+                        eyebrow={t('Join Our Team')}
+                        heading={t('Careers')}
+                        description={t('Open positions across our manufacturing operations.')}
                     />
                 </div>
             </section>
@@ -74,7 +74,7 @@ export default function Index({
                             onClick={() => router.get(localizedRoute('public.careers'))}
                             className={`text-sm font-medium ${!filters.department ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
-                            All
+                            {t('All')}
                         </button>
                         {departments.map((d) => (
                             <button
@@ -89,7 +89,7 @@ export default function Index({
                 )}
 
                 {vacancies.data.length === 0 ? (
-                    <p className="py-8 text-small text-muted-foreground">No open positions at the moment.</p>
+                    <p className="py-8 text-small text-muted-foreground">{t('No open positions at the moment.')}</p>
                 ) : (
                     <div data-reveal-group className="divide-y divide-border border-t border-border">
                         {vacancies.data.map((vacancy) => <VacancyRowItem key={vacancy.id} vacancy={vacancy} />)}

@@ -38,7 +38,7 @@ export function FacilityFeature({
     maxMachines?: number;
     showLink?: boolean;
 }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     if (!facility) return null;
 
     const machines = (facility.machines ?? []).slice(0, maxMachines);
@@ -84,7 +84,7 @@ export function FacilityFeature({
 
                 {showLink && (
                     <Link href={localize('/company#facilities')} className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
-                        View All Facilities &rarr;
+                        {t('View All Facilities')} &rarr;
                     </Link>
                 )}
             </div>

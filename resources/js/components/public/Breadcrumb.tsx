@@ -15,11 +15,11 @@ export interface BreadcrumbItem {
  * markup) and keyboard/screen-reader accessible via a labeled <nav>.
  */
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     if (items.length === 0) return null;
 
     return (
-        <nav aria-label="Breadcrumb" className="text-sm">
+        <nav aria-label={t('Breadcrumb')} className="text-sm">
             <ol
                 itemScope
                 itemType="https://schema.org/BreadcrumbList"

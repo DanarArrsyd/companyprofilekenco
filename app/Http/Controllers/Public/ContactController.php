@@ -19,7 +19,7 @@ class ContactController extends Controller
     public function show(): Response
     {
         return Inertia::render('public/contact/Index', [
-            'seo' => $this->seo->resolveStatic('Contact', 'Get in touch with our team.'),
+            'seo' => $this->seo->resolveStatic(__('Contact'), __('Get in touch with our team.')),
         ]);
     }
 
@@ -31,6 +31,6 @@ class ContactController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return back()->with('success', 'Your message has been sent. We will get back to you soon.');
+        return back()->with('success', __('Your message has been sent. We will get back to you soon.'));
     }
 }

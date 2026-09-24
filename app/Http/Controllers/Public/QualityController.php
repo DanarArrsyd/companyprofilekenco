@@ -23,7 +23,7 @@ class QualityController extends Controller
 
         return Inertia::render('public/quality/Index', [
             'items' => $items,
-            'seo' => $this->seo->resolveStatic('Quality', 'Our commitment to manufacturing quality.'),
+            'seo' => $this->seo->resolveStatic(__('Quality'), __('Our commitment to manufacturing quality.')),
         ]);
     }
 }

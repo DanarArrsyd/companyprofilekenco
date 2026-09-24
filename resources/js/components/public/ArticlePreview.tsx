@@ -14,7 +14,7 @@ export interface ArticlePreviewItem {
 }
 
 export function ArticlePreview({ article }: { article: ArticlePreviewItem }) {
-    const { localize } = useLocale();
+    const { localize, formatDate } = useLocale();
     return (
         <Link href={localize(`/news/${article.slug}`)} className="group block">
             <div className="aspect-[16/9] w-full bg-muted">
@@ -34,7 +34,7 @@ export function ArticlePreview({ article }: { article: ArticlePreviewItem }) {
                     <p className="text-caption uppercase text-muted-foreground">
                         {article.category?.name}
                         {article.category && article.published_at && ' · '}
-                        {article.published_at && new Date(article.published_at).toLocaleDateString()}
+                        {article.published_at && formatDate(article.published_at)}
                     </p>
                 )}
                 <p className="mt-2 text-h4 text-navy-900">{article.title}</p>

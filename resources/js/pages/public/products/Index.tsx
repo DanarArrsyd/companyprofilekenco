@@ -16,7 +16,7 @@ export default function Index({
     filters: { category?: string };
     seo: ResolvedSeo;
 }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} />
@@ -25,9 +25,9 @@ export default function Index({
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
                         as="h1"
-                        eyebrow="What We Make"
-                        heading="Products"
-                        description="Precision components produced for our manufacturing partners."
+                        eyebrow={t('What We Make')}
+                        heading={t('Products')}
+                        description={t('Precision components produced for our manufacturing partners.')}
                     />
                 </div>
             </section>
@@ -39,7 +39,7 @@ export default function Index({
                             onClick={() => router.get(localizedRoute('public.products'))}
                             className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
-                            All
+                            {t('All')}
                         </button>
                         {categories.map((c) => (
                             <button
@@ -54,7 +54,7 @@ export default function Index({
                 )}
 
                 {products.data.length === 0 ? (
-                    <p className="text-small text-muted-foreground">No products published yet.</p>
+                    <p className="text-small text-muted-foreground">{t('No products published yet.')}</p>
                 ) : (
                     <ProductShowcase items={products.data} />
                 )}

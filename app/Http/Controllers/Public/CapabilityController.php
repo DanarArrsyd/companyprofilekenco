@@ -25,7 +25,7 @@ class CapabilityController extends Controller
 
         return Inertia::render('public/capabilities/Index', [
             'capabilities' => $capabilities,
-            'seo' => $this->seo->resolveStatic('Capabilities', 'Explore our manufacturing capabilities.'),
+            'seo' => $this->seo->resolveStatic(__('Capabilities'), __('Explore our manufacturing capabilities.')),
         ]);
     }
 
@@ -38,7 +38,7 @@ class CapabilityController extends Controller
             ->firstOrFail();
 
         $breadcrumb = [
-            ['label' => 'Capabilities', 'href' => '/capabilities'],
+            ['label' => __('Capabilities'), 'href' => '/capabilities'],
             ['label' => $capability->name],
         ];
 

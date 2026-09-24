@@ -70,3 +70,17 @@ test('the sitemap lists both locales with hreflang alternates', function () {
 test('guests receive English route names in the public Ziggy group', function () {
     expect($this->get('/')->getContent())->toContain('en.public.products');
 });
+
+test('error pages for unmatched URLs still receive site settings and locale', function () {
+    $this->get('/tidak-ada')->assertNotFound()->assertInertia(fn ($page) => $page
+        ->component('Error')
+        ->where('locale', 'id')
+        ->where('siteSettings.company_name', config('app.name'))
+        ->where('alternates.en', url('/en/tidak-ada'))
+    );
+
+    $this->get('/en/missing')->assertNotFound()->assertInertia(fn ($page) => $page
+        ->where('locale', 'en')
+        ->has('siteSettings')
+    );
+});

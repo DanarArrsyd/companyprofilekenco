@@ -36,7 +36,7 @@ class ProductController extends Controller
             'products' => $products,
             'categories' => ProductCategory::active()->orderBy('name')->get(['id', 'name', 'slug']),
             'filters' => $request->only('category'),
-            'seo' => $this->seo->resolveStatic('Products', 'Explore our manufacturing product catalog.'),
+            'seo' => $this->seo->resolveStatic(__('Products'), __('Explore our manufacturing product catalog.')),
         ]);
     }
 
@@ -49,7 +49,7 @@ class ProductController extends Controller
             ->firstOrFail();
 
         $breadcrumb = [
-            ['label' => 'Products', 'href' => '/products'],
+            ['label' => __('Products'), 'href' => '/products'],
             ...($product->category ? [['label' => $product->category->name, 'href' => "/products?category={$product->category->slug}"]] : []),
             ['label' => $product->name],
         ];

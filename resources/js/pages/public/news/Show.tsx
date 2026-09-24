@@ -2,6 +2,7 @@ import { ArticlePreview, ArticlePreviewItem } from '@/components/public/ArticleP
 import { Breadcrumb, BreadcrumbItem } from '@/components/public/Breadcrumb';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SeoHead } from '@/components/public/SeoHead';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -22,13 +23,14 @@ export default function Show({
     schema?: Array<Record<string, unknown> | null>;
     preview: boolean;
 }) {
+    const { t, formatDate } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
                 <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
-                    Draft preview — this article is not publicly visible.
+                    {t('Draft preview — this article is not publicly visible.')}
                 </div>
             )}
 
@@ -39,7 +41,7 @@ export default function Show({
                     {article.category && <p className="text-caption uppercase text-muted-foreground">{article.category.name}</p>}
                     <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{article.title}</h1>
                     <div className="mt-4 flex items-center gap-3 text-small text-muted-foreground">
-                        {article.published_at && <span>{new Date(article.published_at).toLocaleDateString()}</span>}
+                        {article.published_at && <span>{formatDate(article.published_at)}</span>}
                         {article.author && <span>By {article.author.name}</span>}
                     </div>
 
@@ -63,8 +65,8 @@ export default function Show({
 
                 {relatedArticles.length > 0 && (
                     <div className="mx-auto mt-20 max-w-content border-t border-border pt-12">
-                        <p className="text-caption uppercase text-muted-foreground">Keep Reading</p>
-                        <h2 className="mt-2 text-h3 text-navy-900">Related Articles</h2>
+                        <p className="text-caption uppercase text-muted-foreground">{t('Keep Reading')}</p>
+                        <h2 className="mt-2 text-h3 text-navy-900">{t('Related Articles')}</h2>
                         <div data-reveal-group className="mt-8 grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-3">
                             {relatedArticles.map((related) => <ArticlePreview key={related.id} article={related} />)}
                         </div>

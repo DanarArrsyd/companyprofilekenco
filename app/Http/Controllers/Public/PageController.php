@@ -80,7 +80,7 @@ class PageController extends Controller
             'industries' => $industries,
             'seo' => $aboutPage
                 ? $this->seo->resolve($aboutPage, $aboutPage->title)
-                : $this->seo->resolveStatic('Company'),
+                : $this->seo->resolveStatic(__('Company')),
         ]);
     }
 }

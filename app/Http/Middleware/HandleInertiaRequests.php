@@ -37,7 +37,6 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $settings = $this->settings->all();
 
         return [
             ...parent::share($request),
@@ -46,21 +45,7 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $user?->getRoleNames() ?? [],
                 'permissions' => $user?->getAllPermissions()->pluck('name') ?? [],
             ],
-            'siteSettings' => [
-                'company_name' => $settings['company_name'] ?: config('app.name'),
-                'tagline' => $settings['tagline'] ?: null,
-                'logo' => $settings['logo'] ?: null,
-                'address' => $settings['address'] ?: null,
-                'phone' => $settings['phone'] ?: null,
-                'email' => $settings['email'] ?: null,
-                'operating_hours' => $settings['operating_hours'] ?: null,
-                'map_embed_url' => $settings['map_embed_url'] ?: null,
-                'social' => [
-                    'linkedin' => $settings['social_linkedin'] ?: null,
-                    'youtube' => $settings['social_youtube'] ?: null,
-                    'instagram' => $settings['social_instagram'] ?: null,
-                ],
-            ],
+            'siteSettings' => $this->siteSettings(),
             'locale' => app()->getLocale(),
             'locales' => Locale::SUPPORTED,
             'defaultLocale' => Locale::DEFAULT,
@@ -71,6 +56,49 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'warning' => fn () => $request->session()->get('warning'),
                 'info' => fn () => $request->session()->get('info'),
+            ],
+        ];
+    }
+
+    /**
+     * Props for public error pages rendered from the exception handler. An
+     * unmatched URL never runs the web middleware, so these must stand on
+     * their own — nothing here touches the session or the authenticated user.
+     *
+     * @return array<string, mixed>
+     */
+    public function errorPageProps(Request $request): array
+    {
+        return [
+            'auth' => ['user' => null, 'roles' => [], 'permissions' => []],
+            'siteSettings' => $this->siteSettings(),
+            'locale' => app()->getLocale(),
+            'locales' => Locale::SUPPORTED,
+            'defaultLocale' => Locale::DEFAULT,
+            'alternates' => Locale::alternates($request),
+            'menuNews' => [],
+            'flash' => [],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function siteSettings(): array
+    {
+        $settings = $this->settings->all();
+
+        return [
+            'company_name' => $settings['company_name'] ?: config('app.name'),
+            'tagline' => $settings['tagline'] ?: null,
+            'logo' => $settings['logo'] ?: null,
+            'address' => $settings['address'] ?: null,
+            'phone' => $settings['phone'] ?: null,
+            'email' => $settings['email'] ?: null,
+            'operating_hours' => $settings['operating_hours'] ?: null,
+            'map_embed_url' => $settings['map_embed_url'] ?: null,
+            'social' => [
+                'linkedin' => $settings['social_linkedin'] ?: null,
+                'youtube' => $settings['social_youtube'] ?: null,
+                'instagram' => $settings['social_instagram'] ?: null,
             ],
         ];
     }

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Breadcrumb, BreadcrumbItem } from '@/components/public/Breadcrumb';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SeoHead } from '@/components/public/SeoHead';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -28,6 +29,7 @@ export default function Show({
     schema?: Record<string, unknown> | null;
     preview: boolean;
 }) {
+    const { t } = useLocale();
     const gallery = [
         ...(product.featured_image ? [{ id: 0, path: product.featured_image, alt_text: product.name }] : []),
         ...product.images,
@@ -48,7 +50,7 @@ export default function Show({
 
             {preview && (
                 <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
-                    Draft preview — this product is not publicly visible.
+                    {t('Draft preview — this product is not publicly visible.')}
                 </div>
             )}
 
@@ -98,7 +100,7 @@ export default function Show({
                             <dl data-reveal-group className="mt-10 divide-y divide-border border-t border-border">
                                 {specs.map(([label, value]) => (
                                     <div key={label} className="flex justify-between gap-4 py-3">
-                                        <dt className="text-small text-muted-foreground">{label}</dt>
+                                        <dt className="text-small text-muted-foreground">{t(label)}</dt>
                                         <dd className="text-small font-medium text-foreground">{value}</dd>
                                     </div>
                                 ))}

@@ -15,7 +15,7 @@ export interface ProductShowcaseItem {
 }
 
 function Unit({ item, large = false }: { item: ProductShowcaseItem; large?: boolean }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     return (
         <Link href={localize(`/products/${item.slug}`)} className="group block shrink-0 w-[78vw] snap-start sm:w-auto">
             <div className={`relative w-full bg-muted ${large ? 'aspect-[4/3]' : 'aspect-square'}`}>
@@ -30,7 +30,7 @@ function Unit({ item, large = false }: { item: ProductShowcaseItem; large?: bool
                     <ImagePlaceholder />
                 )}
                 {item.is_featured && (
-                    <span className="absolute left-0 top-0 bg-navy-900 px-2.5 py-1 text-caption uppercase text-white">Featured</span>
+                    <span className="absolute left-0 top-0 bg-navy-900 px-2.5 py-1 text-caption uppercase text-white">{t('Featured')}</span>
                 )}
             </div>
             {item.category && <p className="mt-4 text-caption uppercase text-muted-foreground">{item.category.name}</p>}

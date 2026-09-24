@@ -2,6 +2,7 @@ import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
 import { revealClass, useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -34,6 +35,7 @@ function QualityBlock({ item, reverse }: { item: QualityRow; reverse: boolean })
 }
 
 export default function Index({ items, seo }: { items: QualityRow[]; seo: ResolvedSeo }) {
+    const { t } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} />
@@ -42,16 +44,16 @@ export default function Index({ items, seo }: { items: QualityRow[]; seo: Resolv
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
                         as="h1"
-                        eyebrow="Quality"
-                        heading="Built on a formal quality system"
-                        description="Every production run is inspected against documented process controls."
+                        eyebrow={t('Quality')}
+                        heading={t('Built on a formal quality system')}
+                        description={t('Every production run is inspected against documented process controls.')}
                     />
                 </div>
             </section>
 
             <div className="mx-auto max-w-content divide-y divide-border px-5 sm:px-6 lg:px-8">
                 {items.length === 0 ? (
-                    <p className="py-16 text-small text-muted-foreground">Quality content coming soon.</p>
+                    <p className="py-16 text-small text-muted-foreground">{t('Quality content coming soon.')}</p>
                 ) : (
                     items.map((item, index) => <QualityBlock key={item.id} item={item} reverse={index % 2 === 1} />)
                 )}

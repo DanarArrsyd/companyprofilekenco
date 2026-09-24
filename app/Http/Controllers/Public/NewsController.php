@@ -41,7 +41,7 @@ class NewsController extends Controller
             'articles' => $articles,
             'categories' => NewsCategory::orderBy('name')->get(['id', 'name', 'slug']),
             'filters' => $request->only(['category']),
-            'seo' => $this->seo->resolveStatic('News', 'Latest company news and updates.'),
+            'seo' => $this->seo->resolveStatic(__('News'), __('Latest company news and updates.')),
         ]);
     }
 
@@ -63,7 +63,7 @@ class NewsController extends Controller
             ->get(['id', 'title', 'slug', 'excerpt', 'featured_image', 'published_at', 'news_category_id']);
 
         $breadcrumb = [
-            ['label' => 'News', 'href' => '/news'],
+            ['label' => __('News'), 'href' => '/news'],
             ...($article->category ? [['label' => $article->category->name, 'href' => "/news?category={$article->category->slug}"]] : []),
             ['label' => $article->title],
         ];

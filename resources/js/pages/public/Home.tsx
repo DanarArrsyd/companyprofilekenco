@@ -8,6 +8,7 @@ import { IndustryGrid, IndustryGridItem } from '@/components/public/IndustryGrid
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { PageSection, ResolvedSeo } from '@/types/cms';
 
@@ -52,14 +53,15 @@ function MilestoneYear({ year }: { year: number }) {
  * when it's replaced.
  */
 function MilestonePlaceholder() {
+    const { t } = useLocale();
     return (
         <div
             className={`flex flex-col items-center justify-center gap-2 border border-border bg-secondary text-muted-foreground ${MILESTONE_IMAGE_CLASS}`}
             role="img"
-            aria-label="Milestone image not set"
+            aria-label={t('Milestone image not set')}
         >
             <ImageOff className="h-5 w-5" aria-hidden="true" />
-            <span className="text-caption">Image not set</span>
+            <span className="text-caption">{t('Image not set')}</span>
         </div>
     );
 }
@@ -133,12 +135,13 @@ function MilestoneCardB({ item }: { item: MilestoneItem }) {
 }
 
 function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
+    const { t } = useLocale();
     if (items.length === 0) return null;
 
     return (
         <section className="border-t border-border">
             <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                <SectionHeader eyebrow="Who We Serve" heading="Industries Served" cta={{ label: 'View All Industries', href: '/company#industries' }} />
+                <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries Served')} cta={{ label: t('View All Industries'), href: '/company#industries' }} />
                 <div className="mt-10">
                     <IndustryGrid items={items} />
                 </div>
@@ -148,6 +151,7 @@ function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
 }
 
 function MilestonesSection({ items }: { items: MilestoneItem[] }) {
+    const { t } = useLocale();
     const scrollRef = useRef<HTMLDivElement>(null);
     const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
     const tickingRef = useRef(false);
@@ -204,7 +208,7 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
     return (
         <section className="border-t border-border bg-background">
             <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                <SectionHeader eyebrow="Since Day One" heading="Company Milestones" />
+                <SectionHeader eyebrow={t('Since Day One')} heading={t('Company Milestones')} />
             </div>
 
             <div className="relative mt-14">
@@ -213,7 +217,7 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                     onScroll={onScroll}
                     tabIndex={0}
                     role="group"
-                    aria-label="Company milestones timeline. Scroll horizontally to see more."
+                    aria-label={t('Company milestones timeline. Scroll horizontally to see more.')}
                     className="scrollbar-hide overflow-x-auto pb-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-navy-900"
                 >
                     <div className="relative flex w-max min-w-full gap-x-8 px-5 sm:gap-x-14 sm:px-6 lg:gap-x-20 lg:px-8">
@@ -269,11 +273,12 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
 }
 
 function NewsSection({ articles }: { articles: ArticlePreviewItem[] }) {
+    const { t } = useLocale();
     if (articles.length === 0) return null;
 
     return (
         <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-            <SectionHeader eyebrow="Newsroom" heading="Latest News" cta={{ label: 'View All News', href: '/news' }} />
+            <SectionHeader eyebrow={t('Newsroom')} heading={t('Latest News')} cta={{ label: t('View All News'), href: '/news' }} />
             <div data-reveal-group className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-3">
                 {articles.map((article) => <ArticlePreview key={article.id} article={article} />)}
             </div>
@@ -300,6 +305,7 @@ export default function Home({
     milestones: MilestoneItem[];
     openJobCount: number;
 }) {
+    const { t } = useLocale();
     const { siteSettings } = usePage().props;
 
     if (sections.length === 0) {
@@ -309,7 +315,7 @@ export default function Home({
                 <div className="mx-auto max-w-content px-5 py-24 text-center sm:px-6 lg:px-8">
                     <h1 className="text-h1 text-navy-900">{siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia'}</h1>
                     <p className="mt-4 text-slate-500">
-                        Homepage content is being prepared. Check back soon.
+                        {t('Homepage content is being prepared. Check back soon.')}
                     </p>
                 </div>
             </PublicLayout>

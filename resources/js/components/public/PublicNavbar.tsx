@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
     { label: 'Contact Us', href: '/contact' },
 ];
 
+// Language names are endonyms, shown the same in every locale.
 const LANGUAGES = [
     { locale: 'id', code: 'ID', label: 'Bahasa Indonesia' },
     { locale: 'en', code: 'EN', label: 'English' },
@@ -62,12 +63,6 @@ function isActive(currentUrl: string, href: string): boolean {
 
 function submenuId(label: string): string {
     return `menu-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-}
-
-function formatNewsDate(date: string | null): string | null {
-    if (!date) return null;
-
-    return new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /**
@@ -108,11 +103,11 @@ const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
  * logo and menu trigger need the room.
  */
 function LanguageSwitch({ hidden }: { hidden: boolean }) {
-    const { locale, alternates } = useLocale();
+    const { locale, alternates, t } = useLocale();
 
     return (
         <nav
-            aria-label="Language"
+            aria-label={t('Language')}
             className={`flex items-center gap-0.5 rounded-full bg-gray-200 p-1 transition-[opacity,visibility] duration-200 max-[379px]:hidden sm:p-1.5 ${
                 hidden ? 'invisible opacity-0' : 'visible opacity-100'
             }`}
@@ -145,7 +140,7 @@ function LanguageSwitch({ hidden }: { hidden: boolean }) {
 export function PublicNavbar({ companyName }: { companyName: string }) {
     const { url, props } = usePage<PageProps>();
     const { siteSettings, menuNews = [] } = props;
-    const { localize } = useLocale();
+    const { localize, t, formatDate } = useLocale();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerMounted, setDrawerMounted] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
@@ -290,7 +285,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
 
     const closeMenu = () => setDrawerOpen(false);
     const year = new Date().getFullYear();
-    const phoneHref = siteSettings.phone ? `tel:${siteSettings.phone.replace(/[^+\d]/g, '')}` : null;
+    const phoneHref = siteSettings?.phone ? `tel:${siteSettings?.phone.replace(/[^+\d]/g, '')}` : null;
 
     return (
         <header onKeyDown={trapFocus}>
@@ -315,7 +310,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                     ref={openButtonRef}
                     type="button"
                     onClick={() => setDrawerOpen((open) => !open)}
-                    aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                    aria-label={drawerOpen ? t('Close navigation menu') : t('Open navigation menu')}
                     aria-haspopup="dialog"
                     aria-expanded={drawerOpen}
                     className="inline-flex h-11 w-14 items-center justify-center rounded-full bg-white text-navy-900 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] transition-colors duration-200 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-700 sm:h-14 sm:w-16"
@@ -354,7 +349,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         ref={panelRef}
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Navigation menu"
+                        aria-label={t('Navigation menu')}
                         data-lenis-prevent
                         className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] md:rounded-l-[40px] ${
                             drawerEntered ? 'translate-x-0' : 'translate-x-full'
@@ -363,16 +358,16 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[clamp(68px,11vh,88px)] sm:px-10 lg:px-14">
                             <Link
                                 href={localize('/')}
-                                aria-label="Home"
+                                aria-label={t('Home')}
                                 className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                             >
                                 <Home className="h-5 w-5" aria-hidden="true" />
                             </Link>
-                            <span className="rounded-full bg-white/10 px-3 py-1 text-small font-medium text-white/80">Menu</span>
+                            <span className="rounded-full bg-white/10 px-3 py-1 text-small font-medium text-white/80">{t('Menu')}</span>
                         </div>
 
                         <div className="flex flex-1 flex-col px-6 pb-[clamp(1rem,4vh,2.5rem)] pt-[clamp(0.5rem,2.5vh,2rem)] sm:px-10 lg:px-14 xl:flex-row">
-                            <nav aria-label="Primary" className={menuNews.length > 0 ? 'xl:w-[52%] xl:pr-10' : 'xl:w-full xl:max-w-xl'}>
+                            <nav aria-label={t('Primary')} className={menuNews.length > 0 ? 'xl:w-[52%] xl:pr-10' : 'xl:w-full xl:max-w-xl'}>
                                 <ul>
                                     {NAV.map((item, index) => {
                                         const expanded = expandedItem === item.label;
@@ -396,7 +391,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                                 active ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
                                                             }`}
                                                         >
-                                                            {item.label}
+                                                            {t(item.label)}
                                                         </span>
                                                     </Link>
                                                 </li>
@@ -419,7 +414,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                             sectionActive ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
                                                         }`}
                                                     >
-                                                        {item.label}
+                                                        {t(item.label)}
                                                     </span>
                                                     <ChevronRight
                                                         className={`h-5 w-5 shrink-0 text-white/60 transition-transform duration-300 ${DRAWER_EASE} group-hover:text-white motion-reduce:transition-none sm:h-6 sm:w-6 ${
@@ -451,7 +446,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                                                 : 'border-white/20 text-white/70 hover:border-white/60 hover:text-white'
                                                                         }`}
                                                                     >
-                                                                        {child.label}
+                                                                        {t(child.label)}
                                                                     </Link>
                                                                 </li>
                                                             );
@@ -469,7 +464,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                     <div aria-hidden="true" className="hidden w-px shrink-0 bg-white/15 xl:block" />
                                     <aside aria-labelledby="menu-news-heading" className="hidden xl:flex xl:min-w-0 xl:flex-1 xl:flex-col xl:gap-4 xl:pl-10">
                                         <h2 id="menu-news-heading" className="text-small font-medium text-white/60">
-                                            Latest news
+                                            {t('Latest news')}
                                         </h2>
                                         {menuNews.map((article, index) => {
                                             const image = mediaUrl(article.featured_image);
@@ -494,7 +489,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                     <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-5">
                                                         {article.published_at && (
                                                             <time dateTime={article.published_at} className="text-caption text-white/70">
-                                                                {formatNewsDate(article.published_at)}
+                                                                {formatDate(article.published_at)}
                                                             </time>
                                                         )}
                                                         <span className="line-clamp-2 text-body-lg font-semibold leading-snug text-white">{article.title}</span>
@@ -510,16 +505,16 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-[clamp(1rem,3vh,1.5rem)] sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
                             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small font-medium">
                                 <li>
-                                    <Link href={localize('/contact')} className="text-white hover:underline hover:underline-offset-4">Contact Us</Link>
+                                    <Link href={localize('/contact')} className="text-white hover:underline hover:underline-offset-4">{t('Contact Us')}</Link>
                                 </li>
-                                {siteSettings.phone && phoneHref && (
+                                {siteSettings?.phone && phoneHref && (
                                     <li>
-                                        <a href={phoneHref} className="text-white/70 hover:text-white">{siteSettings.phone}</a>
+                                        <a href={phoneHref} className="text-white/70 hover:text-white">{siteSettings?.phone}</a>
                                     </li>
                                 )}
-                                {siteSettings.email && (
+                                {siteSettings?.email && (
                                     <li>
-                                        <a href={`mailto:${siteSettings.email}`} className="text-white/70 hover:text-white">{siteSettings.email}</a>
+                                        <a href={`mailto:${siteSettings?.email}`} className="text-white/70 hover:text-white">{siteSettings?.email}</a>
                                     </li>
                                 )}
                             </ul>

@@ -34,7 +34,7 @@ class CareerController extends Controller
             'vacancies' => $vacancies,
             'departments' => JobVacancy::published()->whereNotNull('department')->distinct()->orderBy('department')->pluck('department'),
             'filters' => $request->only(['department', 'employment_type']),
-            'seo' => $this->seo->resolveStatic('Careers', 'Explore open positions and join our team.'),
+            'seo' => $this->seo->resolveStatic(__('Careers'), __('Explore open positions and join our team.')),
         ]);
     }
 
@@ -46,7 +46,7 @@ class CareerController extends Controller
             ->firstOrFail();
 
         $breadcrumb = [
-            ['label' => 'Careers', 'href' => '/careers'],
+            ['label' => __('Careers'), 'href' => '/careers'],
             ['label' => $vacancy->title],
         ];
 
@@ -66,13 +66,13 @@ class CareerController extends Controller
     {
         $vacancy = JobVacancy::query()->published()->where('slug', $slug)->firstOrFail();
 
-        abort_unless($vacancy->isOpen(), 422, 'This vacancy is no longer accepting applications.');
+        abort_unless($vacancy->isOpen(), 422, __('This vacancy is no longer accepting applications.'));
 
         $action->handle($vacancy, [
             ...$request->validated(),
             'cv' => $request->file('cv'),
         ]);
 
-        return back()->with('success', 'Your application has been submitted.');
+        return back()->with('success', __('Your application has been submitted.'));
     }
 }

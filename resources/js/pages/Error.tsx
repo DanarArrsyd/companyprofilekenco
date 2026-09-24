@@ -6,46 +6,42 @@ import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 
-const STATUS_COPY: Record<number, { eyebrow: string; heading: string; description: string }> = {
+// English source text; rendered through t() so the error page follows the URL's locale.
+const STATUS_COPY: Record<number, { heading: string; description: string }> = {
     403: {
-        eyebrow: 'Error 403',
         heading: 'Access Denied',
         description: "You don't have permission to view this page.",
     },
     404: {
-        eyebrow: 'Error 404',
         heading: 'Page Not Found',
         description: "The page you're looking for doesn't exist or may have been moved.",
     },
     419: {
-        eyebrow: 'Error 419',
         heading: 'Page Expired',
         description: 'Your session expired. Please go back and try again.',
     },
     429: {
-        eyebrow: 'Error 429',
         heading: 'Too Many Requests',
         description: 'Please wait a moment before trying again.',
     },
     500: {
-        eyebrow: 'Error 500',
         heading: 'Something Went Wrong',
         description: 'An unexpected error occurred on our end. Please try again shortly.',
     },
     503: {
-        eyebrow: 'Error 503',
         heading: 'Service Unavailable',
         description: "We're performing scheduled maintenance. Please check back soon.",
     },
 };
 
 export default function Error({ status }: { status: number }) {
-    const { localize } = useLocale();
+    const { localize, t } = useLocale();
     const copy = STATUS_COPY[status] ?? STATUS_COPY[500];
+    const heading = t(copy.heading);
 
     return (
         <PublicLayout>
-            <Head title={copy.heading}>
+            <Head title={heading}>
                 <meta name="robots" content="noindex, nofollow" />
             </Head>
 
@@ -56,16 +52,16 @@ export default function Error({ status }: { status: number }) {
                     <SectionHeader
                         as="h1"
                         align="center"
-                        eyebrow={copy.eyebrow}
-                        heading={copy.heading}
-                        description={copy.description}
+                        eyebrow={t('Error :status', { status: STATUS_COPY[status] ? status : 500 })}
+                        heading={heading}
+                        description={t(copy.description)}
                         className="mt-6"
                     />
 
                     <Button asChild className="mt-8">
                         <Link href={localize('/')}>
                             <Home className="mr-2 h-4 w-4" aria-hidden="true" />
-                            Back to Homepage
+                            {t('Back to Homepage')}
                         </Link>
                     </Button>
                 </div>

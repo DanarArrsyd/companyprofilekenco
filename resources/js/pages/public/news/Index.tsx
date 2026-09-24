@@ -11,7 +11,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
 function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t, formatDate } = useLocale();
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
@@ -35,13 +35,13 @@ function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
 
             <div>
                 <p className="text-caption uppercase text-muted-foreground">
-                    Featured
+                    {t('Featured')}
                     {article.category && ` · ${article.category.name}`}
                 </p>
                 <h2 className="mt-3 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{article.title}</h2>
                 {article.excerpt && <p className="mt-4 text-body-lg text-slate-700">{article.excerpt}</p>}
                 <div className="mt-6 flex items-center gap-3 text-small text-muted-foreground">
-                    {article.published_at && <span>{new Date(article.published_at).toLocaleDateString()}</span>}
+                    {article.published_at && <span>{formatDate(article.published_at)}</span>}
                     <span className="font-medium text-navy-700 group-hover:text-navy-900">Read article &rarr;</span>
                 </div>
             </div>
@@ -68,7 +68,7 @@ export default function Index({
     filters: { category?: string };
     seo: ResolvedSeo;
 }) {
-    const { localizedRoute } = useLocale();
+    const { localizedRoute, t } = useLocale();
     const isEmpty = !featuredArticle && articles.data.length === 0;
 
     return (
@@ -79,9 +79,9 @@ export default function Index({
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
                         as="h1"
-                        eyebrow="Newsroom"
-                        heading="News"
-                        description="Updates on our operations, certifications, and company milestones."
+                        eyebrow={t('Newsroom')}
+                        heading={t('News')}
+                        description={t('Updates on our operations, certifications, and company milestones.')}
                     />
                 </div>
             </section>
@@ -93,7 +93,7 @@ export default function Index({
                             onClick={() => router.get(localizedRoute('public.news'))}
                             className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
-                            All
+                            {t('All')}
                         </button>
                         {categories.map((c) => (
                             <button
@@ -108,7 +108,7 @@ export default function Index({
                 )}
 
                 {isEmpty ? (
-                    <p className="text-small text-muted-foreground">No articles published yet.</p>
+                    <p className="text-small text-muted-foreground">{t('No articles published yet.')}</p>
                 ) : (
                     <>
                         {featuredArticle && (

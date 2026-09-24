@@ -66,6 +66,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            Inertia::share(app(HandleInertiaRequests::class)->errorPageProps($request));
+
             return Inertia::render('Error', ['status' => $status])
                 ->toResponse($request)
                 ->setStatusCode($status);

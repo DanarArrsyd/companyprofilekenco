@@ -1,6 +1,7 @@
 import { Breadcrumb, BreadcrumbItem } from '@/components/public/Breadcrumb';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SeoHead } from '@/components/public/SeoHead';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -27,13 +28,14 @@ export default function Show({
     schema?: Array<Record<string, unknown> | null>;
     preview: boolean;
 }) {
+    const { t } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
                 <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
-                    Draft preview — this capability is not publicly visible.
+                    {t('Draft preview — this capability is not publicly visible.')}
                 </div>
             )}
 
@@ -57,7 +59,7 @@ export default function Show({
 
                 {capability.steps.length > 0 && (
                     <div className="mt-16 border-t border-border pt-12">
-                        <h2 className="text-h3 text-navy-900">Process</h2>
+                        <h2 className="text-h3 text-navy-900">{t('Process')}</h2>
                         <ol data-reveal-group className="mt-6 space-y-6">
                             {capability.steps.map((step, index) => (
                                 <li key={step.id} className="flex gap-5">
@@ -76,7 +78,7 @@ export default function Show({
 
                 {capability.machines.length > 0 && (
                     <div className="mt-16 border-t border-border pt-12">
-                        <h2 className="text-h3 text-navy-900">Equipment</h2>
+                        <h2 className="text-h3 text-navy-900">{t('Equipment')}</h2>
                         <dl data-reveal-group className="mt-6 divide-y divide-border">
                             {capability.machines.map((machine) => (
                                 <div key={machine.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">

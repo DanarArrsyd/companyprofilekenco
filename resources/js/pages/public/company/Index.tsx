@@ -7,14 +7,15 @@ import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
 import { revealClass, useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CmsPage, ResolvedSeo } from '@/types/cms';
 
-/** Fallback hero copy until an admin adds a real 'hero' PageSection to the 'company' Page record. */
+/** Fallback hero copy (English source, shown through t()) until an admin adds a real 'hero' PageSection to the 'company' Page record. */
 const ABOUT_HERO_DEFAULTS: AboutHeroContent = {
-    heading: 'Sekilas Tentang Kami',
-    description: 'Didirikan pada tahun 2017, PT Kenco Manufactur Indonesia bergerak di bidang manufaktur dan metal stamping untuk mendukung kebutuhan industri otomotif. Didukung empat Business Unit, perusahaan terus berkembang dengan mengutamakan kualitas dan kepuasan pelanggan.',
-    highlight: 'Berfokus pada solusi manufaktur yang efisien, berkualitas, dan sesuai kebutuhan pelanggan.',
+    heading: 'About Us at a Glance',
+    description: 'Founded in 2017, PT Kenco Manufactur Indonesia works in manufacturing and metal stamping to support the automotive industry. Backed by four business units, the company keeps growing by putting quality and customer satisfaction first.',
+    highlight: 'Focused on manufacturing solutions that are efficient, high-quality, and tailored to customer needs.',
     image: null,
 };
 
@@ -48,6 +49,7 @@ export default function CompanyIndex({
     industries: IndustryGridItem[];
     seo: ResolvedSeo;
 }) {
+    const { t } = useLocale();
     // Land on the requested section once its content has actually mounted —
     // the browser's own hash-scroll runs before React renders anything, so
     // it can't find the target on first paint.
@@ -63,9 +65,9 @@ export default function CompanyIndex({
         ? (aboutPage?.sections ?? []).filter((s) => s.id !== aboutHeroSection.id)
         : (aboutPage?.sections ?? []);
     const aboutHero: AboutHeroContent = {
-        heading: (aboutHeroSection?.content?.heading as string) || aboutHeroSection?.title || ABOUT_HERO_DEFAULTS.heading,
-        description: (aboutHeroSection?.content?.description as string) || ABOUT_HERO_DEFAULTS.description,
-        highlight: (aboutHeroSection?.content?.highlight as string) || ABOUT_HERO_DEFAULTS.highlight,
+        heading: (aboutHeroSection?.content?.heading as string) || aboutHeroSection?.title || t(ABOUT_HERO_DEFAULTS.heading),
+        description: (aboutHeroSection?.content?.description as string) || t(ABOUT_HERO_DEFAULTS.description),
+        highlight: (aboutHeroSection?.content?.highlight as string) || t(ABOUT_HERO_DEFAULTS.highlight ?? ''),
         image: (aboutHeroSection?.content?.image as string) || ABOUT_HERO_DEFAULTS.image,
     };
 
@@ -88,9 +90,9 @@ export default function CompanyIndex({
                 {!visionSections.some((section) => section.section_type === 'vision_mission') && (
                     <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                         <SectionHeader
-                            eyebrow="Our Direction"
-                            heading="Vision & Mission"
-                            description="The principles that guide how we manufacture, and where we aim to be."
+                            eyebrow={t('Our Direction')}
+                            heading={t('Vision & Mission')}
+                            description={t('The principles that guide how we manufacture, and where we aim to be.')}
                         />
                     </div>
                 )}
@@ -100,15 +102,15 @@ export default function CompanyIndex({
             <section id="facilities" className="scroll-mt-20 border-t border-border">
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
                     <SectionHeader
-                        eyebrow="Where We Manufacture"
-                        heading="Facilities"
-                        description="Our production sites and the equipment that runs on them."
+                        eyebrow={t('Where We Manufacture')}
+                        heading={t('Facilities')}
+                        description={t('Our production sites and the equipment that runs on them.')}
                     />
                 </div>
 
                 {facilities.length === 0 ? (
                     <p className="mx-auto max-w-content px-5 pb-16 text-small text-muted-foreground sm:px-6 lg:px-8">
-                        No facilities published yet.
+                        {t('No facilities published yet.')}
                     </p>
                 ) : (
                     <div data-reveal-group className="mx-auto max-w-content space-y-16 px-5 pb-16 sm:px-6 lg:px-8">
@@ -119,12 +121,12 @@ export default function CompanyIndex({
 
             <section id="industries" className="scroll-mt-20 border-t border-border">
                 <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader eyebrow="Who We Serve" heading="Industries" description="Sectors we manufacture for." />
+                    <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries')} description={t('Sectors we manufacture for.')} />
                 </div>
 
                 <div className="mx-auto max-w-content px-5 pb-16 sm:px-6 lg:px-8">
                     {industries.length === 0 ? (
-                        <p className="text-small text-muted-foreground">No industries published yet.</p>
+                        <p className="text-small text-muted-foreground">{t('No industries published yet.')}</p>
                     ) : (
                         <IndustryGrid items={industries} showDescription />
                     )}
