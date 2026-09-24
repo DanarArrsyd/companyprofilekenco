@@ -27,6 +27,7 @@ class CreatePage
 
         return DB::transaction(function () use ($data, $slug) {
             $page = Page::create([
+                'translations' => $data['translations'] ?? [],
                 'title' => $data['title'],
                 'slug' => $slug,
                 'page_type' => PageType::Standard,

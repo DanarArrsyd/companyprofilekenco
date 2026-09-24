@@ -3,17 +3,19 @@ import { ChevronDown, ChevronUp, Eye, Plus, Trash2 } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
-import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface Step {
     id: number;
@@ -28,23 +30,30 @@ interface Capability {
     status: string; published_at: string | null;
     steps: Step[];
     machines: { id: number; name: string }[];
-    seoMetadata: {
+    seo_metadata: {
         meta_title: string | null; meta_description: string | null; canonical_url: string | null;
         og_title: string | null; og_description: string | null; og_image: string | null;
         robots_index: boolean; robots_follow: boolean;
     } | null;
 }
 
-function StepRow({ capabilityId, step, isFirst, isLast, onMove }: { capabilityId: number; step: Step; isFirst: boolean; isLast: boolean; onMove: (dir: 'up' | 'down') => void }) {
+const STEP_TRANSLATABLE_FIELDS = ['title', 'description'];
+
+function StepRow({ capabilityId, step, isFirst, isLast, onMove, locale }: { capabilityId: number; step: Step; isFirst: boolean; isLast: boolean; onMove: (dir: 'up' | 'down') => void; locale: ContentLocale }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const { data, setData, put, processing } = useForm({ title: step.title, description: step.description ?? '' });
+    const { data, setData, put, processing } = useForm({
+        title: step.title,
+        description: step.description ?? '',
+        translations: initialTranslations(step, STEP_TRANSLATABLE_FIELDS),
+    });
+    const bind = translatableBinder(data, setData, locale);
 
     return (
         <div className="rounded-lg border border-border bg-surface p-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
                 <div className="space-y-3">
-                    <Input value={data.title} onChange={(e) => setData('title', e.target.value)} placeholder="Step title" />
-                    <textarea value={data.description} onChange={(e) => setData('description', e.target.value)} rows={2} placeholder="Step description" className="w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                    <Input {...bind('title')} placeholder={bind('title').placeholder ?? 'Step title'} aria-label={locale === 'en' ? 'Step title' : 'Step title (Indonesian)'} />
+                    <textarea {...bind('description')} placeholder={bind('description').placeholder ?? 'Step description'} aria-label={locale === 'en' ? 'Step description' : 'Step description (Indonesian)'} rows={2} className="w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                 </div>
                 <div className="flex items-start gap-2">
                     <Button type="button" variant="secondary" size="sm" disabled={isFirst} onClick={() => onMove('up')} aria-label="Move up"><ChevronUp className="h-4 w-4" /></Button>
@@ -69,6 +78,8 @@ function StepRow({ capabilityId, step, isFirst, isLast, onMove }: { capabilityId
     );
 }
 
+const TRANSLATABLE_FIELDS = ['name', 'summary', 'description'];
+
 export default function Edit({
     capability,
     availableMachines,
@@ -88,7 +99,9 @@ export default function Edit({
         featured_image: File | null; featured_image_path: string; is_featured: boolean; sort_order: number;
         status: string; published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(capability, TRANSLATABLE_FIELDS),
         _method: 'put',
         name: capability.name,
         summary: capability.summary ?? '',
@@ -102,16 +115,20 @@ export default function Edit({
         published_at: capability.published_at ? capability.published_at.slice(0, 16) : '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
-            meta_title: capability.seoMetadata?.meta_title ?? '',
-            meta_description: capability.seoMetadata?.meta_description ?? '',
-            canonical_url: capability.seoMetadata?.canonical_url ?? '',
-            og_title: capability.seoMetadata?.og_title ?? '',
-            og_description: capability.seoMetadata?.og_description ?? '',
-            og_image_path: capability.seoMetadata?.og_image ?? '',
-            robots_index: capability.seoMetadata?.robots_index ?? true,
-            robots_follow: capability.seoMetadata?.robots_follow ?? true,
+            translations: seoTranslations(capability.seo_metadata),
+            meta_title: capability.seo_metadata?.meta_title ?? '',
+            meta_description: capability.seo_metadata?.meta_description ?? '',
+            canonical_url: capability.seo_metadata?.canonical_url ?? '',
+            og_title: capability.seo_metadata?.og_title ?? '',
+            og_description: capability.seo_metadata?.og_description ?? '',
+            og_image_path: capability.seo_metadata?.og_image ?? '',
+            robots_index: capability.seo_metadata?.robots_index ?? true,
+            robots_follow: capability.seo_metadata?.robots_follow ?? true,
         },
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -163,23 +180,24 @@ export default function Edit({
 
             <div className="space-y-6">
                 <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                    <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                     <FormSection title="General">
                         <div>
-                            <Label htmlFor="name">Name</Label>
-                            <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
-                            {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                            <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="name" {...bind('name')} className="mt-1.5" />
+                            {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                         </div>
                         <div>
                             <Label>Slug</Label>
                             <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/capabilities/{capability.slug}</p>
                         </div>
                         <div>
-                            <Label htmlFor="summary">Summary</Label>
-                            <Input id="summary" value={data.summary} onChange={(e) => setData('summary', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="summary" {...bind('summary')} className="mt-1.5" />
                         </div>
                         <div>
-                            <Label htmlFor="description">Description</Label>
-                            <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                            <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                            <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                         </div>
                         <div>
                             <Label htmlFor="icon">Icon</Label>
@@ -219,6 +237,7 @@ export default function Edit({
 
                     <FormSection title="SEO">
                         <SeoFields
+                            locale={contentLocale}
                             data={data.seo}
                             onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                             errors={errors}
@@ -234,9 +253,12 @@ export default function Edit({
 
                 <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <h2 className="text-sm font-semibold text-foreground">Process Steps</h2>
+                    <div className="mb-5 mt-4">
+                        <ContentLocaleTabs inline value={contentLocale} onChange={setContentLocale} />
+                    </div>
                     <div className="mt-5 space-y-4">
                         {steps.map((step, index) => (
-                            <StepRow key={step.id} capabilityId={capability.id} step={step} isFirst={index === 0} isLast={index === steps.length - 1} onMove={(dir) => moveStep(index, dir)} />
+                            <StepRow key={step.id} capabilityId={capability.id} step={step} isFirst={index === 0} isLast={index === steps.length - 1} onMove={(dir) => moveStep(index, dir)} locale={contentLocale} />
                         ))}
                     </div>
                     <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">

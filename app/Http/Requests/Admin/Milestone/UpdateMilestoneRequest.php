@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Admin\Milestone;
 
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateMilestoneRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -13,7 +16,7 @@ class UpdateMilestoneRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'year' => ['required', 'integer', 'min:1900', 'max:2100'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -22,5 +25,9 @@ class UpdateMilestoneRequest extends FormRequest
             'remove_image' => ['nullable', 'boolean'],
             'order' => ['nullable', 'integer', 'min:0'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'description']);
+
+        return $rules;
     }
 }

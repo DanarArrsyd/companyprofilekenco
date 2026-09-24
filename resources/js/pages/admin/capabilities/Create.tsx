@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
@@ -10,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['name', 'summary', 'description'];
 
 export default function Create({ statusOptions }: { statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
@@ -17,12 +21,17 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
         featured_image: File | null; featured_image_path: string; is_featured: boolean; sort_order: number;
         status: string; published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         name: '', slug: '', summary: '', description: '', icon: '',
         featured_image: null, featured_image_path: '', is_featured: false, sort_order: 0,
         status: 'draft', published_at: '',
         seo: SEO_FIELDS_DEFAULT,
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -35,23 +44,24 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
             <PageHeader title="New Capability" breadcrumbs={[{ label: 'Capabilities', href: route('admin.capabilities') }, { label: 'New' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
-                        {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                        <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="name" {...bind('name')} className="mt-1.5" autoFocus />
+                        {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
                         <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="summary">Summary</Label>
-                        <Input id="summary" value={data.summary} onChange={(e) => setData('summary', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="summary" {...bind('summary')} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                     <div>
                         <Label htmlFor="icon">Icon (lucide icon name, optional)</Label>
@@ -92,6 +102,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

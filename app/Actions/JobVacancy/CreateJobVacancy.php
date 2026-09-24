@@ -26,6 +26,7 @@ class CreateJobVacancy
 
         return DB::transaction(function () use ($data, $slug) {
             $vacancy = JobVacancy::create([
+                'translations' => $data['translations'] ?? [],
                 'title' => $data['title'],
                 'slug' => $slug,
                 'department' => $data['department'] ?? null,

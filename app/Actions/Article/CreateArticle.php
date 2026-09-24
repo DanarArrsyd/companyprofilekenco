@@ -32,6 +32,7 @@ class CreateArticle
 
         return DB::transaction(function () use ($data, $slug, $featuredImage) {
             $article = Article::create([
+                'translations' => $data['translations'] ?? [],
                 'news_category_id' => $data['news_category_id'] ?? null,
                 'title' => $data['title'],
                 'slug' => $slug,

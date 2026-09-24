@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface MilestoneRecord {
     id: number;
@@ -18,6 +20,8 @@ interface MilestoneRecord {
     image: string | null;
     order: number;
 }
+
+const TRANSLATABLE_FIELDS = ['title', 'description'];
 
 export default function Edit({ milestone }: { milestone: MilestoneRecord }) {
     const { data, setData, post, processing, errors } = useForm<{
@@ -29,7 +33,9 @@ export default function Edit({ milestone }: { milestone: MilestoneRecord }) {
         image_path: string;
         remove_image: boolean;
         order: number;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(milestone, TRANSLATABLE_FIELDS),
         _method: 'put',
         year: milestone.year,
         title: milestone.title,
@@ -39,6 +45,9 @@ export default function Edit({ milestone }: { milestone: MilestoneRecord }) {
         remove_image: false,
         order: milestone.order,
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -58,6 +67,7 @@ export default function Edit({ milestone }: { milestone: MilestoneRecord }) {
             <PageHeader title={milestone.title} breadcrumbs={[{ label: 'Milestones', href: route('admin.milestones') }, { label: 'Edit' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="year">Year</Label>
@@ -65,13 +75,13 @@ export default function Edit({ milestone }: { milestone: MilestoneRecord }) {
                         {errors.year && <p className="mt-1 text-sm text-danger">{errors.year}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="title">Title</Label>
-                        <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1.5" />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="title" {...bind('title')} className="mt-1.5" />
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 

@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\QualityContent;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreQualityContentRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreQualityContentRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable', 'string', 'max:255',
@@ -31,5 +34,9 @@ class StoreQualityContentRequest extends FormRequest
             'status' => ['required', new Enum(ContentStatus::class)],
             'published_at' => ['nullable', 'date'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'summary', 'content']);
+
+        return $rules;
     }
 }

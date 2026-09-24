@@ -32,6 +32,7 @@ class CreateCapability
 
         return DB::transaction(function () use ($data, $slug, $featuredImage) {
             $capability = Capability::create([
+                'translations' => $data['translations'] ?? [],
                 'name' => $data['name'],
                 'slug' => $slug,
                 'summary' => $data['summary'] ?? null,

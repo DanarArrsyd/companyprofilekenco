@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\Locale;
+use App\Support\LocalizedContent;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -20,6 +21,7 @@ class SetLocale
 
         app()->setLocale($locale);
         Carbon::setLocale($locale);
+        LocalizedContent::$serializeAllLocales = $request->is('admin', 'admin/*');
 
         return $next($request);
     }

@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
@@ -11,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['short_description', 'description', 'material', 'application', 'manufacturing_process'];
 
 export default function Create({
     categories,
@@ -34,7 +38,9 @@ export default function Create({
         status: string;
         published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         product_category_id: '',
         name: '',
         slug: '',
@@ -51,6 +57,9 @@ export default function Create({
         seo: SEO_FIELDS_DEFAULT,
     });
 
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('admin.products.store'), { forceFormData: true });
@@ -62,6 +71,7 @@ export default function Create({
             <PageHeader title="New Product" breadcrumbs={[{ label: 'Products', href: route('admin.products') }, { label: 'New' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General Information">
                     <div>
                         <Label htmlFor="name">Name</Label>
@@ -81,27 +91,27 @@ export default function Create({
                         </select>
                     </div>
                     <div>
-                        <Label htmlFor="short_description">Short Description</Label>
-                        <Input id="short_description" value={data.short_description} onChange={(e) => setData('short_description', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="short_description">Short Description<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="short_description" {...bind('short_description')} className="mt-1.5" />
                     </div>
                 </FormSection>
 
                 <FormSection title="Product Detail">
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                     <div>
-                        <Label htmlFor="material">Material</Label>
-                        <Input id="material" value={data.material} onChange={(e) => setData('material', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="material">Material<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="material" {...bind('material')} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="application">Application</Label>
-                        <Input id="application" value={data.application} onChange={(e) => setData('application', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="application">Application<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="application" {...bind('application')} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="manufacturing_process">Manufacturing Process</Label>
-                        <Input id="manufacturing_process" value={data.manufacturing_process} onChange={(e) => setData('manufacturing_process', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="manufacturing_process">Manufacturing Process<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="manufacturing_process" {...bind('manufacturing_process')} className="mt-1.5" />
                     </div>
                 </FormSection>
 
@@ -136,6 +146,7 @@ export default function Create({
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

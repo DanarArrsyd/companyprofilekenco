@@ -1,10 +1,13 @@
 import { Plus, Trash2 } from 'lucide-react';
 
+import { LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { mediaUrl } from '@/lib/media';
+import { englishOf, readText, writeText } from '@/lib/translatable-form';
+import type { ContentLocale } from '@/lib/translatable-form';
 
 type Content = Record<string, unknown>;
 
@@ -13,16 +16,19 @@ function TextArea({
     value,
     onChange,
     rows = 3,
+    placeholder,
 }: {
     id: string;
     value: string;
     onChange: (value: string) => void;
     rows?: number;
+    placeholder?: string;
 }) {
     return (
         <textarea
             id={id}
             value={value}
+            placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}
             rows={rows}
             className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -44,29 +50,36 @@ export function SectionContentFields({
     content,
     onChange,
     pickerOptions,
+    locale = 'en',
 }: {
     sectionType: string;
     content: Content;
     onChange: (content: Content) => void;
     pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[]; facilities?: PickerOption[] };
+    /** Active content tab: text fields edit that language; images, URLs and picks are shared. */
+    locale?: ContentLocale;
 }) {
     const set = (key: string, value: unknown) => onChange({ ...content, [key]: value });
+    // Translatable text: {"en","id"} maps in content, English as the placeholder hint.
+    const text = (key: string) => readText(content[key], locale);
+    const setText = (key: string, value: string) => set(key, writeText(content[key], locale, value));
+    const hint = (key: string) => (locale === 'en' ? undefined : englishOf(content[key]) || undefined);
 
     switch (sectionType) {
         case 'hero':
             return (
                 <div className="space-y-5">
                     <div>
-                        <Label htmlFor="eyebrow">Eyebrow</Label>
-                        <Input id="eyebrow" value={str(content, 'eyebrow')} onChange={(e) => set('eyebrow', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="eyebrow">Eyebrow<LocaleBadge locale={locale} /></Label>
+                        <Input id="eyebrow" value={text('eyebrow')} placeholder={hint('eyebrow')} onChange={(e) => setText('eyebrow', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="heading">Heading</Label>
-                        <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="heading">Heading<LocaleBadge locale={locale} /></Label>
+                        <Input id="heading" value={text('heading')} placeholder={hint('heading')} onChange={(e) => setText('heading', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
+                        <Label htmlFor="description">Description<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="description" value={text('description')} placeholder={hint('description')} onChange={(v) => setText('description', v)} />
                     </div>
                     <MediaPickerField
                         label="Background image"
@@ -76,22 +89,22 @@ export function SectionContentFields({
                         onClear={() => set('image', '')}
                     />
                     <div>
-                        <Label htmlFor="highlight">Highlight statement</Label>
-                        <TextArea id="highlight" value={str(content, 'highlight')} onChange={(v) => set('highlight', v)} rows={2} />
+                        <Label htmlFor="highlight">Highlight statement<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="highlight" value={text('highlight')} placeholder={hint('highlight')} onChange={(v) => setText('highlight', v)} rows={2} />
                         <p className="mt-1.5 text-xs text-slate-500">Only used by page-intro heroes (e.g. the Company page) that show a second, shorter statement alongside the description.</p>
                     </div>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <Label htmlFor="primary_cta_label">Primary CTA label</Label>
-                            <Input id="primary_cta_label" value={str(content, 'primary_cta_label')} onChange={(e) => set('primary_cta_label', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="primary_cta_label">Primary CTA label<LocaleBadge locale={locale} /></Label>
+                            <Input id="primary_cta_label" value={text('primary_cta_label')} placeholder={hint('primary_cta_label')} onChange={(e) => setText('primary_cta_label', e.target.value)} className="mt-1.5" />
                         </div>
                         <div>
                             <Label htmlFor="primary_cta_url">Primary CTA URL</Label>
                             <Input id="primary_cta_url" value={str(content, 'primary_cta_url')} onChange={(e) => set('primary_cta_url', e.target.value)} className="mt-1.5" />
                         </div>
                         <div>
-                            <Label htmlFor="secondary_cta_label">Secondary CTA label</Label>
-                            <Input id="secondary_cta_label" value={str(content, 'secondary_cta_label')} onChange={(e) => set('secondary_cta_label', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="secondary_cta_label">Secondary CTA label<LocaleBadge locale={locale} /></Label>
+                            <Input id="secondary_cta_label" value={text('secondary_cta_label')} placeholder={hint('secondary_cta_label')} onChange={(e) => setText('secondary_cta_label', e.target.value)} className="mt-1.5" />
                         </div>
                         <div>
                             <Label htmlFor="secondary_cta_url">Secondary CTA URL</Label>
@@ -119,8 +132,8 @@ export function SectionContentFields({
             return (
                 <div className="space-y-5">
                     <div>
-                        <Label htmlFor="body">Body</Label>
-                        <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={6} />
+                        <Label htmlFor="body">Body<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="body" value={text('body')} placeholder={hint('body')} onChange={(v) => setText('body', v)} rows={6} />
                     </div>
                     <div>
                         <MediaPickerField
@@ -146,8 +159,8 @@ export function SectionContentFields({
                         onClear={() => set('image', '')}
                     />
                     <div>
-                        <Label htmlFor="body">Body</Label>
-                        <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={5} />
+                        <Label htmlFor="body">Body<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="body" value={text('body')} placeholder={hint('body')} onChange={(v) => setText('body', v)} rows={5} />
                     </div>
                 </div>
             );
@@ -166,12 +179,12 @@ export function SectionContentFields({
                                 onClear={() => set('left_image', '')}
                             />
                             <div>
-                                <Label htmlFor="visi_title">Title</Label>
-                                <Input id="visi_title" value={str(content, 'visi_title') || 'Visi'} onChange={(e) => set('visi_title', e.target.value)} className="mt-1.5" />
+                                <Label htmlFor="visi_title">Title<LocaleBadge locale={locale} /></Label>
+                                <Input id="visi_title" value={text('visi_title')} placeholder={hint('visi_title') ?? 'Vision'} onChange={(e) => setText('visi_title', e.target.value)} className="mt-1.5" />
                             </div>
                             <div>
-                                <Label htmlFor="visi_text">Statement</Label>
-                                <TextArea id="visi_text" value={str(content, 'visi_text')} onChange={(v) => set('visi_text', v)} rows={4} />
+                                <Label htmlFor="visi_text">Statement<LocaleBadge locale={locale} /></Label>
+                                <TextArea id="visi_text" value={text('visi_text')} placeholder={hint('visi_text')} onChange={(v) => setText('visi_text', v)} rows={4} />
                             </div>
                         </div>
 
@@ -185,12 +198,12 @@ export function SectionContentFields({
                                 onClear={() => set('right_image', '')}
                             />
                             <div>
-                                <Label htmlFor="misi_title">Title</Label>
-                                <Input id="misi_title" value={str(content, 'misi_title') || 'Misi'} onChange={(e) => set('misi_title', e.target.value)} className="mt-1.5" />
+                                <Label htmlFor="misi_title">Title<LocaleBadge locale={locale} /></Label>
+                                <Input id="misi_title" value={text('misi_title')} placeholder={hint('misi_title') ?? 'Mission'} onChange={(e) => setText('misi_title', e.target.value)} className="mt-1.5" />
                             </div>
                             <div>
-                                <Label htmlFor="misi_text">Statement</Label>
-                                <TextArea id="misi_text" value={str(content, 'misi_text')} onChange={(v) => set('misi_text', v)} rows={4} />
+                                <Label htmlFor="misi_text">Statement<LocaleBadge locale={locale} /></Label>
+                                <TextArea id="misi_text" value={text('misi_text')} placeholder={hint('misi_text')} onChange={(v) => setText('misi_text', v)} rows={4} />
                             </div>
                         </div>
                     </div>
@@ -204,17 +217,17 @@ export function SectionContentFields({
             return (
                 <div className="space-y-5">
                     <div>
-                        <Label htmlFor="heading">Heading</Label>
-                        <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="heading">Heading<LocaleBadge locale={locale} /></Label>
+                        <Input id="heading" value={text('heading')} placeholder={hint('heading')} onChange={(e) => setText('heading', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
+                        <Label htmlFor="description">Description<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="description" value={text('description')} placeholder={hint('description')} onChange={(v) => setText('description', v)} />
                     </div>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <Label htmlFor="cta_label">CTA label</Label>
-                            <Input id="cta_label" value={str(content, 'cta_label')} onChange={(e) => set('cta_label', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="cta_label">CTA label<LocaleBadge locale={locale} /></Label>
+                            <Input id="cta_label" value={text('cta_label')} placeholder={hint('cta_label')} onChange={(e) => setText('cta_label', e.target.value)} className="mt-1.5" />
                         </div>
                         <div>
                             <Label htmlFor="cta_url">CTA URL</Label>
@@ -225,17 +238,18 @@ export function SectionContentFields({
             );
 
         case 'stats': {
-            const items = Array.isArray(content.items) ? (content.items as { label: string; value: string }[]) : [];
+            const items = Array.isArray(content.items) ? (content.items as { label: unknown; value: string }[]) : [];
 
+            // The figure is shared; only the label is translated.
             const updateItem = (index: number, key: 'label' | 'value', value: string) => {
                 const next = [...items];
-                next[index] = { ...next[index], [key]: value };
+                next[index] = { ...next[index], [key]: key === 'label' ? writeText(next[index].label, locale, value) : value };
                 set('items', next);
             };
 
             return (
                 <div className="space-y-3">
-                    <Label>Statistic items</Label>
+                    <Label>Statistic items<LocaleBadge locale={locale} /></Label>
                     {items.map((item, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <Input
@@ -245,9 +259,9 @@ export function SectionContentFields({
                                 className="w-28"
                             />
                             <Input
-                                value={item.label ?? ''}
+                                value={readText(item.label, locale)}
                                 onChange={(e) => updateItem(index, 'label', e.target.value)}
-                                placeholder="Projects Completed"
+                                placeholder={locale === 'en' ? 'Projects Completed' : englishOf(item.label) || 'Projects Completed'}
                             />
                             <Button
                                 type="button"
@@ -330,12 +344,12 @@ export function SectionContentFields({
             return (
                 <div className="space-y-5">
                     <div>
-                        <Label htmlFor="heading">Heading</Label>
-                        <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
+                        <Label htmlFor="heading">Heading<LocaleBadge locale={locale} /></Label>
+                        <Input id="heading" value={text('heading')} placeholder={hint('heading')} onChange={(e) => setText('heading', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
+                        <Label htmlFor="description">Description<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="description" value={text('description')} placeholder={hint('description')} onChange={(v) => setText('description', v)} />
                     </div>
 
                     <div>

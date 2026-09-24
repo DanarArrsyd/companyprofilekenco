@@ -3,11 +3,14 @@
 namespace App\Http\Requests\Admin\Page;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdatePageRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -15,7 +18,7 @@ class UpdatePageRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'status' => ['required', new Enum(ContentStatus::class)],
             'published_at' => ['nullable', 'date'],
@@ -30,5 +33,9 @@ class UpdatePageRequest extends FormRequest
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title']);
+
+        return $this->withTranslations($rules, ['meta_title', 'meta_description', 'og_title', 'og_description'], 'seo.');
     }
 }

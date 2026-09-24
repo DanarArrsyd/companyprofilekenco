@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
@@ -11,6 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['title', 'excerpt', 'content'];
 
 export default function Create({
     categories,
@@ -31,7 +35,9 @@ export default function Create({
         status: string;
         published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         news_category_id: '',
         title: '',
         slug: '',
@@ -45,6 +51,9 @@ export default function Create({
         seo: SEO_FIELDS_DEFAULT,
     });
 
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('admin.news.store'), { forceFormData: true });
@@ -56,11 +65,12 @@ export default function Create({
             <PageHeader title="New Article" breadcrumbs={[{ label: 'Articles', href: route('admin.news') }, { label: 'New' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="title">Title</Label>
-                        <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1.5" autoFocus />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="title" {...bind('title')} className="mt-1.5" autoFocus />
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
@@ -75,15 +85,15 @@ export default function Create({
                         </select>
                     </div>
                     <div>
-                        <Label htmlFor="excerpt">Excerpt</Label>
-                        <textarea id="excerpt" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} rows={2} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="excerpt">Excerpt<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="excerpt" {...bind('excerpt')} rows={2} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
                 <FormSection title="Content">
                     <div>
                         <Label>Body</Label>
-                        <RichTextEditor value={data.content} onChange={(html) => setData('content', html)} />
+                        <RichTextEditor key={contentLocale} value={bind('content').value} onChange={bind('content').onChange} />
                     </div>
                 </FormSection>
 
@@ -117,6 +127,7 @@ export default function Create({
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

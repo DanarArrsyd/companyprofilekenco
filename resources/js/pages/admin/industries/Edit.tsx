@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
@@ -10,17 +11,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface Industry {
     id: number; name: string; slug: string; description: string | null; image: string | null;
     sort_order: number; status: string; published_at: string | null;
 }
 
+const TRANSLATABLE_FIELDS = ['name', 'description'];
+
 export default function Edit({ industry, statusOptions }: { industry: Industry; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
         _method: string; name: string; description: string; image: File | null; image_path: string;
         sort_order: number; status: string; published_at: string;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(industry, TRANSLATABLE_FIELDS),
         _method: 'put',
         name: industry.name,
         description: industry.description ?? '',
@@ -30,6 +36,9 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
         status: industry.status,
         published_at: industry.published_at ? industry.published_at.slice(0, 16) : '',
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -42,19 +51,20 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
             <PageHeader title={industry.name} breadcrumbs={[{ label: 'Industries', href: route('admin.industries') }, { label: 'Edit' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
-                        {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                        <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="name" {...bind('name')} className="mt-1.5" />
+                        {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label>Slug</Label>
                         <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/{industry.slug}</p>
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={4} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={4} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 

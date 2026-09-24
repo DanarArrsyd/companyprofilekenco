@@ -34,7 +34,7 @@ export interface CmsPage {
     created_at: string;
     updated_at: string;
     sections?: PageSection[];
-    seoMetadata?: SeoMetadata | null;
+    seo_metadata?: SeoMetadata | null;
 }
 
 export interface ResolvedSeo {

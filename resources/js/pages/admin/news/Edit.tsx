@@ -1,30 +1,34 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { RichTextEditor } from '@/components/admin/RichTextEditor';
-import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface Article {
     id: number; title: string; slug: string; excerpt: string | null; content: string | null;
     featured_image: string | null; is_featured: boolean; status: string; published_at: string | null;
     news_category_id: number | null;
-    seoMetadata: {
+    seo_metadata: {
         meta_title: string | null; meta_description: string | null; canonical_url: string | null;
         og_title: string | null; og_description: string | null; og_image: string | null;
         robots_index: boolean; robots_follow: boolean;
     } | null;
 }
+
+const TRANSLATABLE_FIELDS = ['title', 'excerpt', 'content'];
 
 export default function Edit({
     article,
@@ -41,7 +45,9 @@ export default function Edit({
         _method: string; news_category_id: string; title: string; excerpt: string; content: string;
         featured_image: File | null; featured_image_path: string; is_featured: boolean; status: string; published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(article, TRANSLATABLE_FIELDS),
         _method: 'put',
         news_category_id: article.news_category_id ? String(article.news_category_id) : '',
         title: article.title,
@@ -54,16 +60,20 @@ export default function Edit({
         published_at: article.published_at ? article.published_at.slice(0, 16) : '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
-            meta_title: article.seoMetadata?.meta_title ?? '',
-            meta_description: article.seoMetadata?.meta_description ?? '',
-            canonical_url: article.seoMetadata?.canonical_url ?? '',
-            og_title: article.seoMetadata?.og_title ?? '',
-            og_description: article.seoMetadata?.og_description ?? '',
-            og_image_path: article.seoMetadata?.og_image ?? '',
-            robots_index: article.seoMetadata?.robots_index ?? true,
-            robots_follow: article.seoMetadata?.robots_follow ?? true,
+            translations: seoTranslations(article.seo_metadata),
+            meta_title: article.seo_metadata?.meta_title ?? '',
+            meta_description: article.seo_metadata?.meta_description ?? '',
+            canonical_url: article.seo_metadata?.canonical_url ?? '',
+            og_title: article.seo_metadata?.og_title ?? '',
+            og_description: article.seo_metadata?.og_description ?? '',
+            og_image_path: article.seo_metadata?.og_image ?? '',
+            robots_index: article.seo_metadata?.robots_index ?? true,
+            robots_follow: article.seo_metadata?.robots_follow ?? true,
         },
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -94,11 +104,12 @@ export default function Edit({
             />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="title">Title</Label>
-                        <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1.5" />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="title" {...bind('title')} className="mt-1.5" />
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label>Slug</Label>
@@ -112,15 +123,15 @@ export default function Edit({
                         </select>
                     </div>
                     <div>
-                        <Label htmlFor="excerpt">Excerpt</Label>
-                        <textarea id="excerpt" value={data.excerpt} onChange={(e) => setData('excerpt', e.target.value)} rows={2} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="excerpt">Excerpt<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="excerpt" {...bind('excerpt')} rows={2} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
                 <FormSection title="Content">
                     <div>
                         <Label>Body</Label>
-                        <RichTextEditor value={data.content} onChange={(html) => setData('content', html)} />
+                        <RichTextEditor key={contentLocale} value={bind('content').value} onChange={bind('content').onChange} />
                     </div>
                 </FormSection>
 
@@ -153,6 +164,7 @@ export default function Edit({
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

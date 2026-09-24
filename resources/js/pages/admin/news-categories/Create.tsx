@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
@@ -8,13 +9,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['name', 'description'];
 
 export default function Create() {
     const { data, setData, post, processing, errors } = useForm({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         name: '',
         slug: '',
         description: '',
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -30,11 +38,12 @@ export default function Create() {
             />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
-                        {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                        <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="name" {...bind('name')} className="mt-1.5" autoFocus />
+                        {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
@@ -42,8 +51,8 @@ export default function Create() {
                         {errors.slug && <p className="mt-1 text-sm text-danger">{errors.slug}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 

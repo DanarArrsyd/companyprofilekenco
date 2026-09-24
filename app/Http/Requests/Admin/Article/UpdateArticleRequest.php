@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\Article;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateArticleRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class UpdateArticleRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'news_category_id' => ['nullable', 'integer', Rule::exists('news_categories', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:255'],
@@ -37,5 +40,9 @@ class UpdateArticleRequest extends FormRequest
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'excerpt', 'content']);
+
+        return $this->withTranslations($rules, ['meta_title', 'meta_description', 'og_title', 'og_description'], 'seo.');
     }
 }

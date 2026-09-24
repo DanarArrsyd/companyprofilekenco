@@ -81,7 +81,7 @@ class SeoService
             default => $model->seoMetadata?->og_image,
         };
 
-        $model->seoMetadata()->updateOrCreate([], [
+        $metadata = $model->seoMetadata()->updateOrCreate([], [
             'meta_title' => $seoInput['meta_title'] ?? null,
             'meta_description' => $seoInput['meta_description'] ?? null,
             'canonical_url' => $seoInput['canonical_url'] ?? null,
@@ -91,6 +91,12 @@ class SeoService
             'robots_index' => $seoInput['robots_index'] ?? true,
             'robots_follow' => $seoInput['robots_follow'] ?? true,
         ]);
+
+        $metadata->applyTranslations($seoInput['translations'] ?? []);
+
+        if ($metadata->isDirty()) {
+            $metadata->save();
+        }
     }
 
     /**

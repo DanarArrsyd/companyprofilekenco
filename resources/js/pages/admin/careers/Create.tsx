@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
@@ -9,13 +10,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['title', 'description', 'requirements'];
 
 export default function Create({ statusOptions }: { statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
         title: string; slug: string; department: string; location: string; employment_type: string;
         description: string; requirements: string; status: string; published_at: string; closes_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         title: '',
         slug: '',
         department: '',
@@ -29,6 +35,9 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
         seo: SEO_FIELDS_DEFAULT,
     });
 
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('admin.careers.store'), { forceFormData: true });
@@ -40,11 +49,12 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
             <PageHeader title="New Job Vacancy" breadcrumbs={[{ label: 'Job Vacancies', href: route('admin.careers') }, { label: 'New' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General Information">
                     <div>
-                        <Label htmlFor="title">Position</Label>
-                        <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1.5" autoFocus />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        <Label htmlFor="title">Position<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="title" {...bind('title')} className="mt-1.5" autoFocus />
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
@@ -67,15 +77,15 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
 
                 <FormSection title="Job Description">
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
                 <FormSection title="Requirements">
                     <div>
-                        <Label htmlFor="requirements">Requirements</Label>
-                        <textarea id="requirements" value={data.requirements} onChange={(e) => setData('requirements', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="requirements">Requirements<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="requirements" {...bind('requirements')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
@@ -98,6 +108,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
@@ -10,15 +11,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['name', 'description'];
 
 export default function Create({ categories, statusOptions }: { categories: { id: number; name: string }[]; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
         facility_category_id: string; name: string; slug: string; location: string; description: string;
         image: File | null; image_path: string; sort_order: number; status: string; published_at: string;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         facility_category_id: '', name: '', slug: '', location: '', description: '',
         image: null, image_path: '', sort_order: 0, status: 'draft', published_at: '',
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -31,11 +40,12 @@ export default function Create({ categories, statusOptions }: { categories: { id
             <PageHeader title="New Facility" breadcrumbs={[{ label: 'Facilities', href: route('admin.facilities') }, { label: 'New' }]} />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General">
                     <div>
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
-                        {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                        <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="name" {...bind('name')} className="mt-1.5" autoFocus />
+                        {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
@@ -53,8 +63,8 @@ export default function Create({ categories, statusOptions }: { categories: { id
                         <Input id="location" value={data.location} onChange={(e) => setData('location', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={4} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={4} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 

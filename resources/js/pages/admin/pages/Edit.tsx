@@ -2,18 +2,22 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
 import { PageSectionEditor } from '@/components/admin/PageSectionEditor';
-import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { CmsPage } from '@/types/cms';
+
+const TRANSLATABLE_FIELDS = ['title'];
 
 export default function Edit({
     page,
@@ -30,23 +34,29 @@ export default function Edit({
 
     const { data, setData, post, processing, errors } = useForm<{
         _method: string; title: string; status: string; published_at: string; seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(page, TRANSLATABLE_FIELDS),
         _method: 'put',
         title: page.title,
         status: page.status,
         published_at: page.published_at ? page.published_at.slice(0, 16) : '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
-            meta_title: page.seoMetadata?.meta_title ?? '',
-            meta_description: page.seoMetadata?.meta_description ?? '',
-            canonical_url: page.seoMetadata?.canonical_url ?? '',
-            og_title: page.seoMetadata?.og_title ?? '',
-            og_description: page.seoMetadata?.og_description ?? '',
-            og_image_path: page.seoMetadata?.og_image ?? '',
-            robots_index: page.seoMetadata?.robots_index ?? true,
-            robots_follow: page.seoMetadata?.robots_follow ?? true,
+            translations: seoTranslations(page.seo_metadata),
+            meta_title: page.seo_metadata?.meta_title ?? '',
+            meta_description: page.seo_metadata?.meta_description ?? '',
+            canonical_url: page.seo_metadata?.canonical_url ?? '',
+            og_title: page.seo_metadata?.og_title ?? '',
+            og_description: page.seo_metadata?.og_description ?? '',
+            og_image_path: page.seo_metadata?.og_image ?? '',
+            robots_index: page.seo_metadata?.robots_index ?? true,
+            robots_follow: page.seo_metadata?.robots_follow ?? true,
         },
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -111,16 +121,16 @@ export default function Edit({
 
             <div className="space-y-6">
                 <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                    <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                     <FormSection title="General" description="Basic identity for this page.">
                         <div>
-                            <Label htmlFor="title">Title</Label>
+                            <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
                             <Input
                                 id="title"
-                                value={data.title}
-                                onChange={(e) => setData('title', e.target.value)}
+                                {...bind('title')}
                                 className="mt-1.5"
                             />
-                            {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                            {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                         </div>
 
                         <div>
@@ -165,6 +175,7 @@ export default function Edit({
 
                     <FormSection title="SEO" description="Search engine and social sharing metadata.">
                         <SeoFields
+                            locale={contentLocale}
                             data={data.seo}
                             onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                             errors={errors}
@@ -185,6 +196,9 @@ export default function Edit({
                     <p className="mt-1 text-sm text-slate-500">
                         Structured sections rendered on the public page, in order.
                     </p>
+                    <div className="mt-4">
+                        <ContentLocaleTabs inline value={contentLocale} onChange={setContentLocale} />
+                    </div>
 
                     <div className="mt-4 space-y-4">
                         {sections.map((section, index) => (
@@ -195,6 +209,7 @@ export default function Edit({
                                 isFirst={index === 0}
                                 isLast={index === sections.length - 1}
                                 onMove={(direction) => moveSection(index, direction)}
+                                locale={contentLocale}
                             />
                         ))}
                     </div>

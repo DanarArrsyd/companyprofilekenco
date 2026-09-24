@@ -1,6 +1,13 @@
+import { LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { ContentLocale, WithTranslations } from '@/lib/translatable-form';
+
+/** SEO text that varies per language; canonical, robots and the OG image are shared. */
+export const SEO_TRANSLATABLE_FIELDS = ['meta_title', 'meta_description', 'og_title', 'og_description'] as const;
+
+type SeoTranslatableField = (typeof SEO_TRANSLATABLE_FIELDS)[number];
 
 export interface SeoFieldsData {
     meta_title: string;
@@ -12,13 +19,29 @@ export interface SeoFieldsData {
     og_image_path: string;
     robots_index: boolean;
     robots_follow: boolean;
+    translations: { id: Record<SeoTranslatableField, string> };
 }
 
 export const SEO_FIELDS_DEFAULT: SeoFieldsData = {
     meta_title: '', meta_description: '', canonical_url: '',
     og_title: '', og_description: '', og_image: null, og_image_path: '',
     robots_index: true, robots_follow: true,
+    translations: { id: { meta_title: '', meta_description: '', og_title: '', og_description: '' } },
 };
+
+/** Indonesian SEO text from a loaded `seoMetadata` record. */
+export function seoTranslations(metadata: object | null | undefined): SeoFieldsData['translations'] {
+    const id = (metadata as WithTranslations | null | undefined)?.translations?.id ?? {};
+
+    return {
+        id: {
+            meta_title: id.meta_title ?? '',
+            meta_description: id.meta_description ?? '',
+            og_title: id.og_title ?? '',
+            og_description: id.og_description ?? '',
+        },
+    };
+}
 
 function robotsValue(data: SeoFieldsData): string {
     if (!data.robots_index) return data.robots_follow ? 'noindex,follow' : 'noindex,nofollow';
@@ -45,6 +68,7 @@ export function SeoFields({
     errors = {},
     titleFallback,
     pageUrl,
+    locale = 'en',
 }: {
     data: SeoFieldsData;
     onChange: (patch: Partial<SeoFieldsData>) => void;
@@ -54,9 +78,18 @@ export function SeoFields({
     titleFallback: string;
     /** Public URL this entity will resolve to — shown in the SERP preview and used as the canonical placeholder. */
     pageUrl: string;
+    /** Active content tab; the four text fields edit the Indonesian translation when 'id'. */
+    locale?: ContentLocale;
 }) {
-    const previewTitle = data.meta_title || titleFallback;
-    const previewDescription = data.meta_description || 'No meta description set — a site default will be used.';
+    const translating = locale !== 'en';
+    const text = (field: SeoTranslatableField) => (translating ? data.translations?.id?.[field] ?? '' : data[field]);
+    const setText = (field: SeoTranslatableField, value: string) =>
+        onChange(translating ? { translations: { id: { ...SEO_FIELDS_DEFAULT.translations.id, ...data.translations?.id, [field]: value } } } : { [field]: value });
+    const textError = (field: SeoTranslatableField) => errors[translating ? `seo.translations.${locale}.${field}` : `seo.${field}`];
+    const english = (field: SeoTranslatableField) => (translating ? data[field] || undefined : undefined);
+
+    const previewTitle = text('meta_title') || data.meta_title || titleFallback;
+    const previewDescription = text('meta_description') || data.meta_description || 'No meta description set — a site default will be used.';
 
     return (
         <div className="space-y-6">
@@ -68,17 +101,17 @@ export function SeoFields({
             </div>
 
             <div>
-                <Label htmlFor="meta_title">Meta title</Label>
-                <Input id="meta_title" value={data.meta_title} onChange={(e) => onChange({ meta_title: e.target.value })} className="mt-1.5" />
-                <p className="mt-1 text-xs text-slate-500">{data.meta_title.length}/60 characters recommended.</p>
-                {errors['seo.meta_title'] && <p className="mt-1 text-sm text-danger">{errors['seo.meta_title']}</p>}
+                <Label htmlFor="meta_title">Meta title<LocaleBadge locale={locale} /></Label>
+                <Input id="meta_title" value={text('meta_title')} onChange={(e) => setText('meta_title', e.target.value)} placeholder={english('meta_title')} className="mt-1.5" />
+                <p className="mt-1 text-xs text-slate-500">{text('meta_title').length}/60 characters recommended.</p>
+                {textError('meta_title') && <p className="mt-1 text-sm text-danger">{textError('meta_title')}</p>}
             </div>
 
             <div>
-                <Label htmlFor="meta_description">Meta description</Label>
-                <textarea id="meta_description" value={data.meta_description} onChange={(e) => onChange({ meta_description: e.target.value })} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
-                <p className="mt-1 text-xs text-slate-500">{data.meta_description.length}/160 characters recommended.</p>
-                {errors['seo.meta_description'] && <p className="mt-1 text-sm text-danger">{errors['seo.meta_description']}</p>}
+                <Label htmlFor="meta_description">Meta description<LocaleBadge locale={locale} /></Label>
+                <textarea id="meta_description" value={text('meta_description')} onChange={(e) => setText('meta_description', e.target.value)} placeholder={english('meta_description')} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                <p className="mt-1 text-xs text-slate-500">{text('meta_description').length}/160 characters recommended.</p>
+                {textError('meta_description') && <p className="mt-1 text-sm text-danger">{textError('meta_description')}</p>}
             </div>
 
             <div>
@@ -103,13 +136,15 @@ export function SeoFields({
             </div>
 
             <div>
-                <Label htmlFor="og_title">OG title</Label>
-                <Input id="og_title" value={data.og_title} onChange={(e) => onChange({ og_title: e.target.value })} className="mt-1.5" placeholder={previewTitle} />
+                <Label htmlFor="og_title">OG title<LocaleBadge locale={locale} /></Label>
+                <Input id="og_title" value={text('og_title')} onChange={(e) => setText('og_title', e.target.value)} className="mt-1.5" placeholder={english('og_title') ?? previewTitle} />
+                {textError('og_title') && <p className="mt-1 text-sm text-danger">{textError('og_title')}</p>}
             </div>
 
             <div>
-                <Label htmlFor="og_description">OG description</Label>
-                <Input id="og_description" value={data.og_description} onChange={(e) => onChange({ og_description: e.target.value })} className="mt-1.5" placeholder={previewDescription} />
+                <Label htmlFor="og_description">OG description<LocaleBadge locale={locale} /></Label>
+                <Input id="og_description" value={text('og_description')} onChange={(e) => setText('og_description', e.target.value)} className="mt-1.5" placeholder={english('og_description') ?? previewDescription} />
+                {textError('og_description') && <p className="mt-1 text-sm text-danger">{textError('og_description')}</p>}
             </div>
 
             <MediaPickerField

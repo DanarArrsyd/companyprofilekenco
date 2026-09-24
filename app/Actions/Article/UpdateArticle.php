@@ -35,6 +35,7 @@ class UpdateArticle
 
         return DB::transaction(function () use ($data, $article, $featuredImage) {
             $article->update([
+                'translations' => $data['translations'] ?? [],
                 'news_category_id' => $data['news_category_id'] ?? null,
                 'title' => $data['title'],
                 'excerpt' => $data['excerpt'] ?? null,

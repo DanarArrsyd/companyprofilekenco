@@ -21,6 +21,7 @@ class UpdatePage
     {
         return DB::transaction(function () use ($page, $data) {
             $page->update([
+                'translations' => $data['translations'] ?? [],
                 'title' => $data['title'],
                 // Slug is intentionally left untouched here — editing a page
                 // must never silently change its public URL.

@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\Facility;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateFacilityRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class UpdateFacilityRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'facility_category_id' => ['nullable', 'integer', Rule::exists('facility_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
@@ -27,5 +30,9 @@ class UpdateFacilityRequest extends FormRequest
             'status' => ['required', new Enum(ContentStatus::class)],
             'published_at' => ['nullable', 'date'],
         ];
+
+        $rules = $this->withTranslations($rules, ['name', 'description']);
+
+        return $rules;
     }
 }

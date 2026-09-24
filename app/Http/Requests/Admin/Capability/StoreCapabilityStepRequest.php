@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Admin\Capability;
 
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCapabilityStepRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -13,9 +16,13 @@ class StoreCapabilityStepRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'description']);
+
+        return $rules;
     }
 }

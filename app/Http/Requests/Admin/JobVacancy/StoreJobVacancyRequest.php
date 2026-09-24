@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\JobVacancy;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreJobVacancyRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreJobVacancyRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable', 'string', 'max:255',
@@ -42,5 +45,9 @@ class StoreJobVacancyRequest extends FormRequest
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'description', 'requirements']);
+
+        return $this->withTranslations($rules, ['meta_title', 'meta_description', 'og_title', 'og_description'], 'seo.');
     }
 }

@@ -42,7 +42,8 @@ class PageSection extends Model
     {
         $attributes = $this->translatableAttributesToArray();
 
-        if (array_key_exists('content', $attributes)) {
+        // Admin editors need the raw per-locale maps to edit both languages.
+        if (array_key_exists('content', $attributes) && ! LocalizedContent::$serializeAllLocales) {
             $attributes['content'] = LocalizedContent::resolve($attributes['content']);
         }
 

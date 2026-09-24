@@ -3,11 +3,12 @@ import { Eye, Plus, Star, Trash2 } from 'lucide-react';
 import { FormEventHandler, useRef, useState } from 'react';
 
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { MediaLibraryButton, MediaPickerField } from '@/components/admin/MediaPicker';
 import { PageHeader } from '@/components/admin/PageHeader';
-import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface ProductImage {
     id: number;
@@ -38,12 +40,14 @@ interface Product {
     published_at: string | null;
     product_category_id: number | null;
     images: ProductImage[];
-    seoMetadata: {
+    seo_metadata: {
         meta_title: string | null; meta_description: string | null; canonical_url: string | null;
         og_title: string | null; og_description: string | null; og_image: string | null;
         robots_index: boolean; robots_follow: boolean;
     } | null;
 }
+
+const TRANSLATABLE_FIELDS = ['short_description', 'description', 'material', 'application', 'manufacturing_process'];
 
 export default function Edit({
     product,
@@ -75,7 +79,9 @@ export default function Edit({
         status: string;
         published_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(product, TRANSLATABLE_FIELDS),
         _method: 'put',
         product_category_id: product.product_category_id ? String(product.product_category_id) : '',
         name: product.name,
@@ -91,16 +97,20 @@ export default function Edit({
         published_at: product.published_at ? product.published_at.slice(0, 16) : '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
-            meta_title: product.seoMetadata?.meta_title ?? '',
-            meta_description: product.seoMetadata?.meta_description ?? '',
-            canonical_url: product.seoMetadata?.canonical_url ?? '',
-            og_title: product.seoMetadata?.og_title ?? '',
-            og_description: product.seoMetadata?.og_description ?? '',
-            og_image_path: product.seoMetadata?.og_image ?? '',
-            robots_index: product.seoMetadata?.robots_index ?? true,
-            robots_follow: product.seoMetadata?.robots_follow ?? true,
+            translations: seoTranslations(product.seo_metadata),
+            meta_title: product.seo_metadata?.meta_title ?? '',
+            meta_description: product.seo_metadata?.meta_description ?? '',
+            canonical_url: product.seo_metadata?.canonical_url ?? '',
+            og_title: product.seo_metadata?.og_title ?? '',
+            og_description: product.seo_metadata?.og_description ?? '',
+            og_image_path: product.seo_metadata?.og_image ?? '',
+            robots_index: product.seo_metadata?.robots_index ?? true,
+            robots_follow: product.seo_metadata?.robots_follow ?? true,
         },
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -151,6 +161,7 @@ export default function Edit({
 
             <div className="space-y-6">
                 <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                    <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                     <FormSection title="General Information">
                         <div>
                             <Label htmlFor="name">Name</Label>
@@ -169,27 +180,27 @@ export default function Edit({
                             </select>
                         </div>
                         <div>
-                            <Label htmlFor="short_description">Short Description</Label>
-                            <Input id="short_description" value={data.short_description} onChange={(e) => setData('short_description', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="short_description">Short Description<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="short_description" {...bind('short_description')} className="mt-1.5" />
                         </div>
                     </FormSection>
 
                     <FormSection title="Product Detail">
                         <div>
-                            <Label htmlFor="description">Description</Label>
-                            <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                            <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                            <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                         </div>
                         <div>
-                            <Label htmlFor="material">Material</Label>
-                            <Input id="material" value={data.material} onChange={(e) => setData('material', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="material">Material<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="material" {...bind('material')} className="mt-1.5" />
                         </div>
                         <div>
-                            <Label htmlFor="application">Application</Label>
-                            <Input id="application" value={data.application} onChange={(e) => setData('application', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="application">Application<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="application" {...bind('application')} className="mt-1.5" />
                         </div>
                         <div>
-                            <Label htmlFor="manufacturing_process">Manufacturing Process</Label>
-                            <Input id="manufacturing_process" value={data.manufacturing_process} onChange={(e) => setData('manufacturing_process', e.target.value)} className="mt-1.5" />
+                            <Label htmlFor="manufacturing_process">Manufacturing Process<LocaleBadge locale={contentLocale} /></Label>
+                            <Input id="manufacturing_process" {...bind('manufacturing_process')} className="mt-1.5" />
                         </div>
                     </FormSection>
 
@@ -224,6 +235,7 @@ export default function Edit({
 
                     <FormSection title="SEO">
                         <SeoFields
+                            locale={contentLocale}
                             data={data.seo}
                             onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                             errors={errors}

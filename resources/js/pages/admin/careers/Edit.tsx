@@ -1,28 +1,32 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
-import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData } from '@/components/admin/SeoFields';
+import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
 import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 
 interface Vacancy {
     id: number; title: string; slug: string; department: string | null; location: string | null;
     employment_type: string | null; description: string | null; requirements: string | null;
     status: string; published_at: string | null; closes_at: string | null;
-    seoMetadata: {
+    seo_metadata: {
         meta_title: string | null; meta_description: string | null; canonical_url: string | null;
         og_title: string | null; og_description: string | null; og_image: string | null;
         robots_index: boolean; robots_follow: boolean;
     } | null;
 }
+
+const TRANSLATABLE_FIELDS = ['title', 'description', 'requirements'];
 
 export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; statusOptions: string[] }) {
     const { can } = usePermissions();
@@ -31,7 +35,9 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
         _method: string; title: string; department: string; location: string; employment_type: string;
         description: string; requirements: string; status: string; published_at: string; closes_at: string;
         seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(vacancy, TRANSLATABLE_FIELDS),
         _method: 'put',
         title: vacancy.title,
         department: vacancy.department ?? '',
@@ -44,16 +50,20 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
         closes_at: vacancy.closes_at ? vacancy.closes_at.slice(0, 16) : '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
-            meta_title: vacancy.seoMetadata?.meta_title ?? '',
-            meta_description: vacancy.seoMetadata?.meta_description ?? '',
-            canonical_url: vacancy.seoMetadata?.canonical_url ?? '',
-            og_title: vacancy.seoMetadata?.og_title ?? '',
-            og_description: vacancy.seoMetadata?.og_description ?? '',
-            og_image_path: vacancy.seoMetadata?.og_image ?? '',
-            robots_index: vacancy.seoMetadata?.robots_index ?? true,
-            robots_follow: vacancy.seoMetadata?.robots_follow ?? true,
+            translations: seoTranslations(vacancy.seo_metadata),
+            meta_title: vacancy.seo_metadata?.meta_title ?? '',
+            meta_description: vacancy.seo_metadata?.meta_description ?? '',
+            canonical_url: vacancy.seo_metadata?.canonical_url ?? '',
+            og_title: vacancy.seo_metadata?.og_title ?? '',
+            og_description: vacancy.seo_metadata?.og_description ?? '',
+            og_image_path: vacancy.seo_metadata?.og_image ?? '',
+            robots_index: vacancy.seo_metadata?.robots_index ?? true,
+            robots_follow: vacancy.seo_metadata?.robots_follow ?? true,
         },
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -84,11 +94,12 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
             />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General Information">
                     <div>
-                        <Label htmlFor="title">Position</Label>
-                        <Input id="title" value={data.title} onChange={(e) => setData('title', e.target.value)} className="mt-1.5" />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        <Label htmlFor="title">Position<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="title" {...bind('title')} className="mt-1.5" />
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label>Slug</Label>
@@ -110,15 +121,15 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
 
                 <FormSection title="Job Description">
                     <div>
-                        <Label htmlFor="description">Description</Label>
-                        <textarea id="description" value={data.description} onChange={(e) => setData('description', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
                 <FormSection title="Requirements">
                     <div>
-                        <Label htmlFor="requirements">Requirements</Label>
-                        <textarea id="requirements" value={data.requirements} onChange={(e) => setData('requirements', e.target.value)} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                        <Label htmlFor="requirements">Requirements<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="requirements" {...bind('requirements')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                     </div>
                 </FormSection>
 
@@ -141,6 +152,7 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
 
                 <FormSection title="SEO">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

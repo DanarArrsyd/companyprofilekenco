@@ -42,6 +42,7 @@ class NewsCategoryController extends Controller
             'name' => $data['name'],
             'slug' => trim($data['slug'] ?? '') !== '' ? $data['slug'] : SlugGenerator::unique('news_categories', $data['name']),
             'description' => $data['description'] ?? null,
+            'translations' => $data['translations'] ?? [],
         ]);
 
         return redirect()->route('admin.news.categories')->with('success', 'News category created.');

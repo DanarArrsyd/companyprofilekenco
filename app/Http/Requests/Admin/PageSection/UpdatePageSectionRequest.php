@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\PageSection;
 
 use App\Enums\SectionType;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use App\Rules\RelativeOrAbsoluteUrl;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdatePageSectionRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class UpdatePageSectionRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'section_type' => ['required', new Enum(SectionType::class)],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
@@ -27,5 +30,9 @@ class UpdatePageSectionRequest extends FormRequest
             'settings_json' => ['nullable', 'array'],
             'is_active' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['title', 'subtitle']);
+
+        return $rules;
     }
 }

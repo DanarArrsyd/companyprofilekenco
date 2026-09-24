@@ -35,6 +35,7 @@ class UpdateProduct
 
         return DB::transaction(function () use ($product, $data, $featuredImage) {
             $product->update([
+                'translations' => $data['translations'] ?? [],
                 'product_category_id' => $data['product_category_id'] ?? null,
                 'name' => $data['name'],
                 // Slug is intentionally left untouched — see Page CMS pattern.

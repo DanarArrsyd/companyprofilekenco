@@ -3,10 +3,13 @@ import { ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { PickerOption, SectionContentFields } from '@/components/admin/SectionContentFields';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { initialTranslations, translatableBinder } from '@/lib/translatable-form';
+import type { ContentLocale, TranslationValues } from '@/lib/translatable-form';
 import { PageSection } from '@/types/cms';
 
 // Section content shape varies per section_type, so it is kept loosely typed here.
@@ -22,6 +25,7 @@ export function PageSectionEditor({
     pickerOptions,
     fixed = false,
     label,
+    locale = 'en',
 }: {
     pageId: number;
     section: PageSection;
@@ -31,6 +35,8 @@ export function PageSectionEditor({
     pickerOptions?: { capabilities?: PickerOption[]; products?: PickerOption[]; facilities?: PickerOption[] };
     fixed?: boolean;
     label?: string;
+    /** Active content tab shared by every section on the page. */
+    locale?: ContentLocale;
 }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
     const { data, setData, put, processing, isDirty, wasSuccessful, errors, setDefaults } = useForm<{
@@ -39,13 +45,16 @@ export function PageSectionEditor({
         subtitle: string;
         content: SectionContent;
         is_active: boolean;
+        translations: { id: TranslationValues };
     }>({
         section_type: section.section_type,
         title: section.title ?? '',
         subtitle: section.subtitle ?? '',
         content: (section.content ?? {}) as SectionContent,
         is_active: section.is_active,
+        translations: initialTranslations(section, ['title', 'subtitle']),
     });
+    const bind = translatableBinder(data, setData, locale);
 
     const save = () => {
         put(route('admin.pages.sections.update', [pageId, section.id]), {
@@ -106,22 +115,12 @@ export function PageSectionEditor({
             <div className="space-y-5 p-6 sm:p-8">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                        <Label htmlFor={`title-${section.id}`}>Title</Label>
-                        <Input
-                            id={`title-${section.id}`}
-                            value={data.title}
-                            onChange={(e) => setData('title', e.target.value)}
-                            className="mt-1.5"
-                        />
+                        <Label htmlFor={`title-${section.id}`}>Title<LocaleBadge locale={locale} /></Label>
+                        <Input id={`title-${section.id}`} {...bind('title')} className="mt-1.5" />
                     </div>
                     <div>
-                        <Label htmlFor={`subtitle-${section.id}`}>Subtitle</Label>
-                        <Input
-                            id={`subtitle-${section.id}`}
-                            value={data.subtitle}
-                            onChange={(e) => setData('subtitle', e.target.value)}
-                            className="mt-1.5"
-                        />
+                        <Label htmlFor={`subtitle-${section.id}`}>Subtitle<LocaleBadge locale={locale} /></Label>
+                        <Input id={`subtitle-${section.id}`} {...bind('subtitle')} className="mt-1.5" />
                     </div>
                 </div>
 
@@ -130,6 +129,7 @@ export function PageSectionEditor({
                     content={data.content}
                     onChange={(content) => setData('content', content as SectionContent)}
                     pickerOptions={pickerOptions}
+                    locale={locale}
                 />
 
                 <div className="flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">

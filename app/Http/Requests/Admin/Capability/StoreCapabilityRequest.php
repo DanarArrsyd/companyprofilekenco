@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\Capability;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreCapabilityRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreCapabilityRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable', 'string', 'max:255',
@@ -43,5 +46,9 @@ class StoreCapabilityRequest extends FormRequest
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['name', 'summary', 'description']);
+
+        return $this->withTranslations($rules, ['meta_title', 'meta_description', 'og_title', 'og_description'], 'seo.');
     }
 }

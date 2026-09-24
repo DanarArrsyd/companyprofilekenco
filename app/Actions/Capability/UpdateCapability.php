@@ -35,6 +35,7 @@ class UpdateCapability
 
         return DB::transaction(function () use ($capability, $data, $featuredImage) {
             $capability->update([
+                'translations' => $data['translations'] ?? [],
                 'name' => $data['name'],
                 'summary' => $data['summary'] ?? null,
                 'description' => $data['description'] ?? null,

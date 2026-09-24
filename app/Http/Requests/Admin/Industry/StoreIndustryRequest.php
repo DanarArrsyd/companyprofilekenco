@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\Industry;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreIndustryRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreIndustryRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable', 'string', 'max:255',
@@ -30,5 +33,9 @@ class StoreIndustryRequest extends FormRequest
             'status' => ['required', new Enum(ContentStatus::class)],
             'published_at' => ['nullable', 'date'],
         ];
+
+        $rules = $this->withTranslations($rules, ['name', 'description']);
+
+        return $rules;
     }
 }

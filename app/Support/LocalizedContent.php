@@ -13,6 +13,13 @@ final class LocalizedContent
 {
     public const FALLBACK = 'en';
 
+    /**
+     * When true (admin requests, set by SetLocale), translatable models also
+     * serialize a `translations` key with every non-English locale so edit
+     * forms can show and resubmit them.
+     */
+    public static bool $serializeAllLocales = false;
+
     public static function resolve(mixed $value, ?string $locale = null): mixed
     {
         if (! is_array($value)) {

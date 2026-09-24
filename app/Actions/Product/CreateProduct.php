@@ -32,6 +32,7 @@ class CreateProduct
 
         return DB::transaction(function () use ($data, $slug, $featuredImage) {
             $product = Product::create([
+                'translations' => $data['translations'] ?? [],
                 'product_category_id' => $data['product_category_id'] ?? null,
                 'name' => $data['name'],
                 'slug' => $slug,

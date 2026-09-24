@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\ProductCategory;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreProductCategoryRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreProductCategoryRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
                 'nullable', 'string', 'max:255',
@@ -27,5 +30,9 @@ class StoreProductCategoryRequest extends FormRequest
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'status' => ['required', new Enum(ContentStatus::class)],
         ];
+
+        $rules = $this->withTranslations($rules, ['name', 'description']);
+
+        return $rules;
     }
 }

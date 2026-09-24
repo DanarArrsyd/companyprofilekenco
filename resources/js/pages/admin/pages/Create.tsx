@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
+import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
 import { FormActions } from '@/components/admin/FormActions';
 import { FormSection } from '@/components/admin/FormSection';
 import { PageHeader } from '@/components/admin/PageHeader';
@@ -9,17 +10,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+
+const TRANSLATABLE_FIELDS = ['title'];
 
 export default function Create({ statusOptions }: { statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
         title: string; slug: string; status: string; published_at: string; seo: SeoFieldsData;
+        translations: { id: TranslationValues };
     }>({
+        translations: initialTranslations(null, TRANSLATABLE_FIELDS),
         title: '',
         slug: '',
         status: 'draft',
         published_at: '',
         seo: SEO_FIELDS_DEFAULT,
     });
+
+    const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
+    const bind = translatableBinder(data, setData, contentLocale);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -36,17 +45,17 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
             />
 
             <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
+                <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 <FormSection title="General" description="Basic identity for this page.">
                     <div>
-                        <Label htmlFor="title">Title</Label>
+                        <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
                         <Input
                             id="title"
-                            value={data.title}
-                            onChange={(e) => setData('title', e.target.value)}
+                            {...bind('title')}
                             className="mt-1.5"
                             autoFocus
                         />
-                        {errors.title && <p className="mt-1 text-sm text-danger">{errors.title}</p>}
+                        {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
 
                     <div>
@@ -96,6 +105,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
 
                 <FormSection title="SEO" description="Search engine and social sharing metadata.">
                     <SeoFields
+                            locale={contentLocale}
                         data={data.seo}
                         onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
                         errors={errors}

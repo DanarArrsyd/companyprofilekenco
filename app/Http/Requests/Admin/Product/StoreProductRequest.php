@@ -3,12 +3,15 @@
 namespace App\Http\Requests\Admin\Product;
 
 use App\Enums\ContentStatus;
+use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class StoreProductRequest extends FormRequest
 {
+    use ValidatesTranslations;
+
     public function authorize(): bool
     {
         return true;
@@ -16,7 +19,7 @@ class StoreProductRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'product_category_id' => ['nullable', 'integer', Rule::exists('product_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
             'slug' => [
@@ -45,5 +48,9 @@ class StoreProductRequest extends FormRequest
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
         ];
+
+        $rules = $this->withTranslations($rules, ['short_description', 'description', 'material', 'application', 'manufacturing_process']);
+
+        return $this->withTranslations($rules, ['meta_title', 'meta_description', 'og_title', 'og_description'], 'seo.');
     }
 }
