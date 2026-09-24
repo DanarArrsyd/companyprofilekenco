@@ -15,7 +15,7 @@
         <link href="https://fonts.bunny.net/css?family=caveat:400,500,600,700|inter:400,500,600,700|montserrat:400,700&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
-        @routes
+        @routes(auth()->check() ? null : 'public', \Illuminate\Support\Facades\Vite::cspNonce())
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead

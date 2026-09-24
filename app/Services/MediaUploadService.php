@@ -102,9 +102,22 @@ class MediaUploadService
         }
     }
 
+    /**
+     * Stored extensions come from the sniffed content, never the client's
+     * file name: validation checks the bytes, so trusting the name would let
+     * a valid PDF/PNG named "x.html" land on the public disk as same-origin
+     * HTML. Anything outside the upload allowlist is stored inert as .bin.
+     */
+    private const STORABLE_EXTENSIONS = ['jpg', 'png', 'webp', 'pdf', 'ico', 'doc', 'docx'];
+
     private function safeFilename(UploadedFile $file): string
     {
-        $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'bin');
+        $extension = strtolower((string) $file->guessExtension());
+        $extension = $extension === 'jpeg' ? 'jpg' : $extension;
+
+        if (! in_array($extension, self::STORABLE_EXTENSIONS, true)) {
+            $extension = 'bin';
+        }
 
         return Str::uuid()->toString().'.'.$extension;
     }

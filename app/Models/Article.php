@@ -6,6 +6,8 @@ use App\Enums\ContentStatus;
 use App\Models\Concerns\HasAuditedBy;
 use App\Models\Concerns\HasPublishingLifecycle;
 use App\Models\Concerns\HasSeoMetadata;
+use App\Services\RichTextSanitizer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,6 +39,17 @@ class Article extends Model
             'published_at' => 'datetime',
             'is_featured' => 'boolean',
         ];
+    }
+
+    /**
+     * Article bodies render as raw HTML on the public site, so every write
+     * is cleaned against the editor's allowlist regardless of entry point.
+     */
+    protected function content(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => app(RichTextSanitizer::class)->sanitize($value),
+        );
     }
 
     public function category(): BelongsTo
