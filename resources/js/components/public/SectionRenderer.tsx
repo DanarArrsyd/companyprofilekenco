@@ -101,7 +101,10 @@ export function SectionRenderer({
                                 )}
                             </div>
 
-                            <div data-reveal="image" className="relative mx-auto w-[min(86%,32rem)] py-8 sm:w-[min(78%,34rem)] lg:w-full lg:py-10">
+                            {/* Plain side reveal, not the masked "image" variant: its final
+                                clip-path: inset(0) would crop the rotated photo corners and
+                                the tapes that deliberately overhang this box. */}
+                            <div data-reveal="auto" className="relative mx-auto w-[min(86%,32rem)] pb-20 pt-10 sm:w-[min(78%,34rem)] sm:pb-24 lg:w-[80%] lg:py-12 xl:w-[88%]">
                                 <div className="relative -rotate-[5deg] transform-gpu">
                                     <div className="relative aspect-[4/3] overflow-hidden border border-navy-900/70 bg-muted shadow-sm">
                                         <img
