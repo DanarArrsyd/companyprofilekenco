@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+    /* Side-entering reveals start offset horizontally; clip (not hidden)
+       stops that from adding a sideways scroll while keeping sticky intact. */
+    html,
+    body {
+        overflow-x: clip;
+    }
+
     html {
         scroll-behavior: smooth;
         scrollbar-width: thin;
@@ -105,6 +112,7 @@
         --reveal-duration: 600ms;
         --reveal-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
         --reveal-rise: min(20%, 40px);
+        --reveal-shift: 40px;
         opacity: 0;
         transition:
             opacity var(--reveal-duration) var(--reveal-ease),
@@ -116,11 +124,11 @@
     }
 
     .scroll-reveal--left {
-        transform: translate3d(-24px, 0, 0);
+        transform: translate3d(calc(var(--reveal-shift) * -1), 0, 0);
     }
 
     .scroll-reveal--right {
-        transform: translate3d(24px, 0, 0);
+        transform: translate3d(var(--reveal-shift), 0, 0);
     }
 
     .scroll-reveal--scale {
@@ -147,6 +155,17 @@
         transition-delay: var(--reveal-delay);
     }
 
+    /* Side-aware image masks open from the edge the image sits on. */
+    .scroll-reveal--image-left {
+        clip-path: inset(0 99% 0 0);
+        transform: translate3d(calc(var(--reveal-shift) * -0.5), 0, 0) scale(1.02);
+    }
+
+    .scroll-reveal--image-right {
+        clip-path: inset(0 0 0 99%);
+        transform: translate3d(calc(var(--reveal-shift) * 0.5), 0, 0) scale(1.02);
+    }
+
     .scroll-reveal--image.is-revealed {
         clip-path: inset(0);
     }
@@ -154,17 +173,10 @@
     @media (max-width: 640px) {
         .scroll-reveal {
             --reveal-rise: min(20%, 24px);
+            --reveal-shift: 16px;
         }
 
-        .scroll-reveal--left {
-            transform: translate3d(-12px, 0, 0);
-        }
-
-        .scroll-reveal--right {
-            transform: translate3d(12px, 0, 0);
-        }
-
-        .scroll-reveal--image {
+        .scroll-reveal--image:not(.scroll-reveal--image-left):not(.scroll-reveal--image-right) {
             transform: translate3d(0, 8px, 0) scale(1.015);
         }
     }

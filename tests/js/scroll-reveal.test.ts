@@ -27,6 +27,13 @@ const resolveRevealState = (
     }
 ).resolveRevealState;
 
+type Box = { left: number; width: number; top: number; height: number };
+
+const { resolveRevealSide, sharesRowWith } = reveal as unknown as {
+    resolveRevealSide?: (element: Box, container: Box) => 'left' | 'center' | 'right';
+    sharesRowWith?: (element: Box, others: Box[]) => boolean;
+};
+
 const preferExplicitRevealTargets = (
     reveal as unknown as {
         preferExplicitRevealTargets?: <T>(targets: T[]) => T[];
@@ -55,7 +62,7 @@ test('defines an image mask transition that opens when revealed', () => {
 test('safelists runtime reveal variants for production CSS', () => {
     const config = readFileSync(new URL('../../tailwind.config.js', import.meta.url), 'utf8');
 
-    for (const variant of ['up', 'left', 'right', 'scale', 'fade', 'image']) {
+    for (const variant of ['up', 'left', 'right', 'scale', 'fade', 'image', 'image-left', 'image-right']) {
         assert.match(config, new RegExp(`['\"]scroll-reveal--${variant}['\"]`));
     }
 });
@@ -119,4 +126,30 @@ test('drops an automatic ancestor when an explicit reveal exists inside it', () 
         preferExplicitRevealTargets?.([automaticAncestor, explicitChild, automaticSibling]),
         [explicitChild, automaticSibling],
     );
+});
+
+const container = { left: 0, width: 1200, top: 0, height: 600 };
+
+test('enters from the side a column occupies', () => {
+    assert.equal(resolveRevealSide?.({ left: 0, width: 560, top: 0, height: 400 }, container), 'left');
+    assert.equal(resolveRevealSide?.({ left: 640, width: 560, top: 0, height: 400 }, container), 'right');
+});
+
+test('keeps the vertical rise for centred or near-full-width blocks', () => {
+    assert.equal(resolveRevealSide?.({ left: 400, width: 400, top: 0, height: 200 }, container), 'center');
+    assert.equal(resolveRevealSide?.({ left: 0, width: 1000, top: 0, height: 200 }, container), 'center');
+});
+
+test('splits a four-column row into left and right halves', () => {
+    const sides = [0, 300, 600, 900].map((left) => resolveRevealSide?.({ left, width: 300, top: 0, height: 120 }, container));
+
+    assert.deepEqual(sides, ['left', 'left', 'right', 'right']);
+});
+
+test('detects side-by-side siblings but not stacked ones', () => {
+    const column = { left: 0, width: 560, top: 0, height: 400 };
+
+    assert.equal(sharesRowWith?.(column, [{ left: 640, width: 560, top: 20, height: 380 }]), true);
+    assert.equal(sharesRowWith?.(column, [{ left: 0, width: 560, top: 420, height: 300 }]), false);
+    assert.equal(sharesRowWith?.(column, [{ left: 640, width: 0, top: 0, height: 0 }]), false);
 });

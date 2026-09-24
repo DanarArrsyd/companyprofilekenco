@@ -19,6 +19,8 @@ export default {
         'scroll-reveal--scale',
         'scroll-reveal--fade',
         'scroll-reveal--image',
+        'scroll-reveal--image-left',
+        'scroll-reveal--image-right',
     ],
 
     theme: {

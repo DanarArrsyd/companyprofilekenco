@@ -137,20 +137,87 @@ export function preferExplicitRevealTargets<T>(targets: T[]): T[] {
     ));
 }
 
-function revealVariant(element: HTMLElement): RevealVariant {
+export type RevealSide = 'left' | 'center' | 'right';
+
+interface HorizontalBox {
+    left: number;
+    width: number;
+}
+
+interface Box extends HorizontalBox {
+    top: number;
+    height: number;
+}
+
+/**
+ * Which side of its container an element sits on. Near-full-width or
+ * near-centred elements count as centre so they keep the vertical rise.
+ */
+export function resolveRevealSide(element: HorizontalBox, container: HorizontalBox): RevealSide {
+    if (container.width <= 0 || element.width / container.width >= 0.66) return 'center';
+
+    const offset = (element.left + element.width / 2 - (container.left + container.width / 2)) / container.width;
+
+    if (offset <= -0.08) return 'left';
+    if (offset >= 0.08) return 'right';
+
+    return 'center';
+}
+
+/** True when another box sits beside this one on the same visual row. */
+export function sharesRowWith(element: Box, others: Box[]): boolean {
+    return others.some((other) => {
+        if (other.width <= 0 || other.height <= 0) return false;
+
+        const verticalOverlap = Math.min(element.top + element.height, other.top + other.height) - Math.max(element.top, other.top);
+        const horizontallyApart = other.left >= element.left + element.width - 1 || other.left + other.width <= element.left + 1;
+
+        return horizontallyApart && verticalOverlap > Math.min(element.height, other.height) * 0.5;
+    });
+}
+
+/**
+ * Elements laid out side by side enter from their own side; stacked or
+ * centred ones rise from below. Measured once, before any reveal transform
+ * is applied, so the layout read is clean.
+ */
+function detectRevealSide(element: HTMLElement): RevealSide {
+    const parent = element.parentElement;
+    if (!parent) return 'center';
+
+    const rect = element.getBoundingClientRect();
+    const siblings = Array.from(parent.children)
+        .filter((child): child is HTMLElement => child !== element && child instanceof HTMLElement)
+        .map((child) => child.getBoundingClientRect());
+
+    if (!sharesRowWith(rect, siblings)) return 'center';
+
+    return resolveRevealSide(rect, parent.getBoundingClientRect());
+}
+
+function revealClasses(element: HTMLElement): string[] {
     const requested = element.dataset.reveal;
 
-    if (requested === 'left' || requested === 'right' || requested === 'scale' || requested === 'fade' || requested === 'image') {
-        return requested;
+    if (requested === 'left' || requested === 'right' || requested === 'scale' || requested === 'fade') {
+        return revealClass(false, requested).split(' ');
     }
 
-    return 'up';
+    const side = detectRevealSide(element);
+
+    if (requested === 'image') {
+        const classes = revealClass(false, 'image').split(' ');
+
+        return side === 'center' ? classes : [...classes, `scroll-reveal--image-${side}`];
+    }
+
+    return revealClass(false, side === 'center' ? 'up' : side).split(' ');
 }
 
 /**
  * Apply one shared observer to meaningful content blocks under the public
- * page root. Markup can override direction with data-reveal or opt out by
- * placing itself under data-reveal-skip.
+ * page root. Direction follows each block's side of its row (data-reveal
+ * "auto" or unset); markup can force a variant with data-reveal or opt out
+ * by sitting under data-reveal-skip.
  */
 export function useScrollRevealBoundary<T extends HTMLElement>(
     rootRef: RefObject<T>,
@@ -186,12 +253,16 @@ export function useScrollRevealBoundary<T extends HTMLElement>(
             scrollRevealObserverOptions,
         );
 
-        targets.forEach((element) => {
+        // Read every layout box before writing any class so measurements are
+        // not skewed by transforms applied to earlier siblings.
+        const classesByTarget = targets.map(revealClasses);
+
+        targets.forEach((element, index) => {
             const parent = element.parentElement ?? root;
             const siblingIndex = siblingIndexes.get(parent) ?? 0;
             siblingIndexes.set(parent, siblingIndex + 1);
 
-            element.classList.add(...revealClass(false, revealVariant(element)).split(' '));
+            element.classList.add(...classesByTarget[index]);
             element.style.setProperty('--reveal-delay', revealDelay(siblingIndex));
             observer.observe(element);
         });

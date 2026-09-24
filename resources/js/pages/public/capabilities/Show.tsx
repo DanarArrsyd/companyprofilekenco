@@ -41,7 +41,7 @@ export default function Show({
                 <Breadcrumb items={breadcrumb} />
 
                 <div className="mt-8 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                    <div data-reveal="left">
+                    <div data-reveal="auto">
                         <h1 className="text-h1 text-navy-900" style={{ textWrap: 'balance' }}>{capability.name}</h1>
                         {capability.summary && <p className="mt-4 text-body-lg text-slate-700">{capability.summary}</p>}
                         {capability.description && <p className="mt-6 text-body text-slate-700">{capability.description}</p>}

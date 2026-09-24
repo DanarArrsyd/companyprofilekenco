@@ -88,7 +88,7 @@ export default function Show({
                         )}
                     </div>
 
-                    <div data-reveal="right">
+                    <div data-reveal="auto">
                         {product.category && <p className="text-caption uppercase text-muted-foreground">{product.category.name}</p>}
                         <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{product.name}</h1>
                         {product.short_description && <p className="mt-4 text-body-lg text-slate-700">{product.short_description}</p>}

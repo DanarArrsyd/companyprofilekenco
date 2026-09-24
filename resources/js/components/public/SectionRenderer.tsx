@@ -65,7 +65,7 @@ export function SectionRenderer({
                 <section className="border-t border-border">
                     <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
-                            <div data-reveal="left" className="order-2 lg:order-1">
+                            <div data-reveal="auto" className="order-2 lg:order-1">
                                 {section.title && <h2 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{section.title}</h2>}
                                 {(section.subtitle || c.body) && (
                                     <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
@@ -92,7 +92,7 @@ export function SectionRenderer({
                 return (
                     <section className="overflow-hidden bg-background">
                         <div className="mx-auto grid max-w-content grid-cols-1 items-center gap-12 px-5 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:gap-20 lg:px-8 lg:py-24">
-                            <div data-reveal="left" className="relative z-10 text-navy-900">
+                            <div data-reveal="auto" className="relative z-10 text-navy-900">
                                 {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
                                 {(section.subtitle || presentation.body) && (
                                     <p className="mt-5 max-w-3xl text-body-lg leading-relaxed text-slate-700">
@@ -145,7 +145,7 @@ export function SectionRenderer({
             return (
                 <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
-                        <div data-reveal="left">
+                        <div data-reveal="auto">
                             {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
                             {(section.subtitle || c.body) && (
                                 <p className="mt-4 text-slate-700">{section.subtitle ?? c.body}</p>
@@ -389,7 +389,7 @@ export function SectionRenderer({
                 <section className="border-t border-border">
                     <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
-                            <div data-reveal="left">
+                            <div data-reveal="auto">
                                 <p className="text-caption uppercase text-muted-foreground">Quality</p>
                                 <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
                                 {(c.description || section.subtitle) && (
@@ -397,7 +397,7 @@ export function SectionRenderer({
                                 )}
                             </div>
                             {certs.length > 0 && (
-                                <div data-reveal="right" className="flex items-start">
+                                <div data-reveal="auto" className="flex items-start">
                                     <CertificationItem items={certs} />
                                 </div>
                             )}
