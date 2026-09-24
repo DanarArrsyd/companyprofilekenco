@@ -3,6 +3,7 @@
 use App\Enums\PageType;
 use App\Enums\SectionType;
 use App\Models\Page;
+use App\Models\PageSection;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
@@ -114,4 +115,48 @@ test('the translatable migration wraps legacy text once and unwraps on rollback'
     $migration->down();
 
     expect(DB::table('statistics')->where('id', $id)->value('label'))->toBe('Legacy label');
+});
+
+test('the Indonesian drafts migration fills untranslated known text only and rolls back its own drafts', function () {
+    $migration = require collect(glob(database_path('migrations/*_add_indonesian_drafts_for_existing_content.php')))->sole();
+
+    $draftId = DB::table('statistics')->insertGetId(['label' => '{"en":"Employees"}', 'value' => '500', 'order' => 0]);
+    $editedId = DB::table('statistics')->insertGetId(['label' => '{"en":"Employees","id":"Tenaga Kerja"}', 'value' => '1', 'order' => 1]);
+    $customId = DB::table('statistics')->insertGetId(['label' => '{"en":"Custom label"}', 'value' => '2', 'order' => 2]);
+
+    $section = PageSection::factory()->create([
+        'title' => ['en' => 'Sekilas Tentang Kami'],
+        'content' => [
+            'primary_cta_label' => 'Contact Us',
+            'primary_cta_url' => '/contact',
+            'items' => [['label' => ['en' => 'Founded'], 'value' => '2017']],
+        ],
+    ]);
+
+    $migration->up();
+    $migration->up();
+
+    expect(DB::table('statistics')->where('id', $draftId)->value('label'))->toBe('{"en":"Employees","id":"Karyawan"}')
+        ->and(DB::table('statistics')->where('id', $editedId)->value('label'))->toBe('{"en":"Employees","id":"Tenaga Kerja"}')
+        ->and(DB::table('statistics')->where('id', $customId)->value('label'))->toBe('{"en":"Custom label"}');
+
+    $fresh = $section->fresh();
+    expect($fresh->getTranslations('title'))->toBe(['en' => 'About Us at a Glance', 'id' => 'Sekilas Tentang Kami'])
+        ->and($fresh->content)->toBe([
+            'primary_cta_label' => ['en' => 'Contact Us', 'id' => 'Hubungi Kami'],
+            'primary_cta_url' => '/contact',
+            'items' => [['label' => ['en' => 'Founded', 'id' => 'Didirikan'], 'value' => '2017']],
+        ]);
+
+    $migration->down();
+
+    $restored = $section->fresh();
+    expect(DB::table('statistics')->where('id', $draftId)->value('label'))->toBe('{"en":"Employees"}')
+        ->and(DB::table('statistics')->where('id', $editedId)->value('label'))->toBe('{"en":"Employees","id":"Tenaga Kerja"}')
+        ->and($restored->getTranslations('title'))->toBe(['en' => 'Sekilas Tentang Kami'])
+        ->and($restored->content)->toBe([
+            'primary_cta_label' => 'Contact Us',
+            'primary_cta_url' => '/contact',
+            'items' => [['label' => 'Founded', 'value' => '2017']],
+        ]);
 });
