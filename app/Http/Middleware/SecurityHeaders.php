@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -11,6 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
  * Browser-side hardening for every web response: a nonce-based CSP so only
  * our own bundles and the inline scripts we emit can run, plus the standard
  * anti-framing, MIME-sniffing and referrer headers.
+ *
+ * The CSP is sent both as a header and as a <meta> tag: Hostinger's edge
+ * replaces the Content-Security-Policy header with its own
+ * "upgrade-insecure-requests", while the meta copy in the HTML survives.
  */
 class SecurityHeaders
 {
@@ -18,6 +23,11 @@ class SecurityHeaders
     {
         // Set before the view renders so @vite and @routes stamp the nonce.
         Vite::useCspNonce();
+
+        $policy = Vite::isRunningHot() ? null : $this->contentSecurityPolicy(Vite::cspNonce(), $request->isSecure());
+
+        // frame-ancestors is ignored in <meta>; X-Frame-Options covers framing.
+        View::share('contentSecurityPolicyMeta', $policy ? str_replace("; frame-ancestors 'self'", '', $policy) : null);
 
         $response = $next($request);
 
@@ -33,8 +43,8 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000');
         }
 
-        if (! Vite::isRunningHot()) {
-            $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy(Vite::cspNonce(), $request->isSecure()));
+        if ($policy) {
+            $response->headers->set('Content-Security-Policy', $policy);
         }
 
         return $response;

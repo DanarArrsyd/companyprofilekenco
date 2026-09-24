@@ -54,3 +54,15 @@ test('password reset requests are throttled', function () {
 
     $this->post(route('password.email'), ['email' => 'nobody@kenco.test'])->assertStatus(429);
 });
+
+test('the CSP is repeated in a meta tag so an edge-rewritten header cannot drop it', function () {
+    $response = $this->get('/');
+    $header = $response->headers->get('Content-Security-Policy');
+
+    preg_match('/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/', $response->getContent(), $meta);
+
+    expect($meta[1] ?? null)->not->toBeNull();
+    expect(html_entity_decode($meta[1]))
+        ->toBe(str_replace("; frame-ancestors 'self'", '', $header))
+        ->not->toContain('frame-ancestors');
+});
