@@ -20,6 +20,7 @@ interface Settings {
     seo_title_separator: string | null; seo_default_robots: string | null;
     seo_twitter_card_type: string | null; seo_twitter_username: string | null;
     maintenance_mode: boolean;
+    show_language_switcher: boolean;
 }
 
 const TABS = ['General', 'Branding', 'Contact', 'Social Media', 'SEO Defaults', 'System'] as const;
@@ -39,6 +40,7 @@ export default function Edit({ settings }: { settings: Settings }) {
         seo_title_separator: string; seo_default_robots: string;
         seo_twitter_card_type: string; seo_twitter_username: string;
         maintenance_mode: boolean;
+        show_language_switcher: boolean;
     }>({
         _method: 'put',
         company_name: settings.company_name ?? '',
@@ -65,6 +67,7 @@ export default function Edit({ settings }: { settings: Settings }) {
         seo_twitter_card_type: settings.seo_twitter_card_type ?? 'summary_large_image',
         seo_twitter_username: settings.seo_twitter_username ?? '',
         maintenance_mode: settings.maintenance_mode,
+        show_language_switcher: settings.show_language_switcher,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -241,6 +244,13 @@ export default function Edit({ settings }: { settings: Settings }) {
                         <label className="flex items-center gap-2 text-sm text-slate-700">
                             <input type="checkbox" checked={data.maintenance_mode} onChange={(e) => setData('maintenance_mode', e.target.checked)} className="rounded border-border" />
                             Maintenance mode
+                        </label>
+                        <label className="mt-3 flex items-start gap-2 text-sm text-slate-700">
+                            <input type="checkbox" checked={data.show_language_switcher} onChange={(e) => setData('show_language_switcher', e.target.checked)} className="mt-0.5 rounded border-border" />
+                            <span>
+                                Show language switcher (EN/ID)
+                                <span className="block text-xs text-slate-500">Preview only until Indonesian content is available — the ID option stays disabled.</span>
+                            </span>
                         </label>
                     </FormSection>
                 )}

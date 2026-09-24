@@ -14,11 +14,11 @@ const getNavbarTransformClass = (
         getNavbarTransformClass?: (navbarHidden: boolean, drawerOpen: boolean) => string;
     }
 ).getNavbarTransformClass;
-const getNavbarSurfaceClass = (
+const getTrappedFocusIndex = (
     navbarState as unknown as {
-        getNavbarSurfaceClass?: (transparentHero: boolean, drawerOpen: boolean) => string;
+        getTrappedFocusIndex?: (currentIndex: number, total: number, backwards: boolean) => number | null;
     }
-).getNavbarSurfaceClass;
+).getTrappedFocusIndex;
 const getBodyScrollLockStyles = (
     navbarState as unknown as {
         getBodyScrollLockStyles?: (scrollY: number) => Record<string, string>;
@@ -62,8 +62,27 @@ test('removes the header transform while the viewport-fixed drawer is open', () 
     assert.equal(getNavbarTransformClass?.(false, true), 'transform-none');
 });
 
-test('removes the backdrop-filter containing block while the drawer is open', () => {
-    assert.equal(getNavbarSurfaceClass?.(false, true), 'bg-transparent');
+test('slides the logo tab away only while the menu is closed', () => {
+    assert.equal(getNavbarTransformClass?.(true, false), '-translate-y-full');
+    assert.equal(getNavbarTransformClass?.(false, false), 'translate-y-0');
+});
+
+test('wraps focus from the last menu element back to the first', () => {
+    assert.equal(getTrappedFocusIndex?.(4, 5, false), 0);
+});
+
+test('wraps Shift+Tab from the first menu element to the last', () => {
+    assert.equal(getTrappedFocusIndex?.(0, 5, true), 4);
+});
+
+test('pulls stray focus back into the menu', () => {
+    assert.equal(getTrappedFocusIndex?.(-1, 5, false), 0);
+    assert.equal(getTrappedFocusIndex?.(-1, 5, true), 4);
+});
+
+test('leaves focus moves between inner menu elements to the browser', () => {
+    assert.equal(getTrappedFocusIndex?.(2, 5, false), null);
+    assert.equal(getTrappedFocusIndex?.(0, 0, false), null);
 });
 
 test('locks the page without losing its current scroll offset', () => {

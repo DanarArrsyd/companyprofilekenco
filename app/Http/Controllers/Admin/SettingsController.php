@@ -60,6 +60,7 @@ class SettingsController extends Controller
         }
 
         $data['maintenance_mode'] = $request->boolean('maintenance_mode');
+        $data['show_language_switcher'] = $request->boolean('show_language_switcher');
 
         $this->settings->setMany($data);
 

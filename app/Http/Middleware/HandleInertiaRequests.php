@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Article;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -58,7 +59,9 @@ class HandleInertiaRequests extends Middleware
                     'youtube' => $settings['social_youtube'] ?: null,
                     'instagram' => $settings['social_instagram'] ?: null,
                 ],
+                'show_language_switcher' => (bool) $settings['show_language_switcher'],
             ],
+            'menuNews' => $request->is('admin', 'admin/*') ? [] : fn () => $this->menuNews(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
@@ -66,5 +69,26 @@ class HandleInertiaRequests extends Middleware
                 'info' => fn () => $request->session()->get('info'),
             ],
         ];
+    }
+
+    /**
+     * Latest published articles for the public navigation panel.
+     *
+     * @return array<int, array{title: string, slug: string, featured_image: ?string, published_at: ?string}>
+     */
+    private function menuNews(): array
+    {
+        return Article::query()
+            ->published()
+            ->latest('published_at')
+            ->limit(2)
+            ->get(['title', 'slug', 'featured_image', 'published_at'])
+            ->map(fn (Article $article) => [
+                'title' => $article->title,
+                'slug' => $article->slug,
+                'featured_image' => $article->featured_image,
+                'published_at' => $article->published_at?->toDateString(),
+            ])
+            ->all();
     }
 }

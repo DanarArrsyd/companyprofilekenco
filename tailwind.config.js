@@ -63,6 +63,10 @@ export default {
                     700: 'rgb(var(--color-navy-700) / <alpha-value>)',
                 },
                 charcoal: 'rgb(var(--color-charcoal) / <alpha-value>)',
+                gray: {
+                    200: 'rgb(var(--color-gray-200) / <alpha-value>)',
+                    100: 'rgb(var(--color-gray-100) / <alpha-value>)',
+                },
                 slate: {
                     700: 'rgb(var(--color-slate-700) / <alpha-value>)',
                     500: 'rgb(var(--color-slate-500) / <alpha-value>)',

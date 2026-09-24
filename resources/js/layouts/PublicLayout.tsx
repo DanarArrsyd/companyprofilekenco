@@ -12,10 +12,9 @@ export default function PublicLayout({
     heroVariant = 'solid',
 }: PropsWithChildren<{
     /**
-     * 'transparent-dark' / 'transparent-light' float the header over a
-     * full-bleed hero image (see resources/js/components/public/Hero.tsx),
-     * in white or navy text depending on how light the hero image/overlay
-     * is. 'solid' is every page without a hero.
+     * 'transparent-*' pages open on a full-bleed hero (see
+     * resources/js/components/public/Hero.tsx) that reserves its own top
+     * space; 'solid' pages get top padding so content clears the logo tab.
      */
     heroVariant?: 'transparent-dark' | 'transparent-light' | 'solid';
 }>) {
@@ -29,7 +28,7 @@ export default function PublicLayout({
 
     return (
         <div className="flex min-h-screen flex-col bg-background text-foreground">
-            <PublicNavbar companyName={companyName} variant={heroVariant} />
+            <PublicNavbar companyName={companyName} />
             {/* Header is fixed (out of document flow) on every page, so
                 solid-header pages need top padding equal to its height
                 (h-20) to keep content clear of it. Transparent/hero pages

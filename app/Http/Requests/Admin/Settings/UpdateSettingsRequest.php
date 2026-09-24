@@ -44,6 +44,7 @@ class UpdateSettingsRequest extends FormRequest
             'seo_twitter_username' => ['nullable', 'string', 'max:50'],
 
             'maintenance_mode' => ['boolean'],
+            'show_language_switcher' => ['boolean'],
         ];
     }
 }

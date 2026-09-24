@@ -22,6 +22,14 @@ export interface SiteSettings {
     operating_hours: string | null;
     map_embed_url: string | null;
     social: { linkedin: string | null; youtube: string | null; instagram: string | null };
+    show_language_switcher: boolean;
+}
+
+export interface MenuNewsItem {
+    title: string;
+    slug: string;
+    featured_image: string | null;
+    published_at: string | null;
 }
 
 export type PageProps<
@@ -34,4 +42,5 @@ export type PageProps<
     };
     flash: FlashMessages;
     siteSettings: SiteSettings;
+    menuNews: MenuNewsItem[];
 };

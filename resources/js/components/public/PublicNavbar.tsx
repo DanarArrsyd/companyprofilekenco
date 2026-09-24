@@ -1,17 +1,19 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronDown, ChevronRight, Menu, X } from 'lucide-react';
-import { MouseEvent, useEffect, useRef, useState } from 'react';
+import { ChevronRight, Home } from 'lucide-react';
+import { KeyboardEvent as ReactKeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 
 import logoKmi from '../../../img/logo_kmi.png';
 
 import {
     createNavbarHiddenUpdater,
     getBodyScrollLockStyles,
-    getNavbarSurfaceClass,
     getNavbarTransformClass,
+    getTrappedFocusIndex,
     shouldRestoreMenuTriggerFocus,
 } from '@/components/public/navbar-scroll';
+import { mediaUrl } from '@/lib/media';
 import { pauseSmoothScroll, resumeSmoothScroll, scrollToElement } from '@/lib/smooth-scroll';
+import type { PageProps } from '@/types';
 
 interface NavLink {
     label: string;
@@ -42,8 +44,28 @@ const NAV: NavItem[] = [
     { label: 'Contact Us', href: '/contact' },
 ];
 
+// Only English content exists today; Indonesian is shown as upcoming.
+const LANGUAGES = [
+    { code: 'ID', label: 'Bahasa Indonesia', available: false },
+    { code: 'EN', label: 'English', available: true },
+] as const;
+
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
+
 function isActive(currentUrl: string, href: string): boolean {
-    return href === '/' ? currentUrl === '/' : currentUrl.startsWith(href);
+    const path = currentUrl.split('#')[0];
+
+    return href === '/' ? path === '/' : path.startsWith(href.split('#')[0]);
+}
+
+function submenuId(label: string): string {
+    return `menu-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+}
+
+function formatNewsDate(date: string | null): string | null {
+    if (!date) return null;
+
+    return new Date(`${date}T00:00:00`).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 /**
@@ -73,34 +95,51 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
     }, DRAWER_TRANSITION_MS + 30);
 }
 
-// Keep in sync with the menu overlay's `duration-[320ms]` Tailwind class —
-// the exit animation must finish before it unmounts.
+// Keep in sync with the panel's `duration-[320ms]` Tailwind class — the
+// exit animation must finish before it unmounts.
 const DRAWER_TRANSITION_MS = 320;
 const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
 
-export function PublicNavbar({
-    companyName,
-    variant = 'solid',
-}: {
-    companyName: string;
-    /**
-     * 'transparent-dark' floats the header (white text/icons) over a dark
-     * hero photo. 'transparent-light' floats it (navy text/icons) over a
-     * light/washed-out hero photo. 'solid' is used on pages without a hero.
-     * Away from the top, every variant uses the same translucent surface so
-     * the page remains visible behind the navigation.
-     */
-    variant?: 'transparent-dark' | 'transparent-light' | 'solid';
-}) {
-    const { url } = usePage();
+/** Hidden below 380px, where the wordmark logo and menu trigger need the room. */
+function LanguageSwitch({ hidden }: { hidden: boolean }) {
+    return (
+        <div
+            role="group"
+            aria-label="Language"
+            className={`flex items-center gap-0.5 rounded-full bg-gray-200 p-1 transition-[opacity,visibility] duration-200 max-[379px]:hidden sm:p-1.5 ${
+                hidden ? 'invisible opacity-0' : 'visible opacity-100'
+            }`}
+        >
+            {LANGUAGES.map((language) => (
+                <button
+                    key={language.code}
+                    type="button"
+                    lang={language.code.toLowerCase()}
+                    aria-label={language.available ? language.label : `${language.label} (coming soon)`}
+                    aria-pressed={language.available}
+                    disabled={!language.available}
+                    title={language.available ? language.label : `${language.label} — coming soon`}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-small font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-700 sm:h-11 sm:w-11 ${
+                        language.available ? 'bg-white text-navy-900' : 'cursor-not-allowed text-slate-500'
+                    }`}
+                >
+                    {language.code}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+export function PublicNavbar({ companyName }: { companyName: string }) {
+    const { url, props } = usePage<PageProps>();
+    const { siteSettings, menuNews = [] } = props;
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerMounted, setDrawerMounted] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
     const [navbarHidden, setNavbarHidden] = useState(false);
-    const [previewedItem, setPreviewedItem] = useState<NavItem | null>(null);
+    const [expandedItem, setExpandedItem] = useState<string | null>(null);
     const openButtonRef = useRef<HTMLButtonElement>(null);
-    const closeButtonRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
     const previousDrawerOpenRef = useRef(false);
     const previousScrollYRef = useRef(0);
 
@@ -109,14 +148,16 @@ export function PublicNavbar({
         setNavbarHidden(false);
     }, [url]);
 
-    // Clear the desktop right-pane preview whenever the menu closes, so it
-    // reopens blank instead of showing whatever was last hovered.
+    // Reopen with the section that holds the current page already expanded.
     useEffect(() => {
-        if (!drawerOpen) setPreviewedItem(null);
-    }, [drawerOpen]);
+        if (!drawerOpen) return;
 
-    // Keep navigation out of the content's way while moving down, then make
-    // it immediately reachable again when the visitor reverses direction.
+        const current = NAV.find((item) => item.children?.some((child) => isActive(url, child.href)));
+        setExpandedItem(current?.label ?? null);
+    }, [drawerOpen, url]);
+
+    // Keep the logo tab out of the content's way while moving down, then
+    // bring it back as soon as the visitor reverses direction.
     useEffect(() => {
         previousScrollYRef.current = window.scrollY;
 
@@ -128,7 +169,6 @@ export function PublicNavbar({
                 drawerOpen,
             });
 
-            setScrolled(currentY > 24);
             setNavbarHidden(updateNavbarHidden);
             previousScrollYRef.current = currentY;
         };
@@ -138,7 +178,7 @@ export function PublicNavbar({
         return () => window.removeEventListener('scroll', onScroll);
     }, [drawerOpen]);
 
-    // Mount the dialog for open AND for the duration of the close transition,
+    // Mount the panel for open AND for the duration of the close transition,
     // so the exit animation gets a chance to play instead of being clipped
     // by an instant unmount.
     useEffect(() => {
@@ -164,13 +204,14 @@ export function PublicNavbar({
     }, [drawerOpen]);
 
     useEffect(() => {
-        if (drawerOpen) {
-            closeButtonRef.current?.focus();
+        if (drawerOpen && drawerMounted) {
+            panelRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)?.focus({ preventScroll: true });
         } else if (shouldRestoreMenuTriggerFocus(previousDrawerOpenRef.current, drawerOpen)) {
             openButtonRef.current?.focus();
         }
+
         previousDrawerOpenRef.current = drawerOpen;
-    }, [drawerOpen]);
+    }, [drawerOpen, drawerMounted]);
 
     useEffect(() => {
         if (!drawerMounted) return;
@@ -214,195 +255,261 @@ export function PublicNavbar({
         return () => document.removeEventListener('keydown', onKeyDown);
     }, [drawerOpen]);
 
-    const transparentHero = variant !== 'solid' && !scrolled;
-    const light = variant === 'transparent-light';
+    // Keep keyboard focus inside the menu trigger + panel while open; the
+    // page behind is scroll-locked and dimmed, so tabbing into it is a trap
+    // of its own.
+    function trapFocus(e: ReactKeyboardEvent) {
+        if (e.key !== 'Tab' || !drawerOpen || !panelRef.current) return;
+
+        const focusables = [
+            openButtonRef.current,
+            ...Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)),
+        ].filter((element): element is HTMLElement => (
+            element !== null && element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden'
+        ));
+        const next = getTrappedFocusIndex(focusables.indexOf(document.activeElement as HTMLElement), focusables.length, e.shiftKey);
+
+        if (next === null) return;
+
+        e.preventDefault();
+        focusables[next].focus();
+    }
+
+    const closeMenu = () => setDrawerOpen(false);
+    const year = new Date().getFullYear();
+    const phoneHref = siteSettings.phone ? `tel:${siteSettings.phone.replace(/[^+\d]/g, '')}` : null;
 
     return (
-        <header className="fixed inset-x-0 top-0 z-50">
-            {/*
-                The hide-on-scroll slide only ever applies to this bar (logo +
-                surface). The menu trigger below lives outside it so it stays
-                reachable and instantly tappable even while the bar is off-screen
-                — no waiting on a re-entrance transition before the drawer can open.
-            */}
+        <header onKeyDown={trapFocus}>
+            {/* Logo tab — a white corner card so the mark stays legible over any hero. */}
             <div
-                className={`transition-[transform,background-color,border-color] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${getNavbarTransformClass(navbarHidden)} ${getNavbarSurfaceClass(transparentHero, drawerOpen)}`}
+                className={`fixed left-0 top-0 z-50 transition-transform duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${getNavbarTransformClass(navbarHidden, drawerOpen)}`}
             >
-                <div className="mx-auto flex h-20 max-w-content items-center justify-between px-5 sm:px-6 lg:px-8">
-                    <Link
-                        href="/"
-                        className={`flex shrink-0 items-center gap-2 text-base font-semibold tracking-tight transition-colors duration-200 ${
-                            transparentHero && !light ? 'text-white' : 'text-navy-900'
-                        }`}
-                    >
-                        <img src={logoKmi} alt={companyName} className="h-8 w-auto" />
-                    </Link>
-
-                    <span className="h-10 w-10" aria-hidden="true" />
-                </div>
+                <Link
+                    href="/"
+                    className="flex h-16 items-center rounded-br-[28px] bg-white pl-5 pr-6 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] sm:h-20 sm:rounded-br-[40px] sm:pl-8 sm:pr-10 lg:pl-10 lg:pr-12"
+                >
+                    <img src={logoKmi} alt={companyName} className="h-5 w-auto sm:h-8 lg:h-9" />
+                </Link>
             </div>
 
-            <div className="pointer-events-none absolute inset-0">
-                <div className="mx-auto flex h-20 max-w-content items-center justify-end px-5 sm:px-6 lg:px-8">
-                    <button
-                        ref={openButtonRef}
-                        type="button"
-                        onClick={() => setDrawerOpen((open) => !open)}
-                        aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                        aria-haspopup="dialog"
-                        aria-expanded={drawerOpen}
-                        className={`pointer-events-auto relative inline-flex h-10 w-10 items-center justify-center transition-colors duration-200 active:scale-90 ${
-                            transparentHero
-                                ? light
-                                    ? 'text-navy-900 hover:text-navy-700'
-                                    : 'text-white hover:text-white/70'
-                                : 'text-slate-700 hover:text-navy-900'
-                        }`}
-                    >
-                        <span className="relative inline-flex h-6 w-6 items-center justify-center">
-                            <Menu
-                                className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                    drawerOpen ? 'rotate-90 scale-75 opacity-0' : 'rotate-0 scale-100 opacity-100'
-                                }`}
-                                aria-hidden="true"
-                            />
-                            <X
-                                className={`absolute h-6 w-6 transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                    drawerOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-75 opacity-0'
-                                }`}
-                                aria-hidden="true"
-                            />
-                        </span>
-                    </button>
-                </div>
+            {/* Controls stay put on scroll and sit above the panel, so the
+                trigger doubles as the close button. */}
+            <div className="fixed right-4 top-3 z-[70] flex items-center gap-2 sm:right-6 sm:top-4 sm:gap-3 lg:right-8">
+                {siteSettings.show_language_switcher && <LanguageSwitch hidden={drawerOpen} />}
+
+                <button
+                    ref={openButtonRef}
+                    type="button"
+                    onClick={() => setDrawerOpen((open) => !open)}
+                    aria-label={drawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                    aria-haspopup="dialog"
+                    aria-expanded={drawerOpen}
+                    className="inline-flex h-11 w-14 items-center justify-center rounded-full bg-white text-navy-900 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] transition-colors duration-200 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-700 sm:h-14 sm:w-16"
+                >
+                    <span className="relative block h-4 w-7 sm:w-8" aria-hidden="true">
+                        <span
+                            className={`absolute left-0 top-0 h-0.5 w-full rounded-full bg-current transition-transform duration-500 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                drawerOpen ? 'translate-y-[7px] rotate-45' : ''
+                            }`}
+                        />
+                        <span
+                            className={`absolute left-0 top-[7px] h-0.5 w-full rounded-full bg-current transition-opacity duration-200 motion-reduce:transition-none ${
+                                drawerOpen ? 'opacity-0' : 'opacity-100'
+                            }`}
+                        />
+                        <span
+                            className={`absolute left-0 top-[14px] h-0.5 w-full rounded-full bg-current transition-transform duration-500 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                drawerOpen ? '-translate-y-[7px] -rotate-45' : ''
+                            }`}
+                        />
+                    </span>
+                </button>
             </div>
 
             {drawerMounted && (
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Navigation menu"
-                    data-lenis-prevent
-                    className={`scrollbar-hide fixed inset-0 z-[60] flex flex-col overflow-y-auto md:flex-row md:overflow-hidden transition-[opacity,transform] duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none ${
-                        drawerEntered ? 'scale-100 opacity-100' : 'scale-[0.98] opacity-0'
-                    }`}
-                >
-                    <button
-                        ref={closeButtonRef}
-                        type="button"
-                        onClick={() => setDrawerOpen(false)}
-                        aria-label="Close navigation menu"
-                        className="fixed right-5 top-5 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-navy-900 shadow-md transition-transform duration-200 hover:scale-105 active:scale-95"
-                    >
-                        <X className="h-5 w-5" aria-hidden="true" />
-                    </button>
-
-                    {/* Main menu — always navy/white, full width on mobile. */}
-                    <nav
-                        aria-label="Primary"
-                        className="scrollbar-hide flex w-full shrink-0 flex-col bg-navy-900 px-5 pb-8 pt-20 text-white sm:px-10 sm:pt-24 md:w-1/2 md:overflow-y-auto md:px-14 md:py-24 lg:w-[55%] lg:px-20"
-                    >
-                        <ul className="flex-1">
-                            {NAV.map((item, index) => (
-                                <li
-                                    key={item.label}
-                                    className={`transition-all duration-300 ${DRAWER_EASE} motion-reduce:transition-none motion-reduce:translate-y-0 motion-reduce:opacity-100 ${
-                                        drawerEntered ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
-                                    }`}
-                                    style={{ transitionDelay: drawerEntered ? `${60 + index * 40}ms` : '0ms' }}
-                                >
-                                    {item.children ? (
-                                        <>
-                                            {/* Desktop: hover/focus previews children in the right pane. */}
-                                            <button
-                                                type="button"
-                                                onMouseEnter={() => setPreviewedItem(item)}
-                                                onFocus={() => setPreviewedItem(item)}
-                                                onClick={() => setPreviewedItem(item)}
-                                                className={`hidden w-full items-center justify-between py-4 text-left text-h3 font-semibold transition-colors duration-200 md:flex ${
-                                                    previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
-                                                }`}
-                                            >
-                                                {item.label}
-                                                <ChevronRight className="h-5 w-5 shrink-0 opacity-50" aria-hidden="true" />
-                                            </button>
-
-                                            {/* Mobile: stacked accordion, no right pane to hover into. */}
-                                            <details className="group md:hidden" open={item.children.some((c) => isActive(url, c.href))}>
-                                                <summary className="flex cursor-pointer list-none items-center justify-between py-3 text-h4 font-semibold sm:py-4 sm:text-h3">
-                                                    {item.label}
-                                                    <ChevronDown
-                                                        className="h-4 w-4 shrink-0 text-white/60 transition-transform group-open:rotate-180 sm:h-5 sm:w-5"
-                                                        aria-hidden="true"
-                                                    />
-                                                </summary>
-                                                <ul className="space-y-1 border-l border-white/15 py-2 pl-4">
-                                                    {item.children.map((child) => (
-                                                        <li key={child.href}>
-                                                            <Link
-                                                                href={child.href}
-                                                                onClick={(e) => handleAnchorLinkClick(e, child.href, () => setDrawerOpen(false))}
-                                                                className={`block py-2 text-small ${
-                                                                    isActive(url, child.href) ? 'text-white' : 'text-white/70 hover:text-white'
-                                                                }`}
-                                                            >
-                                                                {child.label}
-                                                            </Link>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </details>
-                                        </>
-                                    ) : (
-                                        <Link
-                                            href={item.href!}
-                                            onMouseEnter={() => setPreviewedItem(item)}
-                                            onFocus={() => setPreviewedItem(item)}
-                                            className={`block py-3 text-h4 font-semibold transition-colors duration-200 sm:py-4 sm:text-h3 ${
-                                                previewedItem?.label === item.label ? 'text-white/45' : 'text-white'
-                                            } ${isActive(url, item.href!) ? 'underline decoration-2 underline-offset-4' : ''}`}
-                                        >
-                                            {item.label}
-                                        </Link>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
-
-                    {/*
-                        Submenu preview — desktop/tablet only. Stays navy (blended
-                        with the left column) until a parent item is previewed,
-                        then flips to the light surface to host its children.
-                    */}
+                <div className="fixed inset-0 z-[60]">
                     <div
-                        className={`scrollbar-hide hidden px-14 py-24 transition-colors duration-300 ${DRAWER_EASE} motion-reduce:transition-none md:flex md:w-1/2 md:flex-col md:justify-center md:overflow-y-auto lg:w-[45%] lg:px-20 ${
-                            previewedItem?.children ? 'bg-background text-navy-900' : 'bg-navy-900 text-white'
+                        aria-hidden="true"
+                        onClick={closeMenu}
+                        className={`absolute inset-0 bg-navy-900/40 transition-opacity duration-300 motion-reduce:transition-none ${
+                            drawerEntered ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
+
+                    <div
+                        ref={panelRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label="Navigation menu"
+                        data-lenis-prevent
+                        className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] md:rounded-l-[40px] ${
+                            drawerEntered ? 'translate-x-0' : 'translate-x-full'
                         }`}
                     >
-                        {previewedItem?.children && (
-                            <ul key={previewedItem.label} className="space-y-3">
-                                {previewedItem.children.map((child, index) => (
-                                    <li
-                                        key={child.href}
-                                        className="submenu-item-enter"
-                                        style={{ animationDelay: `${index * 40}ms` }}
-                                    >
-                                        <Link
-                                            href={child.href}
-                                            onClick={(e) => handleAnchorLinkClick(e, child.href, () => setDrawerOpen(false))}
-                                            className={`block text-h4 font-medium transition-colors duration-200 ${
-                                                isActive(url, child.href)
-                                                    ? 'text-navy-900 underline decoration-2 underline-offset-4'
-                                                    : 'text-navy-700 hover:text-navy-900'
-                                            }`}
-                                        >
-                                            {child.label}
-                                        </Link>
+                        <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[88px] sm:px-10 lg:px-14">
+                            <Link
+                                href="/"
+                                aria-label="Home"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                            >
+                                <Home className="h-5 w-5" aria-hidden="true" />
+                            </Link>
+                            <span className="rounded-full bg-white/10 px-3 py-1 text-small font-medium text-white/80">Menu</span>
+                        </div>
+
+                        <div className="flex flex-1 flex-col px-6 pb-10 pt-4 sm:px-10 lg:flex-row lg:px-14 lg:pt-8">
+                            <nav aria-label="Primary" className={menuNews.length > 0 ? 'lg:w-[52%] lg:pr-10' : 'lg:w-full lg:max-w-xl'}>
+                                <ul>
+                                    {NAV.map((item, index) => {
+                                        const expanded = expandedItem === item.label;
+                                        const staggerStyle = { transitionDelay: drawerEntered ? `${80 + index * 40}ms` : '0ms' };
+                                        const staggerClass = `transition-[opacity,transform] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                            drawerEntered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'
+                                        }`;
+
+                                        if (!item.children) {
+                                            const active = isActive(url, item.href!);
+
+                                            return (
+                                                <li key={item.label} className={staggerClass} style={staggerStyle}>
+                                                    <Link
+                                                        href={item.href!}
+                                                        aria-current={active ? 'page' : undefined}
+                                                        className="group flex py-2.5 text-h4 font-semibold focus-visible:outline-none sm:py-3 sm:text-h3"
+                                                    >
+                                                        <span
+                                                            className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
+                                                                active ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
+                                                            }`}
+                                                        >
+                                                            {item.label}
+                                                        </span>
+                                                    </Link>
+                                                </li>
+                                            );
+                                        }
+
+                                        const sectionActive = item.children.some((child) => isActive(url, child.href));
+
+                                        return (
+                                            <li key={item.label} className={staggerClass} style={staggerStyle}>
+                                                <button
+                                                    type="button"
+                                                    aria-expanded={expanded}
+                                                    aria-controls={submenuId(item.label)}
+                                                    onClick={() => setExpandedItem(expanded ? null : item.label)}
+                                                    className="group flex w-full items-center justify-between gap-6 py-2.5 text-left text-h4 font-semibold focus-visible:outline-none sm:py-3 sm:text-h3"
+                                                >
+                                                    <span
+                                                        className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
+                                                            sectionActive ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
+                                                        }`}
+                                                    >
+                                                        {item.label}
+                                                    </span>
+                                                    <ChevronRight
+                                                        className={`h-5 w-5 shrink-0 text-white/60 transition-transform duration-300 ${DRAWER_EASE} group-hover:text-white motion-reduce:transition-none sm:h-6 sm:w-6 ${
+                                                            expanded ? 'rotate-90' : ''
+                                                        }`}
+                                                        aria-hidden="true"
+                                                    />
+                                                </button>
+
+                                                <div
+                                                    id={submenuId(item.label)}
+                                                    className={`grid transition-[grid-template-rows,visibility] duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                                        expanded ? 'visible grid-rows-[1fr]' : 'invisible grid-rows-[0fr]'
+                                                    }`}
+                                                >
+                                                    <ul className="min-h-0 overflow-hidden">
+                                                        {item.children.map((child) => {
+                                                            const active = isActive(url, child.href) && !child.href.includes('#');
+
+                                                            return (
+                                                                <li key={child.href}>
+                                                                    <Link
+                                                                        href={child.href}
+                                                                        aria-current={active ? 'page' : undefined}
+                                                                        onClick={(e) => handleAnchorLinkClick(e, child.href, closeMenu)}
+                                                                        className={`block border-l py-2 pl-5 text-body-lg transition-colors duration-200 focus-visible:outline-none focus-visible:underline ${
+                                                                            active
+                                                                                ? 'border-white font-medium text-white'
+                                                                                : 'border-white/20 text-white/70 hover:border-white/60 hover:text-white'
+                                                                        }`}
+                                                                    >
+                                                                        {child.label}
+                                                                    </Link>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </nav>
+
+                            {menuNews.length > 0 && (
+                                <>
+                                    <div aria-hidden="true" className="hidden w-px shrink-0 bg-white/15 lg:block" />
+                                    <aside aria-labelledby="menu-news-heading" className="hidden lg:flex lg:flex-1 lg:flex-col lg:gap-4 lg:pl-10">
+                                        <h2 id="menu-news-heading" className="text-small font-medium text-white/60">
+                                            Latest news
+                                        </h2>
+                                        {menuNews.map((article) => {
+                                            const image = mediaUrl(article.featured_image);
+
+                                            return (
+                                                <Link
+                                                    key={article.slug}
+                                                    href={`/news/${article.slug}`}
+                                                    className="group relative block aspect-[2/1] overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                                                >
+                                                    {image && (
+                                                        <img
+                                                            src={image}
+                                                            alt=""
+                                                            loading="lazy"
+                                                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+                                                        />
+                                                    )}
+                                                    <span className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/30 to-transparent" aria-hidden="true" />
+                                                    <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-5">
+                                                        {article.published_at && (
+                                                            <time dateTime={article.published_at} className="text-caption text-white/70">
+                                                                {formatNewsDate(article.published_at)}
+                                                            </time>
+                                                        )}
+                                                        <span className="line-clamp-2 text-body-lg font-semibold leading-snug text-white">{article.title}</span>
+                                                    </span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </aside>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
+                            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small font-medium">
+                                <li>
+                                    <Link href="/contact" className="text-white hover:underline hover:underline-offset-4">Contact Us</Link>
+                                </li>
+                                {siteSettings.phone && phoneHref && (
+                                    <li>
+                                        <a href={phoneHref} className="text-white/70 hover:text-white">{siteSettings.phone}</a>
                                     </li>
-                                ))}
+                                )}
+                                {siteSettings.email && (
+                                    <li>
+                                        <a href={`mailto:${siteSettings.email}`} className="text-white/70 hover:text-white">{siteSettings.email}</a>
+                                    </li>
+                                )}
                             </ul>
-                        )}
+                            <p className="text-caption text-white/50">© {year} {companyName}</p>
+                        </div>
                     </div>
                 </div>
             )}
