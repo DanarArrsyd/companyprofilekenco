@@ -20,7 +20,7 @@ test('authorized admin can create a job vacancy', function () {
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('job_vacancies', ['title' => 'CNC Machine Operator', 'slug' => 'cnc-machine-operator']);
+    $this->assertDatabaseHas('job_vacancies', ['title->en' => 'CNC Machine Operator', 'slug' => 'cnc-machine-operator']);
 });
 
 test('unauthorized user cannot manage job vacancies', function () {
@@ -57,7 +57,7 @@ test('vacancy has polymorphic seo metadata', function () {
         'seo' => ['meta_title' => 'Custom SEO Title'],
     ]);
 
-    $vacancy = JobVacancy::where('title', 'SEO Vacancy')->firstOrFail();
+    $vacancy = JobVacancy::where('title->en', 'SEO Vacancy')->firstOrFail();
 
     expect($vacancy->seoMetadata)->not->toBeNull()
         ->and($vacancy->seoMetadata->meta_title)->toBe('Custom SEO Title');

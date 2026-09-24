@@ -22,7 +22,7 @@ test('admin can create an industry', function () {
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('industries', ['name' => 'Automotive', 'slug' => 'automotive']);
+    $this->assertDatabaseHas('industries', ['name->en' => 'Automotive', 'slug' => 'automotive']);
 });
 
 test('published industries are rendered on the merged company page', function () {

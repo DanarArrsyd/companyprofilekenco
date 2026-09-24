@@ -44,7 +44,7 @@ test('facility accepts a media library path', function () {
         'image_path' => $media->path,
     ])->assertRedirect();
 
-    expect(Facility::where('name', 'Path Facility')->value('image'))->toBe($media->path);
+    expect(Facility::where('name->en', 'Path Facility')->value('image'))->toBe($media->path);
 });
 
 test('machine accepts a media library path', function () {
@@ -71,7 +71,7 @@ test('industry accepts a media library path', function () {
         'image_path' => $media->path,
     ])->assertRedirect();
 
-    expect(Industry::where('name', 'Path Industry')->value('image'))->toBe($media->path);
+    expect(Industry::where('name->en', 'Path Industry')->value('image'))->toBe($media->path);
 });
 
 test('quality content accepts a media library path', function () {
@@ -84,7 +84,7 @@ test('quality content accepts a media library path', function () {
         'image_path' => $media->path,
     ])->assertRedirect();
 
-    expect(QualityContent::where('title', 'Path Quality')->value('image'))->toBe($media->path);
+    expect(QualityContent::where('title->en', 'Path Quality')->value('image'))->toBe($media->path);
 });
 
 test('certification accepts a media library path', function () {

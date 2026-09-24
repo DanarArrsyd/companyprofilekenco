@@ -41,7 +41,7 @@ test('admin can create a page', function () {
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('pages', ['title' => 'About Us', 'slug' => 'about-us']);
+    $this->assertDatabaseHas('pages', ['title->en' => 'About Us', 'slug' => 'about-us']);
 });
 
 test('admin can update a page', function () {

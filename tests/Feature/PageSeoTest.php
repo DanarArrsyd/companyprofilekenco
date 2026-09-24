@@ -20,7 +20,7 @@ test('creating a page creates its polymorphic seo metadata', function () {
         'seo' => ['meta_title' => 'Our Vision'],
     ]);
 
-    $page = Page::where('title', 'Vision & Mission')->firstOrFail();
+    $page = Page::where('title->en', 'Vision & Mission')->firstOrFail();
 
     expect($page->seoMetadata)->not->toBeNull()
         ->and($page->seoMetadata->meta_title)->toBe('Our Vision')

@@ -22,7 +22,7 @@ test('authorized admin can create a capability', function () {
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('capabilities', ['name' => 'CNC Machining', 'slug' => 'cnc-machining']);
+    $this->assertDatabaseHas('capabilities', ['name->en' => 'CNC Machining', 'slug' => 'cnc-machining']);
 });
 
 test('admin can add and reorder capability steps', function () {

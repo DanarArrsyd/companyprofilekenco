@@ -3,6 +3,16 @@
 use App\Enums\PageType;
 use App\Enums\SectionType;
 use App\Models\Page;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * This migration ran before CMS text became translatable, when section
+ * titles were plain strings; store the fixture title in that legacy shape.
+ */
+function legacyTitle(object $section, string $title): void
+{
+    DB::table('page_sections')->where('id', $section->id)->update(['title' => $title]);
+}
 
 function whoWeAreLayoutMigration(): object
 {
@@ -33,6 +43,7 @@ test('migration adds taped layout and reuses the company hero image', function (
         'sort_order' => 1,
         'is_active' => true,
     ]);
+    legacyTitle($section, 'Who We Are');
 
     whoWeAreLayoutMigration()->up();
 
@@ -64,6 +75,7 @@ test('migration preserves an existing Who We Are image and custom layout', funct
         'sort_order' => 1,
         'is_active' => true,
     ]);
+    legacyTitle($section, 'Who We Are');
 
     whoWeAreLayoutMigration()->up();
 
@@ -90,6 +102,7 @@ test('migration rollback preserves a taped image layout that may predate the mig
         'sort_order' => 1,
         'is_active' => true,
     ]);
+    legacyTitle($section, 'Who We Are');
 
     whoWeAreLayoutMigration()->down();
 

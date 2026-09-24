@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ContentStatus;
 use App\Models\Concerns\HasAuditedBy;
+use App\Models\Concerns\HasLocalizedContent;
 use App\Models\Concerns\HasPublishingLifecycle;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,7 +28,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Facility extends Model
 {
-    use HasAuditedBy, HasFactory, HasPublishingLifecycle, SoftDeletes;
+    use HasAuditedBy, HasFactory, HasLocalizedContent, HasPublishingLifecycle, SoftDeletes;
+
+    /** @var list<string> CMS text stored per locale (see HasLocalizedContent). */
+    public array $translatable = ['name', 'description'];
 
     protected function casts(): array
     {

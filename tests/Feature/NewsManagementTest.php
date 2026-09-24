@@ -44,7 +44,7 @@ test('admin can create an article', function () {
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('articles', ['title' => 'New Production Line Launched', 'slug' => 'new-production-line-launched']);
+    $this->assertDatabaseHas('articles', ['title->en' => 'New Production Line Launched', 'slug' => 'new-production-line-launched']);
 });
 
 test('article slug must be unique', function () {
@@ -98,7 +98,7 @@ test('article has polymorphic seo metadata', function () {
         'seo' => ['meta_title' => 'Custom SEO Title'],
     ]);
 
-    $article = Article::where('title', 'SEO Article')->firstOrFail();
+    $article = Article::where('title->en', 'SEO Article')->firstOrFail();
 
     expect($article->seoMetadata)->not->toBeNull()
         ->and($article->seoMetadata->meta_title)->toBe('Custom SEO Title');

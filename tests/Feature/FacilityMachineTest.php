@@ -25,7 +25,7 @@ test('admin can create a facility with a category', function () {
     ]);
 
     $response->assertRedirect();
-    $facility = Facility::where('name', 'Main Plant')->firstOrFail();
+    $facility = Facility::where('name->en', 'Main Plant')->firstOrFail();
     expect($facility->category->is($category))->toBeTrue();
 });
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ContentStatus;
 use App\Models\Concerns\HasAuditedBy;
+use App\Models\Concerns\HasLocalizedContent;
 use App\Models\Concerns\HasPublishingLifecycle;
 use App\Models\Concerns\HasSeoMetadata;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -28,7 +29,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class JobVacancy extends Model
 {
-    use HasAuditedBy, HasFactory, HasPublishingLifecycle, HasSeoMetadata, SoftDeletes;
+    use HasAuditedBy, HasFactory, HasLocalizedContent, HasPublishingLifecycle, HasSeoMetadata, SoftDeletes;
+
+    /** @var list<string> CMS text stored per locale (see HasLocalizedContent). */
+    public array $translatable = ['title', 'description', 'requirements'];
 
     protected function casts(): array
     {

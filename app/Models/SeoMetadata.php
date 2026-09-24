@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasLocalizedContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 ])]
 class SeoMetadata extends Model
 {
-    use HasFactory;
+    use HasFactory, HasLocalizedContent;
+
+    /** @var list<string> CMS text stored per locale (see HasLocalizedContent). */
+    public array $translatable = ['meta_title', 'meta_description', 'og_title', 'og_description'];
 
     protected function casts(): array
     {

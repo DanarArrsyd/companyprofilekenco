@@ -24,7 +24,7 @@ test('script, event handlers and javascript links are stripped from article cont
         'seo' => [],
     ])->assertRedirect();
 
-    $content = Article::query()->where('title', 'Payload Article')->value('content');
+    $content = Article::query()->where('title->en', 'Payload Article')->firstOrFail()->content;
 
     expect($content)
         ->not->toContain('<script')
@@ -46,7 +46,7 @@ test('formatting produced by the editor survives sanitization', function () {
         'seo' => [],
     ])->assertRedirect();
 
-    $content = Article::query()->where('title', 'Formatted Article')->value('content');
+    $content = Article::query()->where('title->en', 'Formatted Article')->firstOrFail()->content;
 
     expect($content)
         ->toContain('<h2>Heading</h2>')

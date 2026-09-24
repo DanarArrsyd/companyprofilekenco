@@ -51,7 +51,7 @@ test('admin can create a milestone with an uploaded image', function () {
 
     $response->assertRedirect(route('admin.milestones'));
 
-    $milestone = Milestone::where('title', 'New plant opened')->firstOrFail();
+    $milestone = Milestone::where('title->en', 'New plant opened')->firstOrFail();
     expect($milestone->year)->toBe(2021);
     expect($milestone->image)->not->toBeNull();
     Storage::disk('public')->assertExists($milestone->image);
@@ -72,7 +72,7 @@ test('admin can create a milestone by selecting an image from the media library'
 
     $response->assertRedirect(route('admin.milestones'));
     $this->assertDatabaseHas('milestones', [
-        'title' => 'Aerospace qualification',
+        'title->en' => 'Aerospace qualification',
         'image' => 'milestones/existing.jpg',
     ]);
 });
