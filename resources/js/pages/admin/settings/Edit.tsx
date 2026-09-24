@@ -128,7 +128,7 @@ export default function Edit({ settings }: { settings: Settings }) {
                         <div>
                             {settings.favicon && <img src={mediaUrl(settings.favicon) ?? ''} alt="Current favicon" className="mb-3 h-10 w-10 rounded border border-border object-contain" />}
                             <Label htmlFor="favicon">Favicon</Label>
-                            <input ref={faviconInputRef} id="favicon" type="file" accept="image/jpeg,image/png,image/webp,image/x-icon" disabled={processing} onChange={(e) => setData('favicon', e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm" />
+                            <input ref={faviconInputRef} id="favicon" type="file" accept="image/jpeg,image/png,image/webp,image/x-icon,.ico" disabled={processing} onChange={(e) => setData('favicon', e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm" />
                             <p className="mt-1 text-xs text-slate-500">ICO, JPG, PNG, or WebP. Maximum 512 KB.</p>
                             {data.favicon && (
                                 <div className="mt-2 flex items-center justify-between gap-3 rounded border border-border bg-muted/40 px-3 py-2 text-sm">

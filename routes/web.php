@@ -4,6 +4,7 @@ use App\Http\Controllers\Public\CapabilityController;
 use App\Http\Controllers\Public\CareerController;
 use App\Http\Controllers\Public\CertificationController;
 use App\Http\Controllers\Public\ContactController;
+use App\Http\Controllers\Public\FaviconController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\NewsController;
 use App\Http\Controllers\Public\PageController;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('robots.txt', [RobotsController::class, 'index'])->name('robots');
+Route::get('favicon.ico', FaviconController::class)->name('favicon');
 
 /*
  * Public pages, registered once per locale: Bahasa Indonesia (default) at the

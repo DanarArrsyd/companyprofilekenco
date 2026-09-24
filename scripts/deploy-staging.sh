@@ -144,6 +144,14 @@ rsync -a \
 cp "${APP_DIR}/deploy/staging/public_html/index.php" "${PUBLIC_DIR}/index.php"
 cp "${APP_DIR}/deploy/staging/public_html/.htaccess" "${PUBLIC_DIR}/.htaccess"
 
+# The repo used to ship an empty public/favicon.ico. rsync is additive, so
+# that 0-byte copy would keep shadowing Laravel's /favicon.ico route (which
+# serves the icon uploaded in Settings). Remove it only while it is empty.
+if [[ -f "${PUBLIC_DIR}/favicon.ico" ]] && [[ ! -s "${PUBLIC_DIR}/favicon.ico" ]]; then
+    log "Removing stale empty favicon.ico (served by Laravel now)..."
+    rm -f "${PUBLIC_DIR}/favicon.ico"
+fi
+
 # Hostinger's placeholder default.php is only ever removed once Laravel's
 # own index.php is confirmed present — never delete it blindly before that.
 if [[ -f "${PUBLIC_DIR}/index.php" ]] && [[ -f "${PUBLIC_DIR}/default.php" ]]; then

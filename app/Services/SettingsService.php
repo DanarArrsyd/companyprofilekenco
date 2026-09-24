@@ -77,6 +77,35 @@ class SettingsService
     }
 
     /**
+     * The browser tab icon: the uploaded favicon, else the logo. Returns the
+     * public URL and its MIME type, or null when neither is set.
+     *
+     * @return array{url: string, type: string}|null
+     */
+    public function siteIcon(): ?array
+    {
+        $path = $this->get('favicon') ?: $this->get('logo');
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        $url = preg_match('#^(https?:)?//|^/#', $path) ? $path : '/storage/'.ltrim($path, '/');
+        $extension = strtolower(pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+
+        return [
+            'url' => $url,
+            'type' => match ($extension) {
+                'ico' => 'image/x-icon',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+                default => 'image/png',
+            },
+        ];
+    }
+
+    /**
      * Persist a batch of key => value pairs known to the settings groups
      * and invalidate the cache once, atomically for the whole request.
      */

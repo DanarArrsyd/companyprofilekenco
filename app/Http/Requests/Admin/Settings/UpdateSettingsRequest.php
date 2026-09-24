@@ -22,7 +22,9 @@ class UpdateSettingsRequest extends FormRequest
 
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'logo_path' => ['nullable', 'string', 'max:255'],
-            'favicon' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,ico', 'max:512'],
+            // No 'image' rule: Laravel's image rule rejects .ico. mimes checks
+            // the sniffed content, so a renamed non-image still fails.
+            'favicon' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,ico', 'max:512'],
 
             'address' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'string', 'max:50'],

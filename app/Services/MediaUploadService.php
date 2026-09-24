@@ -33,6 +33,16 @@ class MediaUploadService
     }
 
     /**
+     * Store a public image exactly as uploaded — no resize or WebP re-encode.
+     * For small assets whose format matters, like a favicon (.ico has no
+     * WebP equivalent and browser tabs need the original transparency).
+     */
+    public function storePublicImageAsIs(UploadedFile $file, string $directory): string
+    {
+        return $file->storeAs($directory, $this->safeFilename($file), 'public');
+    }
+
+    /**
      * Store a private document (e.g. a certification PDF) and return its
      * relative path on the private local disk.
      */

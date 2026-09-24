@@ -48,7 +48,9 @@ class SettingsController extends Controller
             $nextPath = $oldPath;
 
             if ($request->hasFile($key)) {
-                $nextPath = $this->uploader->storePublicImage($request->file($key), 'settings');
+                $nextPath = $key === 'favicon'
+                    ? $this->uploader->storePublicImageAsIs($request->file($key), 'settings')
+                    : $this->uploader->storePublicImage($request->file($key), 'settings');
             } elseif (isset(self::IMAGE_PATH_KEYS[$key]) && $request->exists(self::IMAGE_PATH_KEYS[$key])) {
                 $nextPath = $request->validated(self::IMAGE_PATH_KEYS[$key]);
             }
