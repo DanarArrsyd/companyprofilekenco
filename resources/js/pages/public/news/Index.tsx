@@ -5,7 +5,7 @@ import { ArticlePreview, ArticlePreviewItem } from '@/components/public/ArticleP
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
-import { useInView } from '@/hooks/use-in-view';
+import { revealClass, useInView } from '@/hooks/use-in-view';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -16,7 +16,7 @@ function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
         <Link
             ref={ref}
             href={route('public.news.show', article.slug)}
-            className={`group grid grid-cols-1 gap-8 border-b border-border pb-12 transition-all duration-500 ease-out lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-12 ${inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
+            className={`group grid grid-cols-1 gap-8 border-b border-border pb-12 lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-12 ${revealClass(inView)}`}
         >
             <div className="aspect-[16/10] w-full bg-muted">
                 {article.featured_image ? (
@@ -51,7 +51,7 @@ function ArticleRow({ article }: { article: ArticlePreviewItem }) {
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
-        <div ref={ref} className={`transition-all duration-500 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+        <div ref={ref} className={revealClass(inView)}>
             <ArticlePreview article={article} />
         </div>
     );

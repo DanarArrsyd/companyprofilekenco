@@ -50,7 +50,7 @@ function Figure({ value, animate }: { value: string; animate: boolean }) {
  * the Homepage CMS "stats" section — no invented figures.
  */
 export function MetricStrip({ items }: { items: Metric[] }) {
-    const { ref, inView } = useInView<HTMLDivElement>(0.4);
+    const { ref, inView } = useInView<HTMLDivElement>(0.4, { once: true });
 
     if (items.length === 0) return null;
 

@@ -6,7 +6,7 @@ import { IndustryGrid, IndustryGridItem } from '@/components/public/IndustryGrid
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
-import { useInView } from '@/hooks/use-in-view';
+import { revealClass, useInView } from '@/hooks/use-in-view';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CmsPage, ResolvedSeo } from '@/types/cms';
 
@@ -22,7 +22,7 @@ function FacilityRow({ facility }: { facility: FacilityFeatureItem }) {
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
-        <div ref={ref} className={`transition-all duration-500 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+        <div ref={ref} className={revealClass(inView)}>
             <FacilityFeature facility={facility} maxMachines={12} showLink={false} />
         </div>
     );

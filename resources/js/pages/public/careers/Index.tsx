@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/admin/Pagination';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
-import { useInView } from '@/hooks/use-in-view';
+import { revealClass, useInView } from '@/hooks/use-in-view';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -17,7 +17,7 @@ function VacancyRowItem({ vacancy }: { vacancy: VacancyRow }) {
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
-        <div ref={ref} className={`transition-all duration-500 ease-out ${inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>
+        <div ref={ref} className={revealClass(inView)}>
             <Link
                 href={route('public.careers.show', vacancy.slug)}
                 className="group flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6"

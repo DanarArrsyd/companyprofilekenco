@@ -11,6 +11,7 @@ import {
     getNavbarTransformClass,
     shouldRestoreMenuTriggerFocus,
 } from '@/components/public/navbar-scroll';
+import { pauseSmoothScroll, resumeSmoothScroll, scrollToElement } from '@/lib/smooth-scroll';
 
 interface NavLink {
     label: string;
@@ -67,7 +68,8 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
     // window.scrollTo back to the position captured when the menu opened,
     // which would otherwise stomp on this scroll if it ran any earlier.
     window.setTimeout(() => {
-        document.getElementById(href.slice(hashIndex + 1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const target = document.getElementById(href.slice(hashIndex + 1));
+        if (target) scrollToElement(target);
     }, DRAWER_TRANSITION_MS + 30);
 }
 
@@ -187,6 +189,7 @@ export function PublicNavbar({
         const previousScrollBehavior = root.style.scrollBehavior;
         const lockStyles = getBodyScrollLockStyles(lockedScrollY);
 
+        pauseSmoothScroll();
         Object.assign(body.style, lockStyles);
         root.style.overflow = 'hidden';
 
@@ -196,6 +199,7 @@ export function PublicNavbar({
             root.style.scrollBehavior = 'auto';
             window.scrollTo(0, lockedScrollY);
             root.style.scrollBehavior = previousScrollBehavior;
+            resumeSmoothScroll();
         };
     }, [drawerMounted]);
 
@@ -278,6 +282,7 @@ export function PublicNavbar({
                     role="dialog"
                     aria-modal="true"
                     aria-label="Navigation menu"
+                    data-lenis-prevent
                     className={`scrollbar-hide fixed inset-0 z-[60] flex flex-col overflow-y-auto md:flex-row md:overflow-hidden transition-[opacity,transform] duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none ${
                         drawerEntered ? 'scale-100 opacity-100' : 'scale-[0.98] opacity-0'
                     }`}

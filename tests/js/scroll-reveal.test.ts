@@ -21,6 +21,12 @@ const scrollRevealObserverOptions = (
     }
 ).scrollRevealObserverOptions;
 
+const resolveRevealState = (
+    reveal as unknown as {
+        resolveRevealState?: (isIntersecting: boolean, top: number, triggerLine: number, current: boolean) => boolean;
+    }
+).resolveRevealState;
+
 const preferExplicitRevealTargets = (
     reveal as unknown as {
         preferExplicitRevealTargets?: <T>(targets: T[]) => T[];
@@ -54,10 +60,10 @@ test('safelists runtime reveal variants for production CSS', () => {
     }
 });
 
-test('caps stagger delay so long collections stay responsive', () => {
+test('staggers siblings by 140ms and caps long collections', () => {
     assert.equal(revealDelay?.(0), '0ms');
-    assert.equal(revealDelay?.(3), '270ms');
-    assert.equal(revealDelay?.(20), '360ms');
+    assert.equal(revealDelay?.(2), '280ms');
+    assert.equal(revealDelay?.(20), '420ms');
 });
 
 test('normalizes invalid stagger indexes', () => {
@@ -65,9 +71,30 @@ test('normalizes invalid stagger indexes', () => {
     assert.equal(revealDelay?.(Number.NaN), '0ms');
 });
 
-test('uses a clipped-image-safe observer threshold', () => {
+test('triggers 150px above the viewport bottom with a clipped-image-safe threshold', () => {
     assert.equal(scrollRevealObserverOptions?.threshold, 0);
-    assert.equal(scrollRevealObserverOptions?.rootMargin, '0px 0px -8% 0px');
+    assert.equal(scrollRevealObserverOptions?.rootMargin, '0px 0px -150px 0px');
+});
+
+test('reveals when the element enters the trigger zone', () => {
+    assert.equal(resolveRevealState?.(true, 400, 618, false), true);
+});
+
+test('fades out when the element drops back below the trigger line', () => {
+    assert.equal(resolveRevealState?.(false, 700, 618, true), false);
+});
+
+test('stays revealed when the element leaves through the top', () => {
+    assert.equal(resolveRevealState?.(false, -900, 618, true), true);
+    assert.equal(resolveRevealState?.(false, -900, 618, false), false);
+});
+
+test('delays only the entering transition so exits track the scroll', () => {
+    const css = readFileSync(new URL('../../resources/css/app.css', import.meta.url), 'utf8');
+    const base = css.match(/\.scroll-reveal\s*\{([^}]*)\}/s)?.[1] ?? '';
+
+    assert.doesNotMatch(base, /var\(--reveal-delay\)/);
+    assert.match(css, /\.scroll-reveal\.is-revealed\s*\{[^}]*transition-delay:\s*var\(--reveal-delay\)/s);
 });
 
 test('drops an automatic ancestor when an explicit reveal exists inside it', () => {

@@ -1,7 +1,7 @@
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
-import { useInView } from '@/hooks/use-in-view';
+import { revealClass, useInView } from '@/hooks/use-in-view';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -15,7 +15,7 @@ function QualityBlock({ item, reverse }: { item: QualityRow; reverse: boolean })
     return (
         <div
             ref={ref}
-            className={`grid grid-cols-1 items-center gap-8 py-12 transition-all duration-500 ease-out lg:grid-cols-2 lg:gap-16 ${inView ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
+            className={`grid grid-cols-1 items-center gap-8 py-12 lg:grid-cols-2 lg:gap-16 ${revealClass(inView)}`}
         >
             <div className={`aspect-[4/3] w-full bg-muted ${reverse ? 'lg:order-last' : ''}`}>
                 {item.image ? (

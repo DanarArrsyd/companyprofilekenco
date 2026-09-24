@@ -15,6 +15,25 @@
         }
     }
 
+    /* Lenis (resources/js/lib/smooth-scroll.ts) drives scrolling itself;
+       native smooth behaviour would fight its per-frame updates. */
+    html.lenis,
+    html.lenis body {
+        height: auto;
+    }
+
+    html.lenis {
+        scroll-behavior: auto;
+    }
+
+    html.lenis.lenis-stopped {
+        overflow: clip;
+    }
+
+    .lenis [data-lenis-prevent] {
+        overscroll-behavior: contain;
+    }
+
     /* Thin, on-brand scrollbar for Chromium/WebKit — replaces the default
        OS-styled scrollbar (thick, flat gray on Windows) site-wide. */
     ::-webkit-scrollbar {
@@ -76,32 +95,36 @@
 }
 
 @layer components {
-    /* Astra-inspired, reveal-once motion. Distances stay restrained while
-       timing and grouped delays give each section an editorial rhythm. */
+    /* Astra-matched scroll motion (astra.co.id, inspected 2026-09-24):
+       opacity 0 + translateY(20%) -> resting, 600ms on the CSS `ease`
+       curve, 140ms sibling stagger. Bidirectional: blocks fade out when
+       they drop back below the trigger line and fade in on the next pass.
+       Stagger applies on entry only so exits never lag behind the scroll. */
     .scroll-reveal {
         --reveal-delay: 0ms;
-        --reveal-ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --reveal-duration: 600ms;
+        --reveal-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+        --reveal-rise: min(20%, 40px);
         opacity: 0;
         transition:
-            opacity 480ms var(--reveal-ease) var(--reveal-delay),
-            transform 560ms var(--reveal-ease) var(--reveal-delay);
-        will-change: opacity, transform;
+            opacity var(--reveal-duration) var(--reveal-ease),
+            transform var(--reveal-duration) var(--reveal-ease);
     }
 
     .scroll-reveal--up {
-        transform: translate3d(0, 16px, 0);
+        transform: translate3d(0, var(--reveal-rise), 0);
     }
 
     .scroll-reveal--left {
-        transform: translate3d(-16px, 0, 0);
+        transform: translate3d(-24px, 0, 0);
     }
 
     .scroll-reveal--right {
-        transform: translate3d(16px, 0, 0);
+        transform: translate3d(24px, 0, 0);
     }
 
     .scroll-reveal--scale {
-        transform: scale(0.98);
+        transform: scale(0.96);
     }
 
     .scroll-reveal--fade {
@@ -110,19 +133,18 @@
 
     .scroll-reveal--image {
         clip-path: inset(0 0 99% 0);
-        opacity: 1;
         transform: translate3d(0, 12px, 0) scale(1.02);
         transform-origin: center;
         transition:
-            clip-path 600ms var(--reveal-ease) var(--reveal-delay),
-            transform 600ms var(--reveal-ease) var(--reveal-delay);
-        will-change: clip-path, transform;
+            opacity var(--reveal-duration) var(--reveal-ease),
+            clip-path var(--reveal-duration) var(--reveal-ease),
+            transform var(--reveal-duration) var(--reveal-ease);
     }
 
     .scroll-reveal.is-revealed {
         opacity: 1;
         transform: none;
-        will-change: auto;
+        transition-delay: var(--reveal-delay);
     }
 
     .scroll-reveal--image.is-revealed {
@@ -130,16 +152,16 @@
     }
 
     @media (max-width: 640px) {
-        .scroll-reveal--up {
-            transform: translate3d(0, 10px, 0);
+        .scroll-reveal {
+            --reveal-rise: min(20%, 24px);
         }
 
         .scroll-reveal--left {
-            transform: translate3d(-10px, 0, 0);
+            transform: translate3d(-12px, 0, 0);
         }
 
         .scroll-reveal--right {
-            transform: translate3d(10px, 0, 0);
+            transform: translate3d(12px, 0, 0);
         }
 
         .scroll-reveal--image {

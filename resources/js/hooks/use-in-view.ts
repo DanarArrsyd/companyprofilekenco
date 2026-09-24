@@ -4,11 +4,53 @@ import type { RefObject } from 'react';
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 /**
- * Reveal-once scroll trigger via IntersectionObserver only — no animation
- * library. Respects prefers-reduced-motion by reporting "in view"
- * immediately so reduced-motion users never wait on a scroll trigger.
+ * Astra-style trigger line: content reveals once its top edge rises 150px
+ * above the viewport bottom (astra.co.id hero: `top < innerHeight - 150`).
  */
-export function useInView<T extends HTMLElement = HTMLDivElement>(threshold = 0.2) {
+export const REVEAL_TRIGGER_OFFSET = 150;
+
+export const scrollRevealObserverOptions = {
+    // A clipped image exposes almost no painted area before reveal. The zero
+    // threshold lets the trigger line decide instead of painted area.
+    threshold: 0,
+    rootMargin: `0px 0px -${REVEAL_TRIGGER_OFFSET}px 0px`,
+} as const;
+
+/**
+ * Bidirectional reveal rule. Entering the trigger zone reveals; dropping
+ * back below the trigger line (user scrolls up) hides again so the block
+ * fades back in on the next pass. Leaving through the top keeps it visible,
+ * which avoids content blinking out while it is still being read.
+ */
+export function resolveRevealState(
+    isIntersecting: boolean,
+    top: number,
+    triggerLine: number,
+    current: boolean,
+): boolean {
+    if (isIntersecting) return true;
+    if (top >= triggerLine) return false;
+
+    return current;
+}
+
+function triggerLineFor(entry: IntersectionObserverEntry): number {
+    return entry.rootBounds?.bottom ?? window.innerHeight - REVEAL_TRIGGER_OFFSET;
+}
+
+function prefersReducedMotion(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Scroll trigger via IntersectionObserver only. Fades in and out as the
+ * element crosses the trigger line; pass `once` for effects that should
+ * not replay (e.g. counters). Reduced-motion users get "in view" at once.
+ */
+export function useInView<T extends HTMLElement = HTMLDivElement>(
+    threshold = 0,
+    { once = false }: { once?: boolean } = {},
+) {
     const ref = useRef<T>(null);
     const [inView, setInView] = useState(false);
 
@@ -16,37 +58,43 @@ export function useInView<T extends HTMLElement = HTMLDivElement>(threshold = 0.
         const node = ref.current;
         if (!node) return;
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
             setInView(true);
             return;
         }
 
+        let revealed = false;
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
-                    setInView(true);
-                    observer.disconnect();
-                }
+                revealed = resolveRevealState(
+                    entry.isIntersecting,
+                    entry.boundingClientRect.top,
+                    triggerLineFor(entry),
+                    revealed,
+                );
+                setInView(revealed);
+
+                if (revealed && once) observer.disconnect();
             },
-            { threshold },
+            { ...scrollRevealObserverOptions, threshold },
         );
 
         observer.observe(node);
         return () => observer.disconnect();
-    }, [threshold]);
+    }, [threshold, once]);
 
     return { ref, inView };
 }
 
 export type RevealVariant = 'up' | 'left' | 'right' | 'scale' | 'fade' | 'image';
 
-/** Class pair to spread onto a reveal-once element. */
+/** Class pair to spread onto a scroll-revealed element. */
 export function revealClass(inView: boolean, variant: RevealVariant = 'up'): string {
     return `scroll-reveal scroll-reveal--${variant}${inView ? ' is-revealed' : ''}`;
 }
 
-/** Keep collection entrances sequenced without making long lists feel slow. */
-export function revealDelay(index: number, step = 90, maximum = 360): string {
+/** Astra staggers sibling entrances by 140ms; cap so long lists stay quick. */
+export function revealDelay(index: number, step = 140, maximum = 420): string {
     const normalizedIndex = Number.isFinite(index) ? Math.max(0, index) : 0;
 
     return `${Math.min(normalizedIndex * step, maximum)}ms`;
@@ -69,13 +117,6 @@ const AUTO_REVEAL_SELECTOR = [
     'section li',
     '[data-reveal-group] > *',
 ].join(',');
-
-export const scrollRevealObserverOptions = {
-    // A clipped image exposes almost no painted area before reveal. The low
-    // threshold lets the viewport position trigger it without showing early.
-    threshold: 0,
-    rootMargin: '0px 0px -8% 0px',
-} as const;
 
 function isExplicitRevealTarget(target: unknown): boolean {
     const element = target as HTMLElement;
@@ -119,7 +160,7 @@ export function useScrollRevealBoundary<T extends HTMLElement>(
         const root = rootRef.current;
         if (!root || typeof window === 'undefined') return;
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) {
+        if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
             return;
         }
 
@@ -132,10 +173,14 @@ export function useScrollRevealBoundary<T extends HTMLElement>(
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
-                    if (!entry.isIntersecting) return;
+                    const revealed = resolveRevealState(
+                        entry.isIntersecting,
+                        entry.boundingClientRect.top,
+                        triggerLineFor(entry),
+                        entry.target.classList.contains('is-revealed'),
+                    );
 
-                    entry.target.classList.add('is-revealed');
-                    observer.unobserve(entry.target);
+                    entry.target.classList.toggle('is-revealed', revealed);
                 });
             },
             scrollRevealObserverOptions,

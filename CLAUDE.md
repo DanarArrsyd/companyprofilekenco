@@ -375,8 +375,8 @@ A feature is finished only if:
 - Deploy staging manually with `gh workflow run deploy-staging.yml --ref main`, then verify `https://staging.kencomanufactur.co.id/company#vision-mission`.
 - Company `Who We Are` uses CMS settings `heading_font: caveat` and `layout: taped_image`; its editable 4:3 image remains in section content rather than hardcoded markup.
 - The taped-image presentation lives in `resources/js/components/public/SectionRenderer.tsx`; tape assets live in `resources/img/paper_tape1.png` and `resources/img/paper_tape2.png`.
-- Public scroll reveals use the shared IntersectionObserver implementation in `resources/js/hooks/use-in-view.ts` and motion styles in `resources/css/app.css`; keep motion restrained, reveal once, and honor `prefers-reduced-motion`.
-- Explicit `data-reveal` elements take priority over automatic ancestor reveals to prevent compounded motion; stagger delays use 90 ms steps capped at 360 ms.
+- Public scroll motion matches astra.co.id: Lenis smooth scroll (`resources/js/lib/smooth-scroll.ts`, started by `PublicLayout`, paused while the nav menu is open) plus the shared IntersectionObserver in `resources/js/hooks/use-in-view.ts` and styles in `resources/css/app.css`. Reveals are bidirectional: trigger line 150 px above the viewport bottom, fade out when content drops back below it, stay visible when it leaves through the top; 600 ms, CSS `ease` curve, `translateY(min(20%, 40px))`. Pass `useInView(t, { once: true })` for effects that must not replay (counters). Honor `prefers-reduced-motion` (Lenis and reveals both off).
+- Explicit `data-reveal` elements take priority over automatic ancestor reveals to prevent compounded motion; stagger delays use 140 ms steps capped at 420 ms and apply on entry only.
 - Latest staging release for this work is commit `50b2bbf` (`feat(public): add premium company motion`); GitHub Actions run `35931850444` passed build, deploy, and smoke tests.
 
 ## Companion Specifications

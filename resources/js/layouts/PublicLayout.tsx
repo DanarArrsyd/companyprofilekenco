@@ -1,10 +1,11 @@
 import { usePage } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { PropsWithChildren } from 'react';
 
 import { PublicFooter } from '@/components/public/PublicFooter';
 import { PublicNavbar } from '@/components/public/PublicNavbar';
 import { useScrollRevealBoundary } from '@/hooks/use-in-view';
+import { startSmoothScroll } from '@/lib/smooth-scroll';
 
 export default function PublicLayout({
     children,
@@ -23,6 +24,7 @@ export default function PublicLayout({
     const mainRef = useRef<HTMLElement>(null);
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
+    useEffect(() => startSmoothScroll(), []);
     useScrollRevealBoundary(mainRef, url);
 
     return (
