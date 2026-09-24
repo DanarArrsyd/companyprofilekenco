@@ -466,7 +466,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                     key={article.slug}
                                                     href={`/news/${article.slug}`}
                                                     className={`group relative block aspect-[2/1] max-h-[30vh] w-full overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 ${
-                                                        index > 0 ? '[@media(max-height:640px)]:hidden' : ''
+                                                        index > 0 ? '[@media(max-height:500px)]:hidden' : ''
                                                     }`}
                                                 >
                                                     {image && (
