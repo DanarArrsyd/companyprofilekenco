@@ -12,6 +12,7 @@ import { ProductShowcase, ProductShowcaseItem } from '@/components/public/Produc
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { getSectionHeadingClass } from '@/components/public/section-heading';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/hooks/use-locale';
 import { mediaUrl } from '@/lib/media';
 import { PageSection } from '@/types/cms';
 import paperTape1 from '../../../img/paper_tape1.png';
@@ -51,6 +52,7 @@ export function SectionRenderer({
     certifications?: CertificationItemData[];
     openJobCount?: number;
 }) {
+    const { localize } = useLocale();
     const content = section.content ?? {};
 
     switch (section.section_type) {
@@ -320,7 +322,7 @@ export function SectionRenderer({
                         )}
                         {c.cta_label && c.cta_url && (
                             <div className="mt-6 flex justify-center">
-                                <Button asChild><a href={c.cta_url}>{c.cta_label}</a></Button>
+                                <Button asChild><a href={localize(c.cta_url)}>{c.cta_label}</a></Button>
                             </div>
                         )}
                     </div>
@@ -424,7 +426,7 @@ export function SectionRenderer({
                             )}
                         </div>
                         <Button asChild variant="secondary" className="border-white/30 text-white hover:bg-white/10">
-                            <Link href="/careers">{c.cta_label ?? 'View Openings'}</Link>
+                            <Link href={localize('/careers')}>{c.cta_label ?? 'View Openings'}</Link>
                         </Button>
                     </div>
                 </section>

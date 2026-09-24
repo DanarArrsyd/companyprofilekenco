@@ -4,6 +4,7 @@ import { Pagination } from '@/components/admin/Pagination';
 import { ProductShowcase, ProductShowcaseItem } from '@/components/public/ProductShowcase';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -15,6 +16,7 @@ export default function Index({
     filters: { category?: string };
     seo: ResolvedSeo;
 }) {
+    const { localizedRoute } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} />
@@ -34,7 +36,7 @@ export default function Index({
                 {categories.length > 0 && (
                     <div className="mb-10 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
-                            onClick={() => router.get(route('public.products'))}
+                            onClick={() => router.get(localizedRoute('public.products'))}
                             className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             All
@@ -42,7 +44,7 @@ export default function Index({
                         {categories.map((c) => (
                             <button
                                 key={c.id}
-                                onClick={() => router.get(route('public.products'), { category: c.slug })}
+                                onClick={() => router.get(localizedRoute('public.products'), { category: c.slug })}
                                 className={`text-sm font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {c.name}

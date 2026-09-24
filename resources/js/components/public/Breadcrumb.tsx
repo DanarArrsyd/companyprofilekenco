@@ -2,6 +2,8 @@ import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { Fragment } from 'react';
 
+import { useLocale } from '@/hooks/use-locale';
+
 export interface BreadcrumbItem {
     label: string;
     href?: string;
@@ -13,6 +15,7 @@ export interface BreadcrumbItem {
  * markup) and keyboard/screen-reader accessible via a labeled <nav>.
  */
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
+    const { localize } = useLocale();
     if (items.length === 0) return null;
 
     return (
@@ -36,7 +39,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
                                 className="flex items-center"
                             >
                                 {item.href && !isLast ? (
-                                    <Link href={item.href} itemProp="item" className="hover:text-navy-900">
+                                    <Link href={localize(item.href)} itemProp="item" className="hover:text-navy-900">
                                         <span itemProp="name">{item.label}</span>
                                     </Link>
                                 ) : (

@@ -3,6 +3,7 @@ import { Home, TriangleAlert } from 'lucide-react';
 
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 
 const STATUS_COPY: Record<number, { eyebrow: string; heading: string; description: string }> = {
@@ -39,6 +40,7 @@ const STATUS_COPY: Record<number, { eyebrow: string; heading: string; descriptio
 };
 
 export default function Error({ status }: { status: number }) {
+    const { localize } = useLocale();
     const copy = STATUS_COPY[status] ?? STATUS_COPY[500];
 
     return (
@@ -61,7 +63,7 @@ export default function Error({ status }: { status: number }) {
                     />
 
                     <Button asChild className="mt-8">
-                        <Link href="/">
+                        <Link href={localize('/')}>
                             <Home className="mr-2 h-4 w-4" aria-hidden="true" />
                             Back to Homepage
                         </Link>

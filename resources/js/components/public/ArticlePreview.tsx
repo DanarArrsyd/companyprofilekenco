@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
+import { useLocale } from '@/hooks/use-locale';
 
 export interface ArticlePreviewItem {
     id: number;
@@ -13,8 +14,9 @@ export interface ArticlePreviewItem {
 }
 
 export function ArticlePreview({ article }: { article: ArticlePreviewItem }) {
+    const { localize } = useLocale();
     return (
-        <Link href={`/news/${article.slug}`} className="group block">
+        <Link href={localize(`/news/${article.slug}`)} className="group block">
             <div className="aspect-[16/9] w-full bg-muted">
                 {article.featured_image ? (
                     <img

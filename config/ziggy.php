@@ -7,6 +7,6 @@
  */
 return [
     'groups' => [
-        'public' => ['home', 'sitemap', 'robots', 'public.*', 'login', 'password.*'],
+        'public' => ['home', 'sitemap', 'robots', 'public.*', 'en.*', 'login', 'password.*'],
     ],
 ];

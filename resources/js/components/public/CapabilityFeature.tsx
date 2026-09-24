@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { revealClass, useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
 
 export interface CapabilityFeatureItem {
     id: number;
@@ -12,6 +13,7 @@ export interface CapabilityFeatureItem {
 }
 
 function Row({ item, reverse }: { item: CapabilityFeatureItem; reverse: boolean }) {
+    const { localize } = useLocale();
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
@@ -35,7 +37,7 @@ function Row({ item, reverse }: { item: CapabilityFeatureItem; reverse: boolean 
             <div>
                 <h3 className="text-h3 text-navy-900">{item.name}</h3>
                 {item.summary && <p className="mt-3 text-body text-slate-700">{item.summary}</p>}
-                <Link href={`/capabilities/${item.slug}`} className="mt-5 inline-block text-sm font-medium text-navy-700 hover:text-navy-900">
+                <Link href={localize(`/capabilities/${item.slug}`)} className="mt-5 inline-block text-sm font-medium text-navy-700 hover:text-navy-900">
                     View Capability &rarr;
                 </Link>
             </div>

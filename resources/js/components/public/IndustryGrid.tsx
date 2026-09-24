@@ -1,4 +1,5 @@
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
+import { useLocale } from '@/hooks/use-locale';
 
 export interface IndustryGridItem {
     id: number;
@@ -14,6 +15,7 @@ export interface IndustryGridItem {
  * Image + caption only: no border, no surface box.
  */
 export function IndustryGrid({ items, showDescription = false }: { items: IndustryGridItem[]; showDescription?: boolean }) {
+    const { localize } = useLocale();
     if (items.length === 0) return null;
 
     return (
@@ -22,7 +24,7 @@ export function IndustryGrid({ items, showDescription = false }: { items: Indust
                 <a
                     key={industry.id}
                     id={industry.slug}
-                    href={`/company#${industry.slug}`}
+                    href={localize(`/company#${industry.slug}`)}
                     className="group block"
                 >
                     <div className="aspect-square w-full bg-muted">

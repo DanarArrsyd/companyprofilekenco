@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { ReactNode } from 'react';
 
 import { ScrollReveal } from '@/components/public/ScrollReveal';
+import { useLocale } from '@/hooks/use-locale';
 
 export function SectionHeader({
     eyebrow,
@@ -21,6 +22,7 @@ export function SectionHeader({
     /** Page-level top banners should render a single real H1; nested section headers stay H2. */
     as?: 'h1' | 'h2';
 }) {
+    const { localize } = useLocale();
     if (!heading && !description) return null;
 
     const centered = align === 'center';
@@ -36,7 +38,7 @@ export function SectionHeader({
             </div>
 
             {cta && !centered && (
-                <Link href={cta.href} className="shrink-0 text-sm font-medium text-navy-700 hover:text-navy-900">
+                <Link href={localize(cta.href)} className="shrink-0 text-sm font-medium text-navy-700 hover:text-navy-900">
                     {cta.label} &rarr;
                 </Link>
             )}

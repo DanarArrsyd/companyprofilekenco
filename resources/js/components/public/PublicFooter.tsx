@@ -1,5 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 
+import { useLocale } from '@/hooks/use-locale';
+
 const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[] = [
     {
         heading: 'Company',
@@ -28,6 +30,7 @@ const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[
 ];
 
 export function PublicFooter() {
+    const { localize } = useLocale();
     const { siteSettings } = usePage().props;
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
     const social = siteSettings?.social;
@@ -58,7 +61,7 @@ export function PublicFooter() {
                             <ul className="mt-4 space-y-2.5 text-small">
                                 {group.links.map((link) => (
                                     <li key={link.href}>
-                                        <Link href={link.href} className="text-slate-300 hover:text-white">
+                                        <Link href={localize(link.href)} className="text-slate-300 hover:text-white">
                                             {link.label}
                                         </Link>
                                     </li>
@@ -70,7 +73,7 @@ export function PublicFooter() {
                     <div>
                         <p className="text-caption uppercase text-slate-500">Contact</p>
                         <ul className="mt-4 space-y-2.5 text-small text-slate-300">
-                            <li><Link href="/contact" className="hover:text-white">Get in touch</Link></li>
+                            <li><Link href={localize('/contact')} className="hover:text-white">Get in touch</Link></li>
                             {siteSettings?.phone && <li><a href={`tel:${siteSettings.phone}`} className="hover:text-white">{siteSettings.phone}</a></li>}
                             {siteSettings?.email && <li><a href={`mailto:${siteSettings.email}`} className="hover:text-white">{siteSettings.email}</a></li>}
                             {siteSettings?.address && <li className="text-slate-500">{siteSettings.address}</li>}

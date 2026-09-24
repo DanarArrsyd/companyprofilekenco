@@ -11,6 +11,8 @@ import {
     getTrappedFocusIndex,
     shouldRestoreMenuTriggerFocus,
 } from '@/components/public/navbar-scroll';
+import { useLocale } from '@/hooks/use-locale';
+import { stripLocale } from '@/lib/locale';
 import { mediaUrl } from '@/lib/media';
 import { pauseSmoothScroll, resumeSmoothScroll, scrollToElement } from '@/lib/smooth-scroll';
 import type { PageProps } from '@/types';
@@ -44,16 +46,16 @@ const NAV: NavItem[] = [
     { label: 'Contact Us', href: '/contact' },
 ];
 
-// Only English content exists today; Indonesian is shown as upcoming.
 const LANGUAGES = [
-    { code: 'ID', label: 'Bahasa Indonesia', available: false },
-    { code: 'EN', label: 'English', available: true },
+    { locale: 'id', code: 'ID', label: 'Bahasa Indonesia' },
+    { locale: 'en', code: 'EN', label: 'English' },
 ] as const;
 
 const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled])';
 
+/** Compares locale-free paths, so "/en/products" matches the "/products" item. */
 function isActive(currentUrl: string, href: string): boolean {
-    const path = currentUrl.split('#')[0];
+    const path = stripLocale(currentUrl.split('#')[0]);
 
     return href === '/' ? path === '/' : path.startsWith(href.split('#')[0]);
 }
@@ -100,39 +102,50 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
 const DRAWER_TRANSITION_MS = 320;
 const DRAWER_EASE = 'ease-[cubic-bezier(0.16,1,0.3,1)]';
 
-/** Hidden below 380px, where the wordmark logo and menu trigger need the room. */
+/**
+ * Links to the current page in each language (hreflang alternates from the
+ * server, query string included). Hidden below 380px, where the wordmark
+ * logo and menu trigger need the room.
+ */
 function LanguageSwitch({ hidden }: { hidden: boolean }) {
+    const { locale, alternates } = useLocale();
+
     return (
-        <div
-            role="group"
+        <nav
             aria-label="Language"
             className={`flex items-center gap-0.5 rounded-full bg-gray-200 p-1 transition-[opacity,visibility] duration-200 max-[379px]:hidden sm:p-1.5 ${
                 hidden ? 'invisible opacity-0' : 'visible opacity-100'
             }`}
         >
-            {LANGUAGES.map((language) => (
-                <button
-                    key={language.code}
-                    type="button"
-                    lang={language.code.toLowerCase()}
-                    aria-label={language.available ? language.label : `${language.label} (coming soon)`}
-                    aria-pressed={language.available}
-                    disabled={!language.available}
-                    title={language.available ? language.label : `${language.label} — coming soon`}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-small font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-700 sm:h-11 sm:w-11 ${
-                        language.available ? 'bg-white text-navy-900' : 'cursor-not-allowed text-slate-500'
-                    }`}
-                >
-                    {language.code}
-                </button>
-            ))}
-        </div>
+            {LANGUAGES.map((language) => {
+                const current = language.locale === locale;
+                const href = alternates[language.locale];
+
+                return (
+                    <Link
+                        key={language.locale}
+                        href={href ?? '#'}
+                        hrefLang={language.locale}
+                        lang={language.locale}
+                        aria-label={language.label}
+                        aria-current={current ? 'true' : undefined}
+                        title={language.label}
+                        className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-small font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-700 sm:h-11 sm:w-11 ${
+                            current ? 'bg-white text-navy-900' : 'text-slate-600 hover:text-navy-900'
+                        }`}
+                    >
+                        {language.code}
+                    </Link>
+                );
+            })}
+        </nav>
     );
 }
 
 export function PublicNavbar({ companyName }: { companyName: string }) {
     const { url, props } = usePage<PageProps>();
     const { siteSettings, menuNews = [] } = props;
+    const { localize } = useLocale();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [drawerMounted, setDrawerMounted] = useState(false);
     const [drawerEntered, setDrawerEntered] = useState(false);
@@ -286,7 +299,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                 className={`fixed left-0 top-0 z-50 transition-transform duration-300 ${DRAWER_EASE} motion-reduce:transition-none ${getNavbarTransformClass(navbarHidden, drawerOpen)}`}
             >
                 <Link
-                    href="/"
+                    href={localize('/')}
                     className="flex h-16 items-center rounded-br-[28px] bg-white pl-5 pr-6 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] sm:h-20 sm:rounded-br-[40px] sm:pl-8 sm:pr-10 lg:pl-10 lg:pr-12"
                 >
                     <img src={logoKmi} alt={companyName} className="h-5 w-auto sm:h-8 lg:h-9" />
@@ -296,7 +309,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
             {/* Controls stay put on scroll and sit above the panel, so the
                 trigger doubles as the close button. */}
             <div className="fixed right-4 top-3 z-[70] flex items-center gap-2 sm:right-6 sm:top-4 sm:gap-3 lg:right-8">
-                {siteSettings.show_language_switcher && <LanguageSwitch hidden={drawerOpen} />}
+                <LanguageSwitch hidden={drawerOpen} />
 
                 <button
                     ref={openButtonRef}
@@ -349,7 +362,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                     >
                         <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[clamp(68px,11vh,88px)] sm:px-10 lg:px-14">
                             <Link
-                                href="/"
+                                href={localize('/')}
                                 aria-label="Home"
                                 className="inline-flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors duration-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                             >
@@ -374,7 +387,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                             return (
                                                 <li key={item.label} className={staggerClass} style={staggerStyle}>
                                                     <Link
-                                                        href={item.href!}
+                                                        href={localize(item.href!)}
                                                         aria-current={active ? 'page' : undefined}
                                                         className="menu-item-text group flex font-semibold focus-visible:outline-none"
                                                     >
@@ -429,9 +442,9 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                             return (
                                                                 <li key={child.href}>
                                                                     <Link
-                                                                        href={child.href}
+                                                                        href={localize(child.href)}
                                                                         aria-current={active ? 'page' : undefined}
-                                                                        onClick={(e) => handleAnchorLinkClick(e, child.href, closeMenu)}
+                                                                        onClick={(e) => handleAnchorLinkClick(e, localize(child.href), closeMenu)}
                                                                         className={`menu-sub-link block border-l pl-5 text-body-lg transition-colors duration-200 focus-visible:outline-none focus-visible:underline ${
                                                                             active
                                                                                 ? 'border-white font-medium text-white'
@@ -464,7 +477,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                             return (
                                                 <Link
                                                     key={article.slug}
-                                                    href={`/news/${article.slug}`}
+                                                    href={localize(`/news/${article.slug}`)}
                                                     className={`group relative block aspect-[2/1] max-h-[30vh] w-full overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 ${
                                                         index > 0 ? '[@media(max-height:500px)]:hidden' : ''
                                                     }`}
@@ -497,7 +510,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-[clamp(1rem,3vh,1.5rem)] sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
                             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small font-medium">
                                 <li>
-                                    <Link href="/contact" className="text-white hover:underline hover:underline-offset-4">Contact Us</Link>
+                                    <Link href={localize('/contact')} className="text-white hover:underline hover:underline-offset-4">Contact Us</Link>
                                 </li>
                                 {siteSettings.phone && phoneHref && (
                                     <li>

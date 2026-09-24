@@ -52,7 +52,6 @@ class SettingsService
         ],
         'system' => [
             'maintenance_mode' => 'bool',
-            'show_language_switcher' => 'bool',
         ],
     ];
 

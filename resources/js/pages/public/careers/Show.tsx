@@ -6,6 +6,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -28,6 +29,7 @@ export default function Show({
     schema?: Array<Record<string, unknown> | null>;
     preview: boolean;
 }) {
+    const { localizedRoute } = useLocale();
     const [submitted, setSubmitted] = useState(false);
     const open = isOpen(vacancy);
 
@@ -39,7 +41,7 @@ export default function Show({
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('public.careers.apply', vacancy.slug), {
+        post(localizedRoute('public.careers.apply', vacancy.slug), {
             forceFormData: true,
             onSuccess: () => {
                 reset();

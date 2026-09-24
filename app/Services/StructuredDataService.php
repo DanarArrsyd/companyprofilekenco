@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\JobVacancy;
+use App\Support\Locale;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -74,7 +75,7 @@ class StructuredDataService
                 '@type' => 'ListItem',
                 'position' => $index + 1,
                 'name' => $item['label'],
-                'item' => ! empty($item['href']) ? url($item['href']) : null,
+                'item' => ! empty($item['href']) ? url(Locale::path($item['href'])) : null,
             ]);
         }
 
@@ -198,6 +199,7 @@ class StructuredDataService
                 if ($data[$key] === []) {
                     unset($data[$key]);
                 }
+
                 continue;
             }
 

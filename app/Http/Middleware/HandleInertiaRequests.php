@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Article;
 use App\Services\SettingsService;
+use App\Support\Locale;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -59,8 +60,11 @@ class HandleInertiaRequests extends Middleware
                     'youtube' => $settings['social_youtube'] ?: null,
                     'instagram' => $settings['social_instagram'] ?: null,
                 ],
-                'show_language_switcher' => (bool) $settings['show_language_switcher'],
             ],
+            'locale' => app()->getLocale(),
+            'locales' => Locale::SUPPORTED,
+            'defaultLocale' => Locale::DEFAULT,
+            'alternates' => $request->is('admin', 'admin/*') ? [] : fn () => Locale::alternates($request),
             'menuNews' => $request->is('admin', 'admin/*') ? [] : fn () => $this->menuNews(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { RevealGroup } from '@/components/public/ScrollReveal';
+import { useLocale } from '@/hooks/use-locale';
 
 export interface ProductShowcaseItem {
     id: number;
@@ -14,8 +15,9 @@ export interface ProductShowcaseItem {
 }
 
 function Unit({ item, large = false }: { item: ProductShowcaseItem; large?: boolean }) {
+    const { localize } = useLocale();
     return (
-        <Link href={`/products/${item.slug}`} className="group block shrink-0 w-[78vw] snap-start sm:w-auto">
+        <Link href={localize(`/products/${item.slug}`)} className="group block shrink-0 w-[78vw] snap-start sm:w-auto">
             <div className={`relative w-full bg-muted ${large ? 'aspect-[4/3]' : 'aspect-square'}`}>
                 {item.featured_image ? (
                     <img

@@ -6,16 +6,18 @@ import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
 import { revealClass, useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
 function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
+    const { localizedRoute } = useLocale();
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
         <Link
             ref={ref}
-            href={route('public.news.show', article.slug)}
+            href={localizedRoute('public.news.show', article.slug)}
             className={`group grid grid-cols-1 gap-8 border-b border-border pb-12 lg:grid-cols-[1.3fr_1fr] lg:items-center lg:gap-12 ${revealClass(inView)}`}
         >
             <div className="aspect-[16/10] w-full bg-muted">
@@ -66,6 +68,7 @@ export default function Index({
     filters: { category?: string };
     seo: ResolvedSeo;
 }) {
+    const { localizedRoute } = useLocale();
     const isEmpty = !featuredArticle && articles.data.length === 0;
 
     return (
@@ -87,7 +90,7 @@ export default function Index({
                 {categories.length > 0 && (
                     <div className="mb-10 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
-                            onClick={() => router.get(route('public.news'))}
+                            onClick={() => router.get(localizedRoute('public.news'))}
                             className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             All
@@ -95,7 +98,7 @@ export default function Index({
                         {categories.map((c) => (
                             <button
                                 key={c.id}
-                                onClick={() => router.get(route('public.news'), { category: c.slug })}
+                                onClick={() => router.get(localizedRoute('public.news'), { category: c.slug })}
                                 className={`text-sm font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {c.name}

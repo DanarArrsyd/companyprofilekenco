@@ -22,7 +22,6 @@ export interface SiteSettings {
     operating_hours: string | null;
     map_embed_url: string | null;
     social: { linkedin: string | null; youtube: string | null; instagram: string | null };
-    show_language_switcher: boolean;
 }
 
 export interface MenuNewsItem {
@@ -43,4 +42,9 @@ export type PageProps<
     flash: FlashMessages;
     siteSettings: SiteSettings;
     menuNews: MenuNewsItem[];
+    locale: 'id' | 'en';
+    locales: Array<'id' | 'en'>;
+    defaultLocale: 'id' | 'en';
+    /** Absolute URL of the current public page in each locale (empty on admin pages). */
+    alternates: Partial<Record<'id' | 'en', string>>;
 };

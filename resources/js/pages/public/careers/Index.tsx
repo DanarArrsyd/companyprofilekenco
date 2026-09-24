@@ -5,6 +5,7 @@ import { Pagination } from '@/components/admin/Pagination';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SeoHead } from '@/components/public/SeoHead';
 import { revealClass, useInView } from '@/hooks/use-in-view';
+import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 
@@ -14,12 +15,13 @@ interface VacancyRow {
 }
 
 function VacancyRowItem({ vacancy }: { vacancy: VacancyRow }) {
+    const { localizedRoute } = useLocale();
     const { ref, inView } = useInView<HTMLDivElement>();
 
     return (
         <div ref={ref} className={revealClass(inView)}>
             <Link
-                href={route('public.careers.show', vacancy.slug)}
+                href={localizedRoute('public.careers.show', vacancy.slug)}
                 className="group flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
             >
                 <div>
@@ -49,6 +51,7 @@ export default function Index({
     filters: { department?: string; employment_type?: string };
     seo: ResolvedSeo;
 }) {
+    const { localizedRoute } = useLocale();
     return (
         <PublicLayout>
             <SeoHead seo={seo} />
@@ -68,7 +71,7 @@ export default function Index({
                 {departments.length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
-                            onClick={() => router.get(route('public.careers'))}
+                            onClick={() => router.get(localizedRoute('public.careers'))}
                             className={`text-sm font-medium ${!filters.department ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             All
@@ -76,7 +79,7 @@ export default function Index({
                         {departments.map((d) => (
                             <button
                                 key={d}
-                                onClick={() => router.get(route('public.careers'), { department: d })}
+                                onClick={() => router.get(localizedRoute('public.careers'), { department: d })}
                                 className={`text-sm font-medium ${filters.department === d ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {d}

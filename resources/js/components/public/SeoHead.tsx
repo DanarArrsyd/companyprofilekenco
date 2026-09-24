@@ -1,6 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
 
 import { jsonLdScripts } from '@/components/public/JsonLd';
+import { useLocale } from '@/hooks/use-locale';
+import { DEFAULT_LOCALE } from '@/lib/locale';
 import { ResolvedSeo } from '@/types/cms';
 
 export function SeoHead({
@@ -13,6 +15,7 @@ export function SeoHead({
 }) {
     const { siteSettings } = usePage().props;
     const siteName = siteSettings?.company_name ?? undefined;
+    const { locale, alternates } = useLocale();
 
     const robots = [
         seo.robots_index ? 'index' : 'noindex',
@@ -24,6 +27,13 @@ export function SeoHead({
             {seo.description && <meta name="description" content={seo.description} />}
             <meta name="robots" content={robots} />
             {seo.canonical_url && <link rel="canonical" href={seo.canonical_url} />}
+
+            {/* Every language version, plus x-default → the default locale. */}
+            {Object.entries(alternates).map(([hreflang, href]) => (
+                <link key={hreflang} rel="alternate" hrefLang={hreflang} href={href} />
+            ))}
+            {alternates[DEFAULT_LOCALE] && <link rel="alternate" hrefLang="x-default" href={alternates[DEFAULT_LOCALE]} />}
+            <meta property="og:locale" content={locale === 'id' ? 'id_ID' : 'en_US'} />
 
             {seo.og_title && <meta property="og:title" content={seo.og_title} />}
             {seo.og_description && <meta property="og:description" content={seo.og_description} />}

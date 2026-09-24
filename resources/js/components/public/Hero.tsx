@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/hooks/use-locale';
 import { mediaUrl } from '@/lib/media';
 
 export interface HeroContent {
@@ -22,6 +23,7 @@ export interface HeroContent {
  * Only the text block reveals on load.
  */
 export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbackTitle?: string }) {
+    const { localize } = useLocale();
     const [ready, setReady] = useState(false);
 
     useEffect(() => {
@@ -74,12 +76,12 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
                     <div className="mt-10 flex flex-wrap gap-4">
                         {content.primary_cta_label && content.primary_cta_url && (
                             <Button asChild>
-                                <Link href={content.primary_cta_url}>{content.primary_cta_label}</Link>
+                                <Link href={localize(content.primary_cta_url)}>{content.primary_cta_label}</Link>
                             </Button>
                         )}
                         {content.secondary_cta_label && content.secondary_cta_url && (
                             <Button asChild variant="secondary" className="border-white/40 text-white hover:bg-white/10">
-                                <Link href={content.secondary_cta_url}>{content.secondary_cta_label}</Link>
+                                <Link href={localize(content.secondary_cta_url)}>{content.secondary_cta_label}</Link>
                             </Button>
                         )}
                     </div>

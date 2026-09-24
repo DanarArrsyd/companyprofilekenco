@@ -11,6 +11,7 @@ use App\Models\JobVacancy;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\QualityContent;
+use App\Support\Locale;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -74,15 +75,37 @@ class SitemapController extends Controller
 
         $urls->push($this->entry(url('/contact')));
 
-        return view('sitemap', ['urls' => $urls])->render();
+        return view('sitemap', ['urls' => $urls->flatMap(fn (array $entry) => $this->localized($entry))])->render();
     }
 
-    /** @return array{loc: string, lastmod: ?string} */
+    /** @return array{path: string, lastmod: ?string} */
     private function entry(string $loc, ?Carbon $lastmod = null): array
     {
         return [
-            'loc' => $loc,
+            'path' => parse_url($loc, PHP_URL_PATH) ?: '/',
             'lastmod' => $lastmod?->toAtomString(),
         ];
+    }
+
+    /**
+     * One <url> per locale, each listing every language version (plus
+     * x-default → the default locale) as hreflang alternates.
+     *
+     * @param  array{path: string, lastmod: ?string}  $entry
+     * @return list<array{loc: string, lastmod: ?string, alternates: array<string, string>}>
+     */
+    private function localized(array $entry): array
+    {
+        $alternates = [];
+        foreach (Locale::SUPPORTED as $locale) {
+            $alternates[$locale] = url(Locale::path($entry['path'], $locale));
+        }
+        $alternates['x-default'] = $alternates[Locale::DEFAULT];
+
+        return array_map(fn (string $locale) => [
+            'loc' => $alternates[$locale],
+            'lastmod' => $entry['lastmod'],
+            'alternates' => $alternates,
+        ], Locale::SUPPORTED);
     }
 }

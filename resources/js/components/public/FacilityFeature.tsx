@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
+import { useLocale } from '@/hooks/use-locale';
 
 export interface FacilityFeatureMachine {
     id: number;
@@ -37,6 +38,7 @@ export function FacilityFeature({
     maxMachines?: number;
     showLink?: boolean;
 }) {
+    const { localize } = useLocale();
     if (!facility) return null;
 
     const machines = (facility.machines ?? []).slice(0, maxMachines);
@@ -81,7 +83,7 @@ export function FacilityFeature({
                 )}
 
                 {showLink && (
-                    <Link href="/company#facilities" className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
+                    <Link href={localize('/company#facilities')} className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
                         View All Facilities &rarr;
                     </Link>
                 )}
