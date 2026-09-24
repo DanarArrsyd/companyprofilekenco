@@ -347,7 +347,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                             drawerEntered ? 'translate-x-0' : 'translate-x-full'
                         }`}
                     >
-                        <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[88px] sm:px-10 lg:px-14">
+                        <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[clamp(68px,11vh,88px)] sm:px-10 lg:px-14">
                             <Link
                                 href="/"
                                 aria-label="Home"
@@ -358,8 +358,8 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                             <span className="rounded-full bg-white/10 px-3 py-1 text-small font-medium text-white/80">Menu</span>
                         </div>
 
-                        <div className="flex flex-1 flex-col px-6 pb-10 pt-4 sm:px-10 lg:flex-row lg:px-14 lg:pt-8">
-                            <nav aria-label="Primary" className={menuNews.length > 0 ? 'lg:w-[52%] lg:pr-10' : 'lg:w-full lg:max-w-xl'}>
+                        <div className="flex flex-1 flex-col px-6 pb-[clamp(1rem,4vh,2.5rem)] pt-[clamp(0.5rem,2.5vh,2rem)] sm:px-10 lg:px-14 xl:flex-row">
+                            <nav aria-label="Primary" className={menuNews.length > 0 ? 'xl:w-[52%] xl:pr-10' : 'xl:w-full xl:max-w-xl'}>
                                 <ul>
                                     {NAV.map((item, index) => {
                                         const expanded = expandedItem === item.label;
@@ -376,7 +376,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                     <Link
                                                         href={item.href!}
                                                         aria-current={active ? 'page' : undefined}
-                                                        className="group flex py-2.5 text-h4 font-semibold focus-visible:outline-none sm:py-3 sm:text-h3"
+                                                        className="menu-item-text group flex font-semibold focus-visible:outline-none"
                                                     >
                                                         <span
                                                             className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
@@ -399,7 +399,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                     aria-expanded={expanded}
                                                     aria-controls={submenuId(item.label)}
                                                     onClick={() => setExpandedItem(expanded ? null : item.label)}
-                                                    className="group flex w-full items-center justify-between gap-6 py-2.5 text-left text-h4 font-semibold focus-visible:outline-none sm:py-3 sm:text-h3"
+                                                    className="menu-item-text group flex w-full items-center justify-between gap-6 text-left font-semibold focus-visible:outline-none"
                                                 >
                                                     <span
                                                         className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
@@ -432,7 +432,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                                         href={child.href}
                                                                         aria-current={active ? 'page' : undefined}
                                                                         onClick={(e) => handleAnchorLinkClick(e, child.href, closeMenu)}
-                                                                        className={`block border-l py-2 pl-5 text-body-lg transition-colors duration-200 focus-visible:outline-none focus-visible:underline ${
+                                                                        className={`menu-sub-link block border-l pl-5 text-body-lg transition-colors duration-200 focus-visible:outline-none focus-visible:underline ${
                                                                             active
                                                                                 ? 'border-white font-medium text-white'
                                                                                 : 'border-white/20 text-white/70 hover:border-white/60 hover:text-white'
@@ -453,19 +453,21 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
 
                             {menuNews.length > 0 && (
                                 <>
-                                    <div aria-hidden="true" className="hidden w-px shrink-0 bg-white/15 lg:block" />
-                                    <aside aria-labelledby="menu-news-heading" className="hidden lg:flex lg:flex-1 lg:flex-col lg:gap-4 lg:pl-10">
+                                    <div aria-hidden="true" className="hidden w-px shrink-0 bg-white/15 xl:block" />
+                                    <aside aria-labelledby="menu-news-heading" className="hidden xl:flex xl:min-w-0 xl:flex-1 xl:flex-col xl:gap-4 xl:pl-10">
                                         <h2 id="menu-news-heading" className="text-small font-medium text-white/60">
                                             Latest news
                                         </h2>
-                                        {menuNews.map((article) => {
+                                        {menuNews.map((article, index) => {
                                             const image = mediaUrl(article.featured_image);
 
                                             return (
                                                 <Link
                                                     key={article.slug}
                                                     href={`/news/${article.slug}`}
-                                                    className="group relative block aspect-[2/1] overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900"
+                                                    className={`group relative block aspect-[2/1] max-h-[30vh] w-full overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 ${
+                                                        index > 0 ? '[@media(max-height:640px)]:hidden' : ''
+                                                    }`}
                                                 >
                                                     {image && (
                                                         <img
@@ -492,7 +494,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                             )}
                         </div>
 
-                        <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
+                        <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-[clamp(1rem,3vh,1.5rem)] sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
                             <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small font-medium">
                                 <li>
                                     <Link href="/contact" className="text-white hover:underline hover:underline-offset-4">Contact Us</Link>

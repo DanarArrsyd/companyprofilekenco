@@ -181,6 +181,19 @@
         }
     }
 
+    /* Nav panel type and rhythm follow viewport height as well as width, so
+       short laptop screens (e.g. 1600×690) still fit every item and the
+       contact footer without scrolling. */
+    .menu-item-text {
+        font-size: clamp(1.125rem, min(0.85rem + 2.2vw, 3.4vh), 1.875rem);
+        line-height: 1.2;
+        padding-block: clamp(0.3rem, 1.05vh, 0.75rem);
+    }
+
+    .menu-sub-link {
+        padding-block: clamp(0.25rem, 0.8vh, 0.5rem);
+    }
+
     /* Entrance for the full-page nav menu's right-pane submenu links —
        replays on every hover/focus switch since the list remounts via `key`. */
     @keyframes submenu-item-enter {

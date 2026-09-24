@@ -57,9 +57,13 @@ export function MetricStrip({ items }: { items: Metric[] }) {
     return (
         <section className="border-y border-border bg-navy-900" ref={ref}>
             <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                <div data-reveal-group className="grid grid-cols-2 divide-y divide-white/15 lg:grid-cols-4 lg:divide-y-0 lg:divide-x">
+                <div data-reveal-group className="grid grid-cols-2 lg:grid-cols-4">
                     {items.map((item, index) => (
-                        <div key={index} className="px-2 py-6 text-center first:pl-0 last:pr-0 lg:py-4">
+                        <div
+                            key={index}
+                            // 2-up grid: rule between columns and between rows; 4-up: column rules only.
+                            className="border-white/15 px-2 py-6 text-center even:border-l [&:nth-child(n+3)]:border-t lg:border-l lg:py-4 lg:first:border-l-0 lg:[&:nth-child(n+3)]:border-t-0"
+                        >
                             <p className="text-h2 text-white">
                                 <Figure value={item.value} animate={inView} />
                             </p>
