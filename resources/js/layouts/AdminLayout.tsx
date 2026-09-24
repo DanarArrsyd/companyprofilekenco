@@ -109,8 +109,8 @@ function AdminLayoutInner({ children }: PropsWithChildren) {
             <div className="flex min-w-0 flex-1 flex-col">
                 <AdminHeader onOpenMobileNav={() => setMobileNavOpen(true)} />
 
-                <main className="flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
-                    {children}
+                <main className="flex-1 overflow-x-hidden px-4 py-8 sm:px-8 lg:px-10 lg:py-10">
+                    <div className="mx-auto w-full max-w-7xl">{children}</div>
                 </main>
             </div>
         </div>

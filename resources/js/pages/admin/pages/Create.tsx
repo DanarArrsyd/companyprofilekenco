@@ -35,7 +35,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 breadcrumbs={[{ label: 'Pages', href: route('admin.pages') }, { label: 'New' }]}
             />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="General" description="Basic identity for this page.">
                     <div>
                         <Label htmlFor="title">Title</Label>

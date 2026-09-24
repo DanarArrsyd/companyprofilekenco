@@ -55,7 +55,7 @@ export function SectionContentFields({
     switch (sectionType) {
         case 'hero':
             return (
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
                         <Label htmlFor="eyebrow">Eyebrow</Label>
                         <Input id="eyebrow" value={str(content, 'eyebrow')} onChange={(e) => set('eyebrow', e.target.value)} className="mt-1.5" />
@@ -80,7 +80,7 @@ export function SectionContentFields({
                         <TextArea id="highlight" value={str(content, 'highlight')} onChange={(v) => set('highlight', v)} rows={2} />
                         <p className="mt-1.5 text-xs text-slate-500">Only used by page-intro heroes (e.g. the Company page) that show a second, shorter statement alongside the description.</p>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
                             <Label htmlFor="primary_cta_label">Primary CTA label</Label>
                             <Input id="primary_cta_label" value={str(content, 'primary_cta_label')} onChange={(e) => set('primary_cta_label', e.target.value)} className="mt-1.5" />
@@ -117,7 +117,7 @@ export function SectionContentFields({
 
         case 'text':
             return (
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
                         <Label htmlFor="body">Body</Label>
                         <TextArea id="body" value={str(content, 'body')} onChange={(v) => set('body', v)} rows={6} />
@@ -137,7 +137,7 @@ export function SectionContentFields({
 
         case 'image_text':
             return (
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <MediaPickerField
                         label="Image"
                         currentUrl={mediaUrl(str(content, 'image'))}
@@ -156,7 +156,7 @@ export function SectionContentFields({
             return (
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <div className="space-y-4 rounded border border-border p-4">
+                        <div className="space-y-5 rounded-lg border border-border p-5">
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Visi card</p>
                             <MediaPickerField
                                 label="Background photo"
@@ -175,7 +175,7 @@ export function SectionContentFields({
                             </div>
                         </div>
 
-                        <div className="space-y-4 rounded border border-border p-4">
+                        <div className="space-y-5 rounded-lg border border-border p-5">
                             <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Misi card</p>
                             <MediaPickerField
                                 label="Background photo"
@@ -202,7 +202,7 @@ export function SectionContentFields({
         case 'career_cta':
         case 'contact_cta':
             return (
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
                         <Label htmlFor="heading">Heading</Label>
                         <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
@@ -211,7 +211,7 @@ export function SectionContentFields({
                         <Label htmlFor="description">Description</Label>
                         <TextArea id="description" value={str(content, 'description')} onChange={(v) => set('description', v)} />
                     </div>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
                             <Label htmlFor="cta_label">CTA label</Label>
                             <Input id="cta_label" value={str(content, 'cta_label')} onChange={(e) => set('cta_label', e.target.value)} className="mt-1.5" />
@@ -328,7 +328,7 @@ export function SectionContentFields({
             };
 
             return (
-                <div className="space-y-4">
+                <div className="space-y-5">
                     <div>
                         <Label htmlFor="heading">Heading</Label>
                         <Input id="heading" value={str(content, 'heading')} onChange={(e) => set('heading', e.target.value)} className="mt-1.5" />
@@ -346,7 +346,7 @@ export function SectionContentFields({
                                 them here.
                             </p>
                         ) : (
-                            <div className="mt-2 space-y-1 rounded border border-border p-3">
+                            <div className="mt-2 space-y-1 rounded-lg border border-border p-4">
                                 {options.map((option) => (
                                     <label key={option.id} className="flex items-center gap-2 text-sm text-slate-700">
                                         <input

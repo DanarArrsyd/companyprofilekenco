@@ -56,7 +56,7 @@ export default function Index({
                 actions={can('certifications.create') && <Link href={route('admin.quality-content.create')}><Button><Plus className="mr-2 h-4 w-4" />New Content</Button></Link>}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search })} placeholder="Search…" className="max-w-sm" />
                     <select value={filters.status ?? ''} onChange={(e) => applyFilters({ status: e.target.value })} className="h-10 rounded border border-border bg-surface px-3 text-sm">

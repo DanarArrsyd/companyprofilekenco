@@ -57,8 +57,8 @@ export function PageSectionEditor({
     const saveError = Object.values(errors)[0];
 
     return (
-        <div className="rounded border border-border bg-surface">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <div className="rounded-lg border border-border bg-surface">
+            <div className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-8">
                 <div className="flex items-center gap-2">
                     <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium uppercase text-slate-600">
                         {label ?? section.section_type.replace('_', ' ')}
@@ -103,8 +103,8 @@ export function PageSectionEditor({
                 )}
             </div>
 
-            <div className="space-y-4 p-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-5 p-6 sm:p-8">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <Label htmlFor={`title-${section.id}`}>Title</Label>
                         <Input
@@ -132,7 +132,7 @@ export function PageSectionEditor({
                     pickerOptions={pickerOptions}
                 />
 
-                <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-4 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
                     <label className="flex items-center gap-2 text-sm text-slate-700">
                         <input
                             type="checkbox"

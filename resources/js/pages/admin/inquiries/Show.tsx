@@ -36,7 +36,7 @@ export default function Show({ inquiry, statusOptions }: { inquiry: Inquiry; sta
             />
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-4 rounded border border-border bg-surface p-6 lg:col-span-2">
+                <div className="space-y-4 rounded-lg border border-border bg-surface p-6 sm:p-8 lg:col-span-2">
                     <div>
                         <Label>Company</Label>
                         <p className="mt-1 text-sm text-foreground">{inquiry.company ?? '—'}</p>
@@ -62,7 +62,7 @@ export default function Show({ inquiry, statusOptions }: { inquiry: Inquiry; sta
                     </a>
                 </div>
 
-                <div className="space-y-3 rounded border border-border bg-surface p-6">
+                <div className="space-y-3 rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <h2 className="text-sm font-semibold text-foreground">Status</h2>
                     <div className="flex flex-wrap gap-2">
                         {statusOptions.map((s) => (

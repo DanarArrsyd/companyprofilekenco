@@ -57,12 +57,12 @@ export default function Dashboard({
 
             <PageHeader title="Dashboard" description="Overview of published content and recent activity." />
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {summaryCards.map((card) => {
                     const Icon = card.icon;
 
                     return (
-                        <div key={card.label} className="rounded border border-border bg-surface p-5">
+                        <div key={card.label} className="rounded-lg border border-border bg-surface p-6">
                             <div className="flex items-center justify-between">
                                 <p className="text-sm text-slate-500">{card.label}</p>
                                 <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
@@ -73,8 +73,8 @@ export default function Dashboard({
                 })}
             </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <section className="rounded border border-border bg-surface p-5 lg:col-span-1">
+            <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <section className="rounded-lg border border-border bg-surface p-6 lg:col-span-1">
                     <h2 className="text-sm font-semibold text-foreground">Recent Content Updates</h2>
 
                     {recentContent.length === 0 ? (
@@ -83,9 +83,9 @@ export default function Dashboard({
                             description="Updates to pages, products, and articles will appear here."
                         />
                     ) : (
-                        <ul className="mt-4 space-y-3">
+                        <ul className="mt-5 divide-y divide-border">
                             {recentContent.map((item, index) => (
-                                <li key={index} className="flex items-start justify-between gap-3 text-sm">
+                                <li key={index} className="flex items-start justify-between gap-4 py-3 text-sm first:pt-0 last:pb-0">
                                     <div>
                                         <p className="font-medium text-foreground">{item.title}</p>
                                         <p className="text-xs text-slate-500">{item.type}</p>
@@ -97,7 +97,7 @@ export default function Dashboard({
                     )}
                 </section>
 
-                <section className="rounded border border-border bg-surface p-5 lg:col-span-1">
+                <section className="rounded-lg border border-border bg-surface p-6 lg:col-span-1">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-semibold text-foreground">Recent Contact Inquiries</h2>
                         <Link href={route('admin.inquiries')} className="text-xs text-primary hover:underline">
@@ -112,9 +112,9 @@ export default function Dashboard({
                             description="Contact form submissions will appear here."
                         />
                     ) : (
-                        <ul className="mt-4 space-y-3">
+                        <ul className="mt-5 divide-y divide-border">
                             {recentInquiries.map((inquiry) => (
-                                <li key={inquiry.id} className="flex items-start justify-between gap-3 text-sm">
+                                <li key={inquiry.id} className="flex items-start justify-between gap-4 py-3 text-sm first:pt-0 last:pb-0">
                                     <div>
                                         <p className="font-medium text-foreground">{inquiry.name}</p>
                                         <p className="text-xs text-slate-500">{inquiry.subject ?? 'No subject'}</p>
@@ -126,7 +126,7 @@ export default function Dashboard({
                     )}
                 </section>
 
-                <section className="rounded border border-border bg-surface p-5 lg:col-span-1">
+                <section className="rounded-lg border border-border bg-surface p-6 lg:col-span-1">
                     <div className="flex items-center justify-between">
                         <h2 className="text-sm font-semibold text-foreground">Recent Admin Activity</h2>
                         <Link href={route('admin.activity-logs')} className="text-xs text-primary hover:underline">
@@ -141,9 +141,9 @@ export default function Dashboard({
                             description="Admin actions like logins will appear here."
                         />
                     ) : (
-                        <ul className="mt-4 space-y-3">
+                        <ul className="mt-5 divide-y divide-border">
                             {recentActivity.map((entry) => (
-                                <li key={entry.id} className="text-sm">
+                                <li key={entry.id} className="py-3 text-sm first:pt-0 last:pb-0">
                                     <p className="text-foreground">
                                         <span className="font-medium">{entry.user?.name ?? 'System'}</span>{' '}
                                         {entry.action.replace('admin.', '')}

@@ -38,7 +38,7 @@ export default function Create({ permissionGroups }: { permissionGroups: Permiss
             <Head title="New Role" />
             <PageHeader title="New Role" breadcrumbs={[{ label: 'Roles', href: route('admin.roles') }, { label: 'New' }]} />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Role Name</Label>
@@ -53,12 +53,12 @@ export default function Create({ permissionGroups }: { permissionGroups: Permiss
                             const allChecked = group.permissions.every((p) => data.permissions.includes(p));
 
                             return (
-                                <div key={group.label} className="rounded border border-border p-3">
+                                <div key={group.label} className="rounded-lg border border-border p-4">
                                     <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                         <input type="checkbox" checked={allChecked} onChange={(e) => toggleGroup(group, e.target.checked)} className="rounded border-border" />
                                         {group.label}
                                     </label>
-                                    <div className="mt-2 grid grid-cols-2 gap-2 pl-6 sm:grid-cols-3">
+                                    <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 pl-6 sm:grid-cols-3">
                                         {group.permissions.map((permission) => (
                                             <label key={permission} className="flex items-center gap-2 text-sm text-slate-700">
                                                 <input type="checkbox" checked={data.permissions.includes(permission)} onChange={() => toggle(permission)} className="rounded border-border" />

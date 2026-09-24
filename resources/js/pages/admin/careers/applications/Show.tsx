@@ -46,7 +46,7 @@ export default function Show({ application, statusOptions }: { application: Appl
             />
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-4 rounded border border-border bg-surface p-6 lg:col-span-2">
+                <div className="space-y-4 rounded-lg border border-border bg-surface p-6 sm:p-8 lg:col-span-2">
                     <div>
                         <Label>Email</Label>
                         <p className="mt-1 text-sm text-foreground">{application.applicant_email}</p>
@@ -75,7 +75,7 @@ export default function Show({ application, statusOptions }: { application: Appl
                     </div>
                 </div>
 
-                <form onSubmit={submit} className="space-y-4 rounded border border-border bg-surface p-6">
+                <form onSubmit={submit} className="space-y-4 rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <FormSection title="Status">
                         <div>
                             <Label htmlFor="status">Application status</Label>

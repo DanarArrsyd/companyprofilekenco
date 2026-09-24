@@ -19,7 +19,7 @@ export default function Edit({
             <PageHeader title="Profile" description="Manage your account information and password." />
 
             <div className="space-y-6">
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <UpdateProfileInformationForm
                         mustVerifyEmail={mustVerifyEmail}
                         status={status}
@@ -27,11 +27,11 @@ export default function Edit({
                     />
                 </div>
 
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <UpdatePasswordForm className="max-w-xl" />
                 </div>
 
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <DeleteUserForm className="max-w-xl" />
                 </div>
             </div>

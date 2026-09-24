@@ -397,7 +397,7 @@ export default function Index({
             />
 
             <div className="space-y-5">
-                <section className="overflow-hidden rounded border border-border bg-surface" aria-labelledby="upload-heading">
+                <section className="overflow-hidden rounded-lg border border-border bg-surface" aria-labelledby="upload-heading">
                     <div className="border-b border-border px-5 py-4 sm:px-6">
                         <h2 id="upload-heading" className="text-sm font-semibold text-foreground">Upload asset</h2>
                         <p className="mt-1 text-xs text-slate-500">JPG, PNG, WebP, or PDF · maximum 10 MB</p>

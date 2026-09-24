@@ -41,7 +41,7 @@ export default function Edit({
                 description="Structured sections rendered on the public homepage, in a fixed order."
             />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {sections.map((section) => (
                     <PageSectionEditor
                         key={section.id}

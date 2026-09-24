@@ -44,7 +44,7 @@ export default function Edit({ facility, categories, statusOptions }: { facility
             <Head title={`Edit ${facility.name}`} />
             <PageHeader title={facility.name} breadcrumbs={[{ label: 'Facilities', href: route('admin.facilities') }, { label: 'Edit' }]} />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name</Label>

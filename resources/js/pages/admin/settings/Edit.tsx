@@ -80,7 +80,7 @@ export default function Edit({ settings }: { settings: Settings }) {
             <Head title="Website Settings" />
             <PageHeader title="Website Settings" description="Global site configuration used across the public website." />
 
-            <div className="mb-4 flex flex-wrap gap-2 border-b border-border">
+            <div className="mb-6 flex flex-wrap gap-2 border-b border-border">
                 {TABS.map((t) => (
                     <button
                         key={t}
@@ -93,7 +93,7 @@ export default function Edit({ settings }: { settings: Settings }) {
                 ))}
             </div>
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 {tab === 'General' && (
                     <FormSection title="General">
                         <div>

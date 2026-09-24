@@ -150,7 +150,7 @@ export default function Edit({
             />
 
             <div className="space-y-6">
-                <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+                <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                     <FormSection title="General Information">
                         <div>
                             <Label htmlFor="name">Name</Label>
@@ -237,7 +237,7 @@ export default function Edit({
                     </FormActions>
                 </form>
 
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <h2 className="text-sm font-semibold text-foreground">Product Gallery</h2>
                     <p className="mt-1 text-sm text-slate-500">Additional images shown on the product detail page.</p>
 

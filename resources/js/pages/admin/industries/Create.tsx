@@ -30,7 +30,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
             <Head title="New Industry" />
             <PageHeader title="New Industry" breadcrumbs={[{ label: 'Industries', href: route('admin.industries') }, { label: 'New' }]} />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name</Label>

@@ -49,7 +49,7 @@ export function ConfirmDialog({
                         leaveFrom="opacity-100 scale-100"
                         leaveTo="opacity-0 scale-95"
                     >
-                        <DialogPanel className="w-full max-w-sm rounded border border-border bg-surface p-6 shadow-sm">
+                        <DialogPanel className="w-full max-w-sm rounded-lg border border-border bg-surface p-6 shadow-sm">
                             <DialogTitle className="text-sm font-semibold text-foreground">
                                 {title}
                             </DialogTitle>

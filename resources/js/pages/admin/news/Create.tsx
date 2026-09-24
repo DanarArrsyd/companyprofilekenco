@@ -55,7 +55,7 @@ export default function Create({
             <Head title="New Article" />
             <PageHeader title="New Article" breadcrumbs={[{ label: 'Articles', href: route('admin.news') }, { label: 'New' }]} />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="title">Title</Label>

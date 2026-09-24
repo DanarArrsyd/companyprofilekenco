@@ -58,7 +58,7 @@ export default function Index({
 
             <PageHeader title="Contact Inquiries" description="Review contact form submissions." />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <SearchInput
                         value={search}

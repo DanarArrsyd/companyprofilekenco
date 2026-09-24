@@ -40,13 +40,13 @@ function StepRow({ capabilityId, step, isFirst, isLast, onMove }: { capabilityId
     const { data, setData, put, processing } = useForm({ title: step.title, description: step.description ?? '' });
 
     return (
-        <div className="rounded border border-border bg-surface p-4">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
-                <div className="space-y-2">
+        <div className="rounded-lg border border-border bg-surface p-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
+                <div className="space-y-3">
                     <Input value={data.title} onChange={(e) => setData('title', e.target.value)} placeholder="Step title" />
                     <textarea value={data.description} onChange={(e) => setData('description', e.target.value)} rows={2} placeholder="Step description" className="w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
                 </div>
-                <div className="flex items-start gap-1">
+                <div className="flex items-start gap-2">
                     <Button type="button" variant="secondary" size="sm" disabled={isFirst} onClick={() => onMove('up')} aria-label="Move up"><ChevronUp className="h-4 w-4" /></Button>
                     <Button type="button" variant="secondary" size="sm" disabled={isLast} onClick={() => onMove('down')} aria-label="Move down"><ChevronDown className="h-4 w-4" /></Button>
                     <Button type="button" size="sm" onClick={() => put(route('admin.capabilities.steps.update', [capabilityId, step.id]), { preserveScroll: true })} disabled={processing}>Save</Button>
@@ -162,7 +162,7 @@ export default function Edit({
             />
 
             <div className="space-y-6">
-                <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+                <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                     <FormSection title="General">
                         <div>
                             <Label htmlFor="name">Name</Label>
@@ -232,9 +232,9 @@ export default function Edit({
                     </FormActions>
                 </form>
 
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <h2 className="text-sm font-semibold text-foreground">Process Steps</h2>
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-5 space-y-4">
                         {steps.map((step, index) => (
                             <StepRow key={step.id} capabilityId={capability.id} step={step} isFirst={index === 0} isLast={index === steps.length - 1} onMove={(dir) => moveStep(index, dir)} />
                         ))}
@@ -245,7 +245,7 @@ export default function Edit({
                     </div>
                 </div>
 
-                <div className="rounded border border-border bg-surface p-6">
+                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
                     <h2 className="text-sm font-semibold text-foreground">Assigned Machines</h2>
                     {availableMachines.length === 0 ? (
                         <p className="mt-2 text-sm text-slate-500">No published machines available yet.</p>

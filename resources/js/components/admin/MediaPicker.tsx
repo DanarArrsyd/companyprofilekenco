@@ -453,7 +453,7 @@ export function MediaPickerField({
     return (
         <div>
             <Label>{label}</Label>
-            <div className="mt-1.5 flex flex-col gap-4 rounded border border-border bg-surface p-4 sm:flex-row sm:items-center">
+            <div className="mt-1.5 flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-center sm:p-5">
                 {previewUrl ? (
                     <img src={previewUrl} alt="" className="h-24 w-full rounded border border-border object-cover sm:w-32" />
                 ) : (

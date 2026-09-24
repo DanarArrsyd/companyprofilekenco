@@ -116,7 +116,7 @@ export default function Index({
 
             <PageHeader title="Activity Logs" description="Read-only history of admin actions." />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <SearchInput
                         value={search}

@@ -124,7 +124,7 @@ export default function Index({
                 }
             />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <form onSubmit={submitSearch} className="w-full max-w-sm">
                         <SearchInput

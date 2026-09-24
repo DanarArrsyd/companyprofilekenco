@@ -30,7 +30,7 @@ export default function Create({ roles }: { roles: string[] }) {
             <Head title="New User" />
             <PageHeader title="New User" breadcrumbs={[{ label: 'Users', href: route('admin.users') }, { label: 'New' }]} />
 
-            <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+            <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                 <FormSection title="Account">
                     <div>
                         <Label htmlFor="name">Name</Label>

@@ -29,7 +29,7 @@ export function DataTable<T extends { id: number | string }>({
     }
 
     return (
-        <div className="overflow-x-auto rounded border border-border bg-surface">
+        <div className="overflow-x-auto rounded-lg border border-border bg-surface">
             <table className="w-full min-w-[640px] text-left text-sm">
                 <thead>
                     <tr className="border-b border-border bg-muted/50">
@@ -61,9 +61,9 @@ export function DataTable<T extends { id: number | string }>({
 }
 
 function cnHeader(extra?: string) {
-    return ['px-4 py-3 font-medium text-slate-700', extra].filter(Boolean).join(' ');
+    return ['px-5 py-3.5 font-medium text-slate-700', extra].filter(Boolean).join(' ');
 }
 
 function cnCell(extra?: string) {
-    return ['px-4 py-3 text-foreground', extra].filter(Boolean).join(' ');
+    return ['px-5 py-4 text-foreground', extra].filter(Boolean).join(' ');
 }

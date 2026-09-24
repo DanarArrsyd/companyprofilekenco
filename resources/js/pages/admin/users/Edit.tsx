@@ -48,7 +48,7 @@ export default function Edit({ user, roles, isSelf }: { user: UserDetail; roles:
             />
 
             <div className="space-y-6">
-                <form onSubmit={submit} className="rounded border border-border bg-surface px-6">
+                <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
                     <FormSection title="Account">
                         <div>
                             <Label htmlFor="name">Name</Label>
@@ -82,9 +82,9 @@ export default function Edit({ user, roles, isSelf }: { user: UserDetail; roles:
                     </FormActions>
                 </form>
 
-                <form onSubmit={submitPassword} className="rounded border border-border bg-surface px-6 py-6">
-                    <h2 className="text-sm font-semibold text-foreground">Password</h2>
-                    <div className="mt-4 space-y-4">
+                <form onSubmit={submitPassword} className="rounded-lg border border-border bg-surface p-6 sm:p-8">
+                    <h2 className="text-base font-semibold text-foreground">Password</h2>
+                    <div className="mt-5 space-y-5">
                         <label className="flex items-center gap-2 text-sm text-slate-700">
                             <input type="radio" checked={passwordForm.data.mode === 'generate'} onChange={() => passwordForm.setData('mode', 'generate')} />
                             Generate a temporary password (shown once)
@@ -95,7 +95,7 @@ export default function Edit({ user, roles, isSelf }: { user: UserDetail; roles:
                         </label>
 
                         {passwordForm.data.mode === 'manual' && (
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 <div>
                                     <Label htmlFor="new_password">New password</Label>
                                     <Input id="new_password" type="password" value={passwordForm.data.password} onChange={(e) => passwordForm.setData('password', e.target.value)} className="mt-1.5" />

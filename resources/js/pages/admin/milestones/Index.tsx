@@ -76,7 +76,7 @@ export default function Index({
                 actions={can('milestones.create') && <Link href={route('admin.milestones.create')}><Button><Plus className="mr-2 h-4 w-4" />New Milestone</Button></Link>}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && applyFilters({ search })} placeholder="Search milestones…" className="max-w-sm" />
                 </FilterBar>

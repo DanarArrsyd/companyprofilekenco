@@ -75,7 +75,7 @@ export default function Index({
                 }
             />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 <FilterBar>
                     <SearchInput
                         value={search}
