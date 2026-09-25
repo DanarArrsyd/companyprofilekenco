@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Services\Translation\AzureTranslator;
+use App\Services\Translation\GlossaryProtector;
+use App\Services\Translation\Translator;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Translatable\Facades\Translatable;
@@ -13,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(Translator::class, fn () => new AzureTranslator(
+            new GlossaryProtector(config('translation.glossary', [])),
+            config('translation.azure', []),
+        ));
     }
 
     /**

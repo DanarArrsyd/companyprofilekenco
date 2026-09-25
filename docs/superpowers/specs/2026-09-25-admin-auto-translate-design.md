@@ -10,8 +10,12 @@ has to be typed twice.
 
 ## Behaviour
 
-- Every admin form with translatable fields gets a checkbox
-  **"Auto-translate the other language"**, on by default.
+- The language tab bar on every translatable admin form gets a checkbox
+  **"Auto-translate the other language"**, on by default and remembered per
+  browser. It is shown only when a translator is configured
+  (`autoTranslate` shared prop). When on, admin form submissions carry the
+  header `X-Auto-Translate: 1` (added by one Inertia `before` listener), so no
+  individual form changes.
 - On save, per translatable field, compared with the stored value:
 
 | Changed in this save | Result |
@@ -19,7 +23,8 @@ has to be typed twice.
 | English only | Indonesian re-generated from English (overwrites) |
 | Indonesian only | English re-generated from Indonesian (overwrites) |
 | Both | Both kept as typed, nothing translated |
-| Neither | Untouched, no API call |
+| Neither, other language empty | Other language filled from the source |
+| Neither, both filled | Untouched, no API call |
 
   A changed source that is now empty is not translated (clearing English does
   not wipe Indonesian and vice versa).
@@ -47,7 +52,7 @@ has to be typed twice.
   writes the generated locale through `setTranslation()`.
 - Hook: `HasLocalizedContent` runs the action in `saving` only when
   `LocalizedContent::$autoTranslate` is on. `SetLocale` (admin requests) turns
-  it on when the request carries `auto_translate=1` and a translator is
+  it on when the request carries `X-Auto-Translate: 1` and a translator is
   configured. Seeders, migrations, tests and console commands never call the API.
 - Synchronous (Hostinger has no queue worker); edits are small.
 
