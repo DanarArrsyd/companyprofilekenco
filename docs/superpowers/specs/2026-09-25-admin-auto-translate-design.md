@@ -63,8 +63,13 @@ articles, capabilities + steps, vacancies, pages, facilities, industries,
 quality content, milestones, product/facility/news categories, statistics —
 and `SeoMetadata`.
 
-Phase 2 (separate spec): `PageSection.content` inline `{"en","id"}` values
-(homepage and page sections), which need a per-section map of text keys.
+Phase 2 (done 2026-09-25): `PageSection.content` text values (homepage and
+page sections). `PageSection` implements `HasTranslatableContent`, whose
+`translatableContentPaths()` lists the editor's text keys (`heading`,
+`visi_text`, `items.*.label`, …); a translated plain string becomes
+`{"en","id"}`. Shared values (images, URLs, item IDs) are never sent.
+`tests/js/section-content-paths.test.ts` keeps the list in sync with
+`SectionContentFields.tsx`.
 
 ## Errors
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SectionType;
 use App\Models\Concerns\HasLocalizedContent;
+use App\Models\Contracts\HasTranslatableContent;
 use App\Support\LocalizedContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['page_id', 'section_type', 'title', 'subtitle', 'content', 'settings_json', 'sort_order', 'is_active'])]
-class PageSection extends Model
+class PageSection extends Model implements HasTranslatableContent
 {
     use HasFactory;
     use HasLocalizedContent {
@@ -21,6 +22,20 @@ class PageSection extends Model
 
     /** @var list<string> CMS text stored per locale (see HasLocalizedContent). */
     public array $translatable = ['title', 'subtitle'];
+
+    /**
+     * Text keys the admin section editor writes with writeText()
+     * (resources/js/components/admin/SectionContentFields.tsx). Keep in sync.
+     */
+    public function translatableContentPaths(): array
+    {
+        return [
+            'eyebrow', 'heading', 'highlight', 'description', 'body',
+            'primary_cta_label', 'secondary_cta_label', 'cta_label',
+            'visi_title', 'visi_text', 'misi_title', 'misi_text',
+            'items.*.label',
+        ];
+    }
 
     protected function casts(): array
     {
