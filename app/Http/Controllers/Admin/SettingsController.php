@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Settings\UpdateSettingsRequest;
 use App\Services\ActivityLogService;
+use App\Services\FaviconFileService;
 use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Services\SettingsService;
@@ -26,6 +27,7 @@ class SettingsController extends Controller
         private readonly MediaUploadService $uploader,
         private readonly MediaLifecycleService $mediaLifecycle,
         private readonly ActivityLogService $activityLog,
+        private readonly FaviconFileService $favicons,
     ) {}
 
     public function edit(): Response
@@ -64,6 +66,10 @@ class SettingsController extends Controller
         $data['maintenance_mode'] = $request->boolean('maintenance_mode');
 
         $this->settings->setMany($data);
+
+        if (array_key_exists('favicon', $data)) {
+            $this->favicons->publish($data['favicon']);
+        }
 
         $this->activityLog->record('settings.updated', null, [
             'old' => $before,

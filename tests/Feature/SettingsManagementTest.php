@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\FaviconFileService;
 use App\Services\SettingsService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -89,6 +90,7 @@ test('the logo stands in for a missing favicon and nothing is linked without eit
 
 test('an ICO favicon upload is accepted and stored without conversion', function () {
     Storage::fake('public');
+    useTempWebRoot();
     $user = User::factory()->create();
     $user->givePermissionTo('settings.manage');
 
@@ -108,6 +110,7 @@ test('an ICO favicon upload is accepted and stored without conversion', function
 
 test('a PNG favicon keeps its original format', function () {
     Storage::fake('public');
+    useTempWebRoot();
     $user = User::factory()->create();
     $user->givePermissionTo('settings.manage');
 
@@ -135,4 +138,44 @@ function realUpload(string $name, string $content): UploadedFile
     file_put_contents($path, $content);
 
     return new UploadedFile($path, $name, null, null, true);
+}
+
+test('saving a favicon writes it to the web root as favicon.ico and removing it deletes the copy', function () {
+    Storage::fake('public');
+    $webRoot = useTempWebRoot();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.manage');
+
+    $this->actingAs($user)->put(route('admin.settings.update'), [
+        'favicon' => UploadedFile::fake()->image('icon.png', 32, 32),
+    ])->assertSessionHasNoErrors();
+
+    $stored = app(SettingsService::class)->get('favicon');
+    expect(file_get_contents("{$webRoot}/favicon.ico"))->toBe(Storage::disk('public')->get($stored));
+
+    app(FaviconFileService::class)->publish(null);
+    expect(file_exists("{$webRoot}/favicon.ico"))->toBeFalse();
+});
+
+test('favicon:publish copies the current favicon into the given web root', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('settings/icon.png', 'png-bytes');
+    app(SettingsService::class)->setMany(['favicon' => 'settings/icon.png']);
+    $webRoot = sys_get_temp_dir().'/webroot-'.uniqid();
+    mkdir($webRoot);
+
+    $this->artisan('favicon:publish', ['--web-root' => $webRoot])->assertSuccessful();
+
+    expect(file_get_contents("{$webRoot}/favicon.ico"))->toBe('png-bytes');
+});
+
+/** Favicon saves write favicon.ico to the web root; point it at a temp dir, not public/. */
+function useTempWebRoot(): string
+{
+    $webRoot = sys_get_temp_dir().'/webroot-'.uniqid();
+    mkdir($webRoot);
+    app()->usePublicPath($webRoot);
+
+    return $webRoot;
 }

@@ -36,4 +36,9 @@ require __DIR__.'/../application/vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../application/bootstrap/app.php';
 
+// The one addition beyond the paths above: public_path() is this web root,
+// so files the app writes for the web server (favicon.ico) land where
+// Hostinger actually serves them.
+$app->usePublicPath(__DIR__);
+
 $app->handleRequest(Request::capture());

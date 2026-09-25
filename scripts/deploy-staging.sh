@@ -145,10 +145,10 @@ cp "${APP_DIR}/deploy/staging/public_html/index.php" "${PUBLIC_DIR}/index.php"
 cp "${APP_DIR}/deploy/staging/public_html/.htaccess" "${PUBLIC_DIR}/.htaccess"
 
 # The repo used to ship an empty public/favicon.ico. rsync is additive, so
-# that 0-byte copy would keep shadowing Laravel's /favicon.ico route (which
-# serves the icon uploaded in Settings). Remove it only while it is empty.
+# that 0-byte copy would linger; the real one is written by favicon:publish
+# (step 7) and on every Settings save. Remove it only while it is empty.
 if [[ -f "${PUBLIC_DIR}/favicon.ico" ]] && [[ ! -s "${PUBLIC_DIR}/favicon.ico" ]]; then
-    log "Removing stale empty favicon.ico (served by Laravel now)..."
+    log "Removing stale empty favicon.ico..."
     rm -f "${PUBLIC_DIR}/favicon.ico"
 fi
 
@@ -197,6 +197,8 @@ log "Optimizing (config/route/view cache)..."
 "$PHP_BIN" "${APP_DIR}/artisan" config:cache
 "$PHP_BIN" "${APP_DIR}/artisan" route:cache
 "$PHP_BIN" "${APP_DIR}/artisan" view:cache
+# Web-root copy of the Settings favicon (Hostinger serves /favicon.ico itself).
+"$PHP_BIN" "${APP_DIR}/artisan" favicon:publish --web-root="${PUBLIC_DIR}" || true
 
 # ---------------------------------------------------------------------------
 # 8. Bring the site back out of maintenance mode before health-checking it
