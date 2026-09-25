@@ -17,6 +17,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface ProductImage {
     id: number;
@@ -94,7 +95,7 @@ export default function Edit({
         featured_image_path: product.featured_image ?? '',
         is_featured: product.is_featured,
         status: product.status,
-        published_at: product.published_at ? product.published_at.slice(0, 16) : '',
+        published_at: product.published_at ?? '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
             translations: seoTranslations(product.seo_metadata),
@@ -229,7 +230,7 @@ export default function Edit({
                         </div>
                         <div>
                             <Label htmlFor="published_at">Published at</Label>
-                            <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                            <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                         </div>
                     </FormSection>
 

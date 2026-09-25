@@ -23,14 +23,16 @@ class UpdateCapability
     {
         $featuredImage = $capability->featured_image;
 
+        // A submitted featured_image_path replaces the image; an empty one
+        // removes it. Leaving the key out keeps the current image.
         if (isset($data['featured_image']) && $data['featured_image'] !== null) {
-            $this->mediaLifecycle->deleteIfUnmanaged($capability->featured_image);
             $featuredImage = $this->media->storePublicImage($data['featured_image'], 'capabilities');
-        } elseif (! empty($data['featured_image_path'])) {
-            if ($data['featured_image_path'] !== $capability->featured_image) {
-                $this->mediaLifecycle->deleteIfUnmanaged($capability->featured_image);
-            }
+        } elseif (array_key_exists('featured_image_path', $data)) {
             $featuredImage = $data['featured_image_path'];
+        }
+
+        if ($featuredImage !== $capability->featured_image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($capability->featured_image);
         }
 
         return DB::transaction(function () use ($capability, $data, $featuredImage) {

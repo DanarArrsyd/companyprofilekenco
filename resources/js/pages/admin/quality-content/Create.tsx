@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 const TRANSLATABLE_FIELDS = ['title', 'summary', 'content'];
 
@@ -86,7 +87,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                 </FormSection>
 

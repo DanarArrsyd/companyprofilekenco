@@ -23,14 +23,16 @@ class UpdateArticle
     {
         $featuredImage = $article->featured_image;
 
+        // A submitted featured_image_path replaces the image; an empty one
+        // removes it. Leaving the key out keeps the current image.
         if (isset($data['featured_image']) && $data['featured_image'] !== null) {
-            $this->mediaLifecycle->deleteIfUnmanaged($article->featured_image);
             $featuredImage = $this->media->storePublicImage($data['featured_image'], 'articles');
-        } elseif (! empty($data['featured_image_path'])) {
-            if ($data['featured_image_path'] !== $article->featured_image) {
-                $this->mediaLifecycle->deleteIfUnmanaged($article->featured_image);
-            }
+        } elseif (array_key_exists('featured_image_path', $data)) {
             $featuredImage = $data['featured_image_path'];
+        }
+
+        if ($featuredImage !== $article->featured_image) {
+            $this->mediaLifecycle->deleteIfUnmanaged($article->featured_image);
         }
 
         return DB::transaction(function () use ($data, $article, $featuredImage) {

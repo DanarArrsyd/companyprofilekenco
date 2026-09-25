@@ -71,13 +71,15 @@ class SeoService
      * robots/OG) — the one place every Create/Update Action calls instead
      * of writing $model->seoMetadata()->updateOrCreate() by hand. Resolves
      * the OG image the same way every other admin image field works: a
-     * fresh upload wins, then a Media Library path, then the existing value.
+     * fresh upload wins, then the submitted path (empty = removed), then the
+     * existing value when the path was not submitted at all.
      */
     public function saveMetadata(Model $model, array $seoInput, MediaUploadService $media, string $directory): void
     {
         $ogImage = match (true) {
             isset($seoInput['og_image']) && $seoInput['og_image'] instanceof UploadedFile => $media->storePublicImage($seoInput['og_image'], $directory),
-            ! empty($seoInput['og_image_path']) => $seoInput['og_image_path'],
+            // Submitted path replaces the image, an empty one removes it.
+            array_key_exists('og_image_path', $seoInput) => $seoInput['og_image_path'] ?: null,
             default => $model->seoMetadata?->og_image,
         };
 

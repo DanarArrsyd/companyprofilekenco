@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface Vacancy {
     id: number; title: string; slug: string; department: string | null; location: string | null;
@@ -46,8 +47,8 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
         description: vacancy.description ?? '',
         requirements: vacancy.requirements ?? '',
         status: vacancy.status,
-        published_at: vacancy.published_at ? vacancy.published_at.slice(0, 16) : '',
-        closes_at: vacancy.closes_at ? vacancy.closes_at.slice(0, 16) : '',
+        published_at: vacancy.published_at ?? '',
+        closes_at: vacancy.closes_at ?? '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
             translations: seoTranslations(vacancy.seo_metadata),
@@ -142,11 +143,11 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                     <div>
                         <Label htmlFor="closes_at">Closing date</Label>
-                        <Input id="closes_at" type="datetime-local" value={data.closes_at} onChange={(e) => setData('closes_at', e.target.value)} className="mt-1.5" />
+                        <Input id="closes_at" type="datetime-local" value={toDateTimeInput(data.closes_at)} onChange={(e) => setData('closes_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                 </FormSection>
 

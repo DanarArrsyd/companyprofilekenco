@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface Step {
     id: number;
@@ -108,11 +109,11 @@ export default function Edit({
         description: capability.description ?? '',
         icon: capability.icon ?? '',
         featured_image: null,
-        featured_image_path: '',
+        featured_image_path: capability.featured_image ?? '',
         is_featured: capability.is_featured,
         sort_order: capability.sort_order,
         status: capability.status,
-        published_at: capability.published_at ? capability.published_at.slice(0, 16) : '',
+        published_at: capability.published_at ?? '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
             translations: seoTranslations(capability.seo_metadata),
@@ -208,9 +209,10 @@ export default function Edit({
                     <FormSection title="Media">
                         <MediaPickerField
                             label="Featured Image"
-                            currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : (capability.featured_image ? `/storage/${capability.featured_image}` : null))}
+                            currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : null)}
                             onUploadFile={(file) => { setData('featured_image', file); setData('featured_image_path', ''); }}
                             onSelectPath={(path) => { setData('featured_image_path', path); setData('featured_image', null); }}
+                            onClear={() => { setData('featured_image', null); setData('featured_image_path', ''); }}
                         />
                     </FormSection>
 
@@ -231,7 +233,7 @@ export default function Edit({
                         </div>
                         <div>
                             <Label htmlFor="published_at">Published at</Label>
-                            <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                            <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                         </div>
                     </FormSection>
 

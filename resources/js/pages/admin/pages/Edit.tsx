@@ -16,6 +16,7 @@ import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { CmsPage } from '@/types/cms';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 const TRANSLATABLE_FIELDS = ['title'];
 
@@ -40,7 +41,7 @@ export default function Edit({
         _method: 'put',
         title: page.title,
         status: page.status,
-        published_at: page.published_at ? page.published_at.slice(0, 16) : '',
+        published_at: page.published_at ?? '',
         seo: {
             ...SEO_FIELDS_DEFAULT,
             translations: seoTranslations(page.seo_metadata),
@@ -166,8 +167,8 @@ export default function Edit({
                             <Input
                                 id="published_at"
                                 type="datetime-local"
-                                value={data.published_at}
-                                onChange={(e) => setData('published_at', e.target.value)}
+                                value={toDateTimeInput(data.published_at)}
+                                onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))}
                                 className="mt-1.5"
                             />
                         </div>

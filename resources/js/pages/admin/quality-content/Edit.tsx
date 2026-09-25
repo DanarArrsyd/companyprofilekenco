@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface Item {
     id: number; title: string; slug: string; summary: string | null; content: string | null;
@@ -35,7 +36,7 @@ export default function Edit({ item, statusOptions }: { item: Item; statusOption
         image_path: item.image ?? '',
         sort_order: item.sort_order,
         status: item.status,
-        published_at: item.published_at ? item.published_at.slice(0, 16) : '',
+        published_at: item.published_at ?? '',
     });
 
     const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
@@ -98,7 +99,7 @@ export default function Edit({ item, statusOptions }: { item: Item; statusOption
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                 </FormSection>
 

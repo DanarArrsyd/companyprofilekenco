@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface Certification {
     id: number; name: string; issuer: string | null; certificate_number: string | null;
@@ -40,7 +41,7 @@ export default function Edit({ certification, statusOptions }: { certification: 
         document: null,
         sort_order: certification.sort_order,
         status: certification.status,
-        published_at: certification.published_at ? certification.published_at.slice(0, 16) : '',
+        published_at: certification.published_at ?? '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -130,7 +131,7 @@ export default function Edit({ certification, statusOptions }: { certification: 
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                 </FormSection>
 

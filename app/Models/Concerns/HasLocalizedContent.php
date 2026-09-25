@@ -15,6 +15,35 @@ trait HasLocalizedContent
 {
     use HasTranslations;
 
+    /**
+     * Clearing a field stores NULL instead of an empty locale map such as
+     * {"en":null}, and empty locales are dropped from partially filled maps.
+     */
+    public static function bootHasLocalizedContent(): void
+    {
+        static::saving(function ($model) {
+            foreach ($model->getTranslatableAttributes() as $key) {
+                $raw = $model->getAttributes()[$key] ?? null;
+
+                if (! is_string($raw) || ! str_starts_with($raw, '{')) {
+                    continue;
+                }
+
+                $translations = json_decode($raw, true);
+
+                if (! is_array($translations)) {
+                    continue;
+                }
+
+                $filled = array_filter($translations, fn ($value) => $value !== null && $value !== '');
+
+                if (count($filled) !== count($translations)) {
+                    $model->attributes[$key] = $filled === [] ? null : $model->asJson($filled);
+                }
+            }
+        });
+    }
+
     /** Serialize translatable attributes in the current locale instead of as locale maps. */
     public function attributesToArray(): array
     {

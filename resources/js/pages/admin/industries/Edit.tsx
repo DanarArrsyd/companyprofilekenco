@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 
 interface Industry {
     id: number; name: string; slug: string; description: string | null; image: string | null;
@@ -34,7 +35,7 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
         image_path: industry.image ?? '',
         sort_order: industry.sort_order,
         status: industry.status,
-        published_at: industry.published_at ? industry.published_at.slice(0, 16) : '',
+        published_at: industry.published_at ?? '',
     });
 
     const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
@@ -93,7 +94,7 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={data.published_at} onChange={(e) => setData('published_at', e.target.value)} className="mt-1.5" />
+                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
                     </div>
                 </FormSection>
 
