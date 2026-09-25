@@ -22,6 +22,18 @@
         }
     }
 
+    /* Public desktop scales as one piece, like browser zoom: a MacBook
+       viewport (1440 x 780) is the 16px reference, and shorter or narrower
+       laptop screens (e.g. Windows 1536 x 660) shrink every rem-based size —
+       type, spacing, shapes — by the same ratio, so each screen shows the
+       same composition. Never upscales; phones and tablets keep 16px. Public
+       sizes are in rem (not px) so they follow. Admin is untouched. */
+    @media (min-width: 1024px) {
+        html:has(.public-site) {
+            font-size: clamp(13px, min(1.1111vw, 2.0513vh), 16px);
+        }
+    }
+
     /* Lenis (resources/js/lib/smooth-scroll.ts) drives scrolling itself;
        native smooth behaviour would fight its per-frame updates. */
     html.lenis,

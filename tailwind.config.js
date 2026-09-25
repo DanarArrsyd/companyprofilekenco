@@ -27,9 +27,9 @@ export default {
         container: {
             center: true,
             padding: {
-                DEFAULT: '20px',
-                sm: '24px',
-                lg: '32px',
+                DEFAULT: '1.25rem',
+                sm: '1.5rem',
+                lg: '2rem',
             },
         },
         extend: {
@@ -73,8 +73,8 @@ export default {
                 },
             },
             maxWidth: {
-                content: '1280px',
-                wide: '1440px',
+                content: '80rem',
+                wide: '90rem',
             },
             fontSize: {
                 // Fluid via clamp(min, preferred, max): scales down smoothly on
@@ -86,13 +86,13 @@ export default {
                 h2: ['clamp(1.5rem, 0.9rem + 3.2vw, 2.5rem)', { lineHeight: '1.2', fontWeight: '700' }],
                 h3: ['clamp(1.25rem, 0.85rem + 2.2vw, 1.875rem)', { lineHeight: '1.25', fontWeight: '600' }],
                 h4: ['clamp(1.125rem, 0.85rem + 1.4vw, 1.4375rem)', { lineHeight: '1.35', fontWeight: '600' }],
-                'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
-                body: ['16px', { lineHeight: '1.65', fontWeight: '400' }],
-                small: ['14px', { lineHeight: '1.5', fontWeight: '400' }],
-                caption: ['12.5px', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.06em' }],
+                'body-lg': ['1.125rem', { lineHeight: '1.6', fontWeight: '400' }],
+                body: ['1rem', { lineHeight: '1.65', fontWeight: '400' }],
+                small: ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }],
+                caption: ['0.78125rem', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.06em' }],
             },
             borderRadius: {
-                DEFAULT: '6px',
+                DEFAULT: '0.375rem',
             },
         },
     },

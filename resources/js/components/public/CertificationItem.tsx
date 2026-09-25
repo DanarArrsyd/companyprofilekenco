@@ -45,7 +45,7 @@ function Plate({ cert }: { cert: CertificationItemData }) {
 function Row({ cert }: { cert: CertificationItemData }) {
     const { t, formatDate } = useLocale();
     return (
-        <div className="flex flex-col gap-4 py-6 sm:grid sm:grid-cols-[64px_1fr_auto] sm:items-center sm:gap-8">
+        <div className="flex flex-col gap-4 py-6 sm:grid sm:grid-cols-[4rem_1fr_auto] sm:items-center sm:gap-8">
             <div className="flex items-start gap-4 sm:contents">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-border">
                     {cert.image ? (
@@ -63,7 +63,7 @@ function Row({ cert }: { cert: CertificationItemData }) {
                 </div>
             </div>
 
-            <div className="flex items-center gap-6 pl-[72px] sm:justify-end sm:pl-0">
+            <div className="flex items-center gap-6 pl-[4.5rem] sm:justify-end sm:pl-0">
                 <dl className="text-small text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {cert.issued_at && (
                         <div className="flex gap-2 sm:justify-end">

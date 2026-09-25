@@ -70,7 +70,7 @@ export default function Show({
             <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
                 <Breadcrumb items={breadcrumb} />
 
-                <div className="mt-8 flex flex-col gap-10 lg:grid lg:grid-cols-[1fr_360px] lg:items-start lg:gap-16">
+                <div className="mt-8 flex flex-col gap-10 lg:grid lg:grid-cols-[1fr_22.5rem] lg:items-start lg:gap-16">
                     <div className="lg:col-start-1">
                         <h1 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{vacancy.title}</h1>
                         {!open && (

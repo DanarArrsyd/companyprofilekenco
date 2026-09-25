@@ -46,12 +46,12 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
     const { siteSettings } = usePage().props;
 
     return (
-        <section className="relative isolate min-h-[560px] w-full overflow-hidden bg-secondary sm:min-h-[640px] lg:min-h-[720px]">
+        <section className="relative isolate min-h-[35rem] w-full overflow-hidden bg-secondary sm:min-h-[40rem] lg:min-h-[45rem]">
             <div className="absolute inset-0">
                 {content.image ? (
                     <img src={`/storage/${content.image}`} alt="" className="h-full w-full object-cover" loading="eager" />
                 ) : (
-                    <ImagePlaceholder className="h-full min-h-[560px]" />
+                    <ImagePlaceholder className="h-full min-h-[35rem]" />
                 )}
             </div>
 
@@ -71,9 +71,9 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
                 aria-hidden="true"
             />
 
-            <div className="relative mx-auto flex min-h-[560px] max-w-content flex-col justify-between px-5 pb-12 pt-28 sm:min-h-[640px] sm:px-6 sm:pt-32 lg:min-h-[720px] lg:px-8 lg:pb-20 lg:pt-36">
+            <div className="relative mx-auto flex min-h-[35rem] max-w-content flex-col justify-between px-5 pb-12 pt-28 sm:min-h-[40rem] sm:px-6 sm:pt-32 lg:min-h-[45rem] lg:px-8 lg:pb-20 lg:pt-36">
                 <h1
-                    className="mx-auto max-w-4xl text-center text-h1 text-navy-900 sm:text-display lg:text-[76px] lg:leading-[1.05]"
+                    className="mx-auto max-w-4xl text-center text-h1 text-navy-900 sm:text-display lg:text-[4.75rem] lg:leading-[1.05]"
                     style={{ textWrap: 'balance' }}
                 >
                     {content.heading}

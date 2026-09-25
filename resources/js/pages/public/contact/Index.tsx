@@ -45,7 +45,7 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
             </section>
 
             <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_380px] lg:gap-16">
+                <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_23.75rem] lg:gap-16">
                     <div data-reveal="auto">
                         {submitted ? (
                             <p className="border-t border-success/30 pt-6 text-small font-medium text-success">

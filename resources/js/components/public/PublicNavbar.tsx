@@ -295,7 +295,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
             >
                 <Link
                     href={localize('/')}
-                    className="flex h-16 items-center rounded-br-[28px] bg-white pl-5 pr-6 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] sm:h-20 sm:rounded-br-[40px] sm:pl-8 sm:pr-10 lg:pl-10 lg:pr-12"
+                    className="flex h-16 items-center rounded-br-[1.75rem] bg-white pl-5 pr-6 shadow-[0_1px_2px_rgb(var(--color-navy-900)/0.08)] sm:h-20 sm:rounded-br-[2.5rem] sm:pl-8 sm:pr-10 lg:pl-10 lg:pr-12"
                 >
                     <img src={logoKmi} alt={companyName} className="h-5 w-auto sm:h-8 lg:h-9" />
                 </Link>
@@ -318,17 +318,17 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                     <span className="relative block h-4 w-7 sm:w-8" aria-hidden="true">
                         <span
                             className={`absolute left-0 top-0 h-0.5 w-full rounded-full bg-current transition-transform duration-500 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                drawerOpen ? 'translate-y-[7px] rotate-45' : ''
+                                drawerOpen ? 'translate-y-[0.4375rem] rotate-45' : ''
                             }`}
                         />
                         <span
-                            className={`absolute left-0 top-[7px] h-0.5 w-full rounded-full bg-current transition-opacity duration-200 motion-reduce:transition-none ${
+                            className={`absolute left-0 top-[0.4375rem] h-0.5 w-full rounded-full bg-current transition-opacity duration-200 motion-reduce:transition-none ${
                                 drawerOpen ? 'opacity-0' : 'opacity-100'
                             }`}
                         />
                         <span
-                            className={`absolute left-0 top-[14px] h-0.5 w-full rounded-full bg-current transition-transform duration-500 ${DRAWER_EASE} motion-reduce:transition-none ${
-                                drawerOpen ? '-translate-y-[7px] -rotate-45' : ''
+                            className={`absolute left-0 top-[0.875rem] h-0.5 w-full rounded-full bg-current transition-transform duration-500 ${DRAWER_EASE} motion-reduce:transition-none ${
+                                drawerOpen ? '-translate-y-[0.4375rem] -rotate-45' : ''
                             }`}
                         />
                     </span>
@@ -351,11 +351,11 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         aria-modal="true"
                         aria-label={t('Navigation menu')}
                         data-lenis-prevent
-                        className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] md:rounded-l-[40px] ${
+                        className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] md:rounded-l-[2.5rem] ${
                             drawerEntered ? 'translate-x-0' : 'translate-x-full'
                         }`}
                     >
-                        <div className="flex h-[68px] shrink-0 items-center gap-3 px-6 sm:h-[clamp(68px,11vh,88px)] sm:px-10 lg:px-14">
+                        <div className="flex h-[4.25rem] shrink-0 items-center gap-3 px-6 sm:h-[clamp(4.25rem,11vh,5.5rem)] sm:px-10 lg:px-14">
                             <Link
                                 href={localize('/')}
                                 aria-label={t('Home')}
@@ -387,7 +387,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                         className="menu-item-text group flex font-semibold focus-visible:outline-none"
                                                     >
                                                         <span
-                                                            className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
+                                                            className={`underline-offset-[0.625rem] group-hover:underline group-focus-visible:underline ${
                                                                 active ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
                                                             }`}
                                                         >
@@ -410,7 +410,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                     className="menu-item-text group flex w-full items-center justify-between gap-6 text-left font-semibold focus-visible:outline-none"
                                                 >
                                                     <span
-                                                        className={`underline-offset-[10px] group-hover:underline group-focus-visible:underline ${
+                                                        className={`underline-offset-[0.625rem] group-hover:underline group-focus-visible:underline ${
                                                             sectionActive ? 'underline decoration-2' : 'decoration-white/40 decoration-2'
                                                         }`}
                                                     >
@@ -473,7 +473,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                 <Link
                                                     key={article.slug}
                                                     href={localize(`/news/${article.slug}`)}
-                                                    className={`group relative block aspect-[2/1] max-h-[30vh] w-full overflow-hidden rounded-[24px] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 ${
+                                                    className={`group relative block aspect-[2/1] max-h-[30vh] w-full overflow-hidden rounded-[1.5rem] bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-900 ${
                                                         index > 0 ? '[@media(max-height:500px)]:hidden' : ''
                                                     }`}
                                                 >

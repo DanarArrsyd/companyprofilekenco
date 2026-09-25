@@ -33,13 +33,13 @@ const MILESTONE_ABOVE_HEIGHT = 190;
 const MILESTONE_MARKER_GAP = 28;
 const MILESTONE_MARKER_SIZE = 12;
 const MILESTONE_RAIL_TOP = MILESTONE_ABOVE_HEIGHT + MILESTONE_MARKER_GAP + MILESTONE_MARKER_SIZE / 2;
-const MILESTONE_ITEM_CLASS = 'w-[84vw] shrink-0 sm:w-[380px] lg:w-[440px]';
+const MILESTONE_ITEM_CLASS = 'w-[84vw] shrink-0 sm:w-[23.75rem] lg:w-[27.5rem]';
 const MILESTONE_IMAGE_CLASS = 'aspect-[4/3] w-full max-w-[15rem] rounded-sm object-cover';
 
 function MilestoneYear({ year }: { year: number }) {
     return (
         <p
-            className="text-[36px] font-bold leading-none text-navy-900 sm:text-[48px]"
+            className="text-[2.25rem] font-bold leading-none text-navy-900 sm:text-[3rem]"
             style={{ fontVariantNumeric: 'tabular-nums' }}
         >
             {year}

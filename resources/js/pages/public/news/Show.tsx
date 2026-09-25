@@ -37,7 +37,7 @@ export default function Show({
             <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
                 <Breadcrumb items={breadcrumb} />
 
-                <article className="mx-auto mt-8 max-w-[760px]">
+                <article className="mx-auto mt-8 max-w-[47.5rem]">
                     {article.category && <p className="text-caption uppercase text-muted-foreground">{article.category.name}</p>}
                     <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{article.title}</h1>
                     <div className="mt-4 flex items-center gap-3 text-small text-muted-foreground">

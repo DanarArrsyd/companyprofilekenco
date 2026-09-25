@@ -181,7 +181,7 @@ export function SectionRenderer({
             const grayscalePhoto: CSSProperties = { filter: 'grayscale(1) contrast(1.08) brightness(1.05)' };
 
             return (
-                <section className="relative isolate w-full overflow-hidden bg-navy-900 [--color-navy-900:5_31_65] lg:aspect-[1532/852] lg:max-h-[880px] lg:min-h-[560px]" style={{ fontFamily: 'Montserrat, Inter, sans-serif' }}>
+                <section className="relative isolate w-full overflow-hidden bg-navy-900 [--color-navy-900:5_31_65] lg:aspect-[1532/852] lg:max-h-[55rem] lg:min-h-[35rem]" style={{ fontFamily: 'Montserrat, Inter, sans-serif' }}>
                     {/* Background — full-bleed factory photos, split left/right. */}
                     <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">

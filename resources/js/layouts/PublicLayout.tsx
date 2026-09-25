@@ -27,7 +27,8 @@ export default function PublicLayout({
     useScrollRevealBoundary(mainRef, url);
 
     return (
-        <div className="flex min-h-screen flex-col bg-background text-foreground">
+        // `public-site` opts the page into desktop proportional scaling (app.css).
+        <div className="public-site flex min-h-screen flex-col bg-background text-foreground">
             <PublicNavbar companyName={companyName} />
             {/* Header is fixed (out of document flow) on every page, so
                 solid-header pages need top padding equal to its height
