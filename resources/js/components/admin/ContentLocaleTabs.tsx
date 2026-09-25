@@ -1,5 +1,8 @@
+import { usePage } from '@inertiajs/react';
 import { Languages } from 'lucide-react';
+import { useState } from 'react';
 
+import { autoTranslateEnabled, setAutoTranslateEnabled } from '@/lib/auto-translate';
 import type { ContentLocale } from '@/lib/translatable-form';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +31,9 @@ export function ContentLocaleTabs({
     /** Plain (non-sticky, edge-free) variant for secondary cards on the same page. */
     inline?: boolean;
 }) {
+    const { autoTranslate } = usePage().props;
+    const [translateOnSave, setTranslateOnSave] = useState(autoTranslateEnabled);
+
     return (
         <div className={inline ? '' : 'sticky top-0 z-20 -mx-6 border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:-mx-8 sm:px-8'}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -58,12 +64,31 @@ export function ContentLocaleTabs({
                     })}
                 </div>
 
-                <p className="flex items-center gap-2 text-xs text-slate-500">
-                    <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    {value === 'en'
-                        ? 'English is required. Images, status and other shared fields apply to both languages.'
-                        : 'Fields marked ID are translated. Leave one blank to show the English text instead.'}
-                </p>
+                <div className="flex flex-col gap-2 sm:items-end">
+                    <p className="flex items-center gap-2 text-xs text-slate-500">
+                        <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {value === 'en'
+                            ? 'English is required. Images, status and other shared fields apply to both languages.'
+                            : 'Fields marked ID are translated. Leave one blank to show the English text instead.'}
+                    </p>
+                    {autoTranslate && !inline && (
+                        <label
+                            className="flex items-center gap-2 text-xs font-medium text-slate-700"
+                            title="Edit one language and save: the other language is translated for you. Turn off to keep both languages exactly as typed."
+                        >
+                            <input
+                                type="checkbox"
+                                checked={translateOnSave}
+                                onChange={(e) => {
+                                    setAutoTranslateEnabled(e.target.checked);
+                                    setTranslateOnSave(e.target.checked);
+                                }}
+                                className="rounded border-border text-primary focus:ring-primary"
+                            />
+                            Auto-translate the other language on save
+                        </label>
+                    )}
+                </div>
             </div>
         </div>
     );

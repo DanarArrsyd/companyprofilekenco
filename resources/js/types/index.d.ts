@@ -42,6 +42,8 @@ export type PageProps<
     flash: FlashMessages;
     siteSettings: SiteSettings;
     menuNews: MenuNewsItem[];
+    /** Admin only: a machine translator is configured, so the auto-translate option is offered. */
+    autoTranslate: boolean;
     locale: 'id' | 'en';
     locales: Array<'id' | 'en'>;
     defaultLocale: 'id' | 'en';
