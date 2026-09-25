@@ -36,6 +36,7 @@ export default {
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
                 caveat: ['Caveat', 'cursive'],
+                montserrat: ['Montserrat', 'Inter', ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 background: 'rgb(var(--background) / <alpha-value>)',
@@ -58,6 +59,7 @@ export default {
                 warning: 'rgb(var(--color-warning) / <alpha-value>)',
                 danger: 'rgb(var(--color-danger) / <alpha-value>)',
                 navy: {
+                    950: 'rgb(var(--color-navy-950) / <alpha-value>)',
                     900: 'rgb(var(--color-navy-900) / <alpha-value>)',
                     800: 'rgb(var(--color-navy-800) / <alpha-value>)',
                     700: 'rgb(var(--color-navy-700) / <alpha-value>)',

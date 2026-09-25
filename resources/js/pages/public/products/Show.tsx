@@ -50,7 +50,7 @@ export default function Show({
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
-                <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
+                <div className="bg-warning/10 px-5 py-2 text-center text-small font-medium text-warning">
                     {t('Draft preview — this product is not publicly visible.')}
                 </div>
             )}
@@ -93,7 +93,7 @@ export default function Show({
 
                     <div data-reveal="auto">
                         {product.category && <p className="text-caption uppercase text-muted-foreground">{product.category.name}</p>}
-                        <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{product.name}</h1>
+                        <h1 className="text-balance mt-2 text-h2 text-navy-900">{product.name}</h1>
                         {product.short_description && <p className="mt-4 text-body-lg text-slate-700">{product.short_description}</p>}
                         {product.description && <p className="mt-6 text-body text-slate-700">{product.description}</p>}
 

@@ -64,7 +64,7 @@ function Row({ cert }: { cert: CertificationItemData }) {
             </div>
 
             <div className="flex items-center gap-6 pl-[4.5rem] sm:justify-end sm:pl-0">
-                <dl className="text-small text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <dl className="tabular-nums text-small text-muted-foreground">
                     {cert.issued_at && (
                         <div className="flex gap-2 sm:justify-end">
                             <dt>{t('Issued')}</dt><dd className="text-foreground">{formatDate(cert.issued_at)}</dd>

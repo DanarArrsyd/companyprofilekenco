@@ -126,7 +126,7 @@ function LanguageSwitch({ hidden }: { hidden: boolean }) {
                         aria-current={current ? 'true' : undefined}
                         title={language.label}
                         className={`inline-flex h-9 w-9 items-center justify-center rounded-full text-small font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-700 sm:h-11 sm:w-11 ${
-                            current ? 'bg-white text-navy-900' : 'text-slate-600 hover:text-navy-900'
+                            current ? 'bg-white text-navy-900' : 'text-slate-700 hover:text-navy-900'
                         }`}
                     >
                         {language.code}

@@ -1,5 +1,4 @@
 import { Link } from '@inertiajs/react';
-import { CSSProperties } from 'react';
 
 import { CapabilityFeature, CapabilityFeatureItem } from '@/components/public/CapabilityFeature';
 import { CertificationItem, CertificationItemData } from '@/components/public/CertificationItem';
@@ -68,7 +67,7 @@ export function SectionRenderer({
                 <Section className="border-t border-border">
                     <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
                         <div data-reveal="auto" className="order-2 lg:order-1">
-                            {section.title && <h2 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{section.title}</h2>}
+                            {section.title && <h2 className="text-balance text-h2 text-navy-900">{section.title}</h2>}
                             {(section.subtitle || c.body) && (
                                 <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
                             )}
@@ -158,7 +157,7 @@ export function SectionRenderer({
                         {c.image ? (
                             <img data-reveal="image" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
-                            <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-sm text-muted-foreground">
+                            <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-small text-muted-foreground">
                                 {t('No image set')}
                             </div>
                         )}
@@ -177,22 +176,20 @@ export function SectionRenderer({
                 misi_text?: string;
             };
 
-            const grayscalePhoto: CSSProperties = { filter: 'grayscale(1) contrast(1.08) brightness(1.05)' };
-
             return (
-                <section className="relative isolate w-full overflow-hidden bg-navy-900 [--color-navy-900:5_31_65] lg:aspect-[1532/852] lg:max-h-[55rem] lg:min-h-[35rem]" style={{ fontFamily: 'Montserrat, Inter, sans-serif' }}>
+                <section className="relative isolate w-full overflow-hidden bg-navy-950 font-montserrat lg:aspect-[1532/852] lg:max-h-[55rem] lg:min-h-[35rem]">
                     {/* Background — full-bleed factory photos, split left/right. */}
                     <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">
                             {c.left_image ? (
-                                <img src={mediaUrl(c.left_image) ?? undefined} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
+                                <img src={mediaUrl(c.left_image) ?? undefined} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
                         </div>
                         <div className="h-full w-1/2">
                             {c.right_image ? (
-                                <img src={mediaUrl(c.right_image) ?? undefined} alt="" className="h-full w-full object-cover" style={grayscalePhoto} />
+                                <img src={mediaUrl(c.right_image) ?? undefined} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
@@ -209,11 +206,11 @@ export function SectionRenderer({
                         />
                         <div
                             aria-hidden="true"
-                            className="absolute inset-0 bg-navy-900"
+                            className="absolute inset-0 bg-navy-950"
                             // Extend both slanted sides behind the paper to hide the top edge.
                             style={{ clipPath: 'polygon(54.9% 0%, 83.28% 0%, 70.95% 76.3%, 44.97% 64.2%)' }}
                         />
-                        <div className="absolute text-center text-navy-900" style={{ left: '23.7%', top: '32.2%', width: '20.2%' }}>
+                        <div className="absolute text-center text-navy-950" style={{ left: '23.7%', top: '32.2%', width: '20.2%' }}>
                             <h3 className="font-bold" style={{ fontSize: 'clamp(2.5rem, 4.18vw, 4.5rem)', lineHeight: 1.1 }}>
                                 {c.visi_title || t('Vision')}
                             </h3>
@@ -257,14 +254,14 @@ export function SectionRenderer({
                         the same angular silhouettes, contrast, and torn-paper framing. */}
                     <div className="relative z-10 flex flex-col gap-8 px-5 py-16 sm:px-6 lg:hidden">
                         <div
-                            className="mx-auto w-full max-w-sm bg-[#fafafa] px-8 pb-10 pt-12 text-center"
+                            className="mx-auto w-full max-w-sm bg-background px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(10% 0%, 100% 6%, 92% 100%, 0% 94%)' }}
                         >
-                            <h3 className="text-h2 font-bold text-navy-900">{c.visi_title || t('Vision')}</h3>
+                            <h3 className="text-h2 font-bold text-navy-950">{c.visi_title || t('Vision')}</h3>
                             {c.visi_text && <p className="mt-5 text-body text-slate-700">{c.visi_text}</p>}
                         </div>
                         <div
-                            className="mx-auto w-full max-w-sm bg-navy-900 px-8 pb-10 pt-12 text-center"
+                            className="mx-auto w-full max-w-sm bg-navy-950 px-8 pb-10 pt-12 text-center"
                             style={{ clipPath: 'polygon(8% 0%, 100% 8%, 90% 100%, 0% 92%)' }}
                         >
                             <h3 className="text-h2 font-bold text-white">{c.misi_title || t('Mission')}</h3>
@@ -298,7 +295,7 @@ export function SectionRenderer({
                 <Container as="section" spacing="section">
                     {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
                     {images.length === 0 ? (
-                        <p className="mt-4 text-sm text-slate-500">{t('Gallery coming soon.')}</p>
+                        <p className="mt-4 text-small text-slate-500">{t('Gallery coming soon.')}</p>
                     ) : (
                         <div data-reveal-group className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
                             {images.map((src, index) => (
@@ -392,7 +389,7 @@ export function SectionRenderer({
                     <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
                         <div data-reveal="auto">
                             <p className="text-caption uppercase text-muted-foreground">{t('Quality')}</p>
-                            <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
+                            <h2 className="text-balance mt-2 text-h2 text-navy-900">{c.heading ?? section.title}</h2>
                             {(c.description || section.subtitle) && (
                                 <p className="mt-4 text-body text-slate-700">{c.description ?? section.subtitle}</p>
                             )}

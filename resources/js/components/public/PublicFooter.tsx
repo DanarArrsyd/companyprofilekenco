@@ -62,7 +62,7 @@ export function PublicFooter() {
                             <ul className="mt-4 space-y-2.5 text-small">
                                 {group.links.map((link) => (
                                     <li key={link.href}>
-                                        <Link href={localize(link.href)} className="text-slate-300 hover:text-white">
+                                        <Link href={localize(link.href)} className="text-white/75 hover:text-white">
                                             {t(link.label)}
                                         </Link>
                                     </li>
@@ -73,7 +73,7 @@ export function PublicFooter() {
 
                     <div>
                         <p className="text-caption uppercase text-slate-500">{t('Contact')}</p>
-                        <ul className="mt-4 space-y-2.5 text-small text-slate-300">
+                        <ul className="mt-4 space-y-2.5 text-small text-white/75">
                             <li><Link href={localize('/contact')} className="hover:text-white">{t('Get in touch')}</Link></li>
                             {siteSettings?.phone && <li><a href={`tel:${siteSettings.phone}`} className="hover:text-white">{siteSettings.phone}</a></li>}
                             {siteSettings?.email && <li><a href={`mailto:${siteSettings.email}`} className="hover:text-white">{siteSettings.email}</a></li>}

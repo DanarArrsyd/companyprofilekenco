@@ -35,7 +35,7 @@ function VacancyRowItem({ vacancy }: { vacancy: VacancyRow }) {
                     </div>
                 </div>
 
-                <span className="flex shrink-0 items-center gap-1.5 text-sm font-medium text-navy-700 group-hover:text-navy-900">
+                <span className="flex shrink-0 items-center gap-1.5 text-small font-medium text-navy-700 group-hover:text-navy-900">
                     {t('View position')}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                 </span>
@@ -71,7 +71,7 @@ export default function Index({
                     <div className="mb-4 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
                             onClick={() => router.get(localizedRoute('public.careers'))}
-                            className={`text-sm font-medium ${!filters.department ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                            className={`text-small font-medium ${!filters.department ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             {t('All')}
                         </button>
@@ -79,7 +79,7 @@ export default function Index({
                             <button
                                 key={d}
                                 onClick={() => router.get(localizedRoute('public.careers'), { department: d })}
-                                className={`text-sm font-medium ${filters.department === d ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                                className={`text-small font-medium ${filters.department === d ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {d}
                             </button>

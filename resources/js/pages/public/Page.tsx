@@ -30,7 +30,7 @@ export default function Page({
             <SeoHead seo={seo} />
 
             {preview && (
-                <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
+                <div className="bg-warning/10 px-5 py-2 text-center text-small font-medium text-warning">
                     {t('Draft preview — this page is not publicly visible.')}
                 </div>
             )}

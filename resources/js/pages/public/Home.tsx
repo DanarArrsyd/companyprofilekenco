@@ -40,8 +40,7 @@ const MILESTONE_IMAGE_CLASS = 'aspect-[4/3] w-full max-w-[15rem] rounded-sm obje
 function MilestoneYear({ year }: { year: number }) {
     return (
         <p
-            className="text-[2.25rem] font-bold leading-none text-navy-900 sm:text-[3rem]"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
+            className="tabular-nums text-[2.25rem] font-bold leading-none text-navy-900 sm:text-[3rem]"
         >
             {year}
         </p>
@@ -239,13 +238,11 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
 
                 <div
                     aria-hidden="true"
-                    className={`pointer-events-none absolute inset-y-0 left-0 z-10 w-14 transition-opacity duration-300 sm:w-20 lg:w-32 ${showLeftFade ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ background: 'linear-gradient(to right, rgb(var(--background)) 0%, rgb(var(--background) / 0) 100%)' }}
+                    className={`pointer-events-none absolute inset-y-0 left-0 z-10 w-14 bg-gradient-to-r from-background to-background/0 transition-opacity duration-300 sm:w-20 lg:w-32 ${showLeftFade ? 'opacity-100' : 'opacity-0'}`}
                 />
                 <div
                     aria-hidden="true"
-                    className={`pointer-events-none absolute inset-y-0 right-0 z-10 w-14 transition-opacity duration-300 sm:w-20 lg:w-32 ${showRightFade ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ background: 'linear-gradient(to left, rgb(var(--background)) 0%, rgb(var(--background) / 0) 100%)' }}
+                    className={`pointer-events-none absolute inset-y-0 right-0 z-10 w-14 bg-gradient-to-l from-background to-background/0 transition-opacity duration-300 sm:w-20 lg:w-32 ${showRightFade ? 'opacity-100' : 'opacity-0'}`}
                 />
             </div>
 
@@ -257,10 +254,9 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                             type="button"
                             onClick={() => scrollToItem(index)}
                             aria-current={activeIndex === index ? 'true' : undefined}
-                            className={`shrink-0 text-small transition-colors duration-200 ${
+                            className={`tabular-nums shrink-0 text-small transition-colors duration-200 ${
                                 activeIndex === index ? 'font-bold text-navy-900' : 'text-muted-foreground hover:text-navy-700'
                             }`}
-                            style={{ fontVariantNumeric: 'tabular-nums' }}
                         >
                             {item.year}
                         </button>

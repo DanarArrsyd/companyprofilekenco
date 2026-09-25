@@ -33,12 +33,12 @@ export function SectionHeader({
         <ScrollReveal className={`flex flex-col gap-4 ${centered ? 'items-center text-center' : 'sm:flex-row sm:items-end sm:justify-between'} ${className}`}>
             <div className={centered ? 'max-w-2xl' : 'max-w-2xl'}>
                 {eyebrow && <p className="text-caption uppercase text-muted-foreground">{eyebrow}</p>}
-                {heading && <Heading className={`mt-2 ${headingSize} text-navy-900`} style={{ textWrap: 'balance' }}>{heading}</Heading>}
+                {heading && <Heading className={`text-balance mt-2 ${headingSize} text-navy-900`}>{heading}</Heading>}
                 {description && <p className="mt-3 text-body-lg text-slate-700">{description}</p>}
             </div>
 
             {cta && !centered && (
-                <Link href={localize(cta.href)} className="shrink-0 text-sm font-medium text-navy-700 hover:text-navy-900">
+                <Link href={localize(cta.href)} className="shrink-0 text-small font-medium text-navy-700 hover:text-navy-900">
                     {cta.label} &rarr;
                 </Link>
             )}

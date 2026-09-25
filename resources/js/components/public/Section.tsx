@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType, type ReactNode } from 'react';
-import { clsx } from 'clsx';
+import { cn } from '@/lib/utils';
 
 /**
  * Vertical rhythm tiers for public sections (DESIGN.md "Section Spacing").
@@ -7,9 +7,7 @@ import { clsx } from 'clsx';
  * - intro:   page title bands and compact strips — 56 / 64 / 80px
  * - content: page body directly below an intro band — 48 / 56 / 64px
  * Values are rem-based so the proportional desktop scaling still applies.
- * Classes join with clsx, not twMerge: custom tokens like `text-small` would
- * otherwise be read as a colour and drop `text-muted-foreground`. To change
- * spacing, pick another tier (or `none` plus your own padding).
+ * To change spacing, pick another tier (or `none` plus your own padding).
  */
 export const sectionSpacing = {
     none: '',
@@ -32,7 +30,7 @@ export function Container<T extends ElementType = 'div'>({ as, spacing = 'none',
     const Component: ElementType = as ?? 'div';
 
     return (
-        <Component className={clsx('mx-auto w-full max-w-content px-5 sm:px-6 lg:px-8', sectionSpacing[spacing], className)} {...props}>
+        <Component className={cn('mx-auto w-full max-w-content px-5 sm:px-6 lg:px-8', sectionSpacing[spacing], className)} {...props}>
             {children}
         </Component>
     );

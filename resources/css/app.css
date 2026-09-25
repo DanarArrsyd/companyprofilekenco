@@ -76,6 +76,7 @@
 
     :root {
         /* Modern Industrial Corporate palette — DESIGN.md */
+        --color-navy-950: 5 31 65; /* Vision–Mission reference navy */
         --color-navy-900: 11 31 51;
         --color-navy-800: 18 49 77;
         --color-navy-700: 23 70 107;
@@ -269,7 +270,7 @@
     }
 
     .article-prose blockquote {
-        @apply border-l-2 border-navy-900 pl-5 text-body-lg italic text-slate-600;
+        @apply border-l-2 border-navy-900 pl-5 text-body-lg italic text-slate-500;
     }
 
     .article-prose a {

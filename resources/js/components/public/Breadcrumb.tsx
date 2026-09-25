@@ -19,7 +19,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
     if (items.length === 0) return null;
 
     return (
-        <nav aria-label={t('Breadcrumb')} className="text-sm">
+        <nav aria-label={t('Breadcrumb')} className="text-small">
             <ol
                 itemScope
                 itemType="https://schema.org/BreadcrumbList"

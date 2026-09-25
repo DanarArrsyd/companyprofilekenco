@@ -30,7 +30,7 @@ export default function Show({
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
-                <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
+                <div className="bg-warning/10 px-5 py-2 text-center text-small font-medium text-warning">
                     {t('Draft preview — this article is not publicly visible.')}
                 </div>
             )}
@@ -40,7 +40,7 @@ export default function Show({
 
                 <article className="mx-auto mt-8 max-w-[47.5rem]">
                     {article.category && <p className="text-caption uppercase text-muted-foreground">{article.category.name}</p>}
-                    <h1 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{article.title}</h1>
+                    <h1 className="text-balance mt-2 text-h2 text-navy-900">{article.title}</h1>
                     <div className="mt-4 flex items-center gap-3 text-small text-muted-foreground">
                         {article.published_at && <span>{formatDate(article.published_at)}</span>}
                         {article.author && <span>By {article.author.name}</span>}

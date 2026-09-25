@@ -74,7 +74,7 @@ export function FacilityFeature({
                                         <span className="text-white/50"> — {[machine.brand, machine.model].filter(Boolean).join(' ')}</span>
                                     )}
                                 </dt>
-                                <dd className="shrink-0 text-small text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                <dd className="tabular-nums shrink-0 text-small text-white">
                                     {[machine.capacity, machine.quantity ? `×${machine.quantity}` : null].filter(Boolean).join(' · ') || '—'}
                                 </dd>
                             </div>
@@ -83,7 +83,7 @@ export function FacilityFeature({
                 )}
 
                 {showLink && (
-                    <Link href={localize('/company#facilities')} className="mt-6 inline-block text-sm font-medium text-white hover:text-white/80">
+                    <Link href={localize('/company#facilities')} className="mt-6 inline-block text-small font-medium text-white hover:text-white/80">
                         {t('View All Facilities')} &rarr;
                     </Link>
                 )}

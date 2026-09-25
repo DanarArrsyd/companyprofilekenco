@@ -68,7 +68,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
                     {content.eyebrow && (
                         <p className="text-caption uppercase text-white/70">{content.eyebrow}</p>
                     )}
-                    <h1 className="mt-4 break-words text-h1 text-white" style={{ textWrap: 'balance' }}>
+                    <h1 className="text-balance mt-4 break-words text-h1 text-white">
                         {heading}
                     </h1>
                     {content.description && (

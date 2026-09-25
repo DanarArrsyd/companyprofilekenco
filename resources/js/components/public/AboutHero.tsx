@@ -74,8 +74,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
 
             <Container className="relative flex min-h-[35rem] flex-col justify-between pb-12 pt-28 sm:min-h-[40rem] sm:pt-32 lg:min-h-[45rem] lg:pb-20 lg:pt-36">
                 <h1
-                    className="mx-auto max-w-4xl text-center text-h1 text-navy-900 sm:text-display lg:text-[4.75rem] lg:leading-[1.05]"
-                    style={{ textWrap: 'balance' }}
+                    className="text-balance mx-auto max-w-4xl text-center text-h1 text-navy-900 sm:text-display lg:text-[4.75rem] lg:leading-[1.05]"
                 >
                     {content.heading}
                 </h1>

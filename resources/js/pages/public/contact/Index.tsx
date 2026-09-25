@@ -68,7 +68,7 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                                     <div>
                                         <Label htmlFor="name">{t('Name')}</Label>
                                         <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
-                                        {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                                        {errors.name && <p className="mt-1 text-small text-danger">{errors.name}</p>}
                                     </div>
                                     <div>
                                         <Label htmlFor="company">{t('Company')}</Label>
@@ -79,7 +79,7 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                                     <div>
                                         <Label htmlFor="email">{t('Email')}</Label>
                                         <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
-                                        {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
+                                        {errors.email && <p className="mt-1 text-small text-danger">{errors.email}</p>}
                                     </div>
                                     <div>
                                         <Label htmlFor="phone">{t('Phone')}</Label>
@@ -92,8 +92,8 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                                 </div>
                                 <div>
                                     <Label htmlFor="message">{t('Message')}</Label>
-                                    <textarea id="message" value={data.message} onChange={(e) => setData('message', e.target.value)} rows={6} className="mt-1.5 w-full border border-border bg-surface px-3 py-2 text-sm" />
-                                    {errors.message && <p className="mt-1 text-sm text-danger">{errors.message}</p>}
+                                    <textarea id="message" value={data.message} onChange={(e) => setData('message', e.target.value)} rows={6} className="mt-1.5 w-full border border-border bg-surface px-3 py-2 text-small" />
+                                    {errors.message && <p className="mt-1 text-small text-danger">{errors.message}</p>}
                                 </div>
                                 <Button type="submit" disabled={processing}>{t('Send Message')}</Button>
                             </form>

@@ -39,11 +39,11 @@ function Figure({ value, animate }: { value: string; animate: boolean }) {
     }, [animate, numeric]);
 
     if (Number.isNaN(numeric)) {
-        return <span style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</span>;
+        return <span className="tabular-nums">{value}</span>;
     }
 
     return (
-        <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <span className="tabular-nums">
             {prefix}{display.toLocaleString(intlLocale(locale), { useGrouping: numeric >= 10000 })}{suffix}
         </span>
     );

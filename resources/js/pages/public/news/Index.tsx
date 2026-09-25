@@ -39,7 +39,7 @@ function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
                     {t('Featured')}
                     {article.category && ` · ${article.category.name}`}
                 </p>
-                <h2 className="mt-3 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{article.title}</h2>
+                <h2 className="text-balance mt-3 text-h2 text-navy-900">{article.title}</h2>
                 {article.excerpt && <p className="mt-4 text-body-lg text-slate-700">{article.excerpt}</p>}
                 <div className="mt-6 flex items-center gap-3 text-small text-muted-foreground">
                     {article.published_at && <span>{formatDate(article.published_at)}</span>}
@@ -90,7 +90,7 @@ export default function Index({
                     <div className="mb-10 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
                             onClick={() => router.get(localizedRoute('public.news'))}
-                            className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                            className={`text-small font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             {t('All')}
                         </button>
@@ -98,7 +98,7 @@ export default function Index({
                             <button
                                 key={c.id}
                                 onClick={() => router.get(localizedRoute('public.news'), { category: c.slug })}
-                                className={`text-sm font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                                className={`text-small font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {c.name}
                             </button>

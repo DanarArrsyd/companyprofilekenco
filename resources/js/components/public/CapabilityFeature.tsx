@@ -37,7 +37,7 @@ function Row({ item, reverse }: { item: CapabilityFeatureItem; reverse: boolean 
             <div>
                 <h3 className="text-h3 text-navy-900">{item.name}</h3>
                 {item.summary && <p className="mt-3 text-body text-slate-700">{item.summary}</p>}
-                <Link href={localize(`/capabilities/${item.slug}`)} className="mt-5 inline-block text-sm font-medium text-navy-700 hover:text-navy-900">
+                <Link href={localize(`/capabilities/${item.slug}`)} className="mt-5 inline-block text-small font-medium text-navy-700 hover:text-navy-900">
                     {t('View Capability')} &rarr;
                 </Link>
             </div>

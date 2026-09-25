@@ -36,7 +36,7 @@ export default function Index({
                     <div className="mb-10 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
                             onClick={() => router.get(localizedRoute('public.products'))}
-                            className={`text-sm font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                            className={`text-small font-medium ${!filters.category ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                         >
                             {t('All')}
                         </button>
@@ -44,7 +44,7 @@ export default function Index({
                             <button
                                 key={c.id}
                                 onClick={() => router.get(localizedRoute('public.products'), { category: c.slug })}
-                                className={`text-sm font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
+                                className={`text-small font-medium ${filters.category === c.slug ? 'text-navy-900' : 'text-muted-foreground hover:text-navy-900'}`}
                             >
                                 {c.name}
                             </button>

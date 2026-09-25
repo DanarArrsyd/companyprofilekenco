@@ -63,7 +63,7 @@ export default function Show({
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
-                <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
+                <div className="bg-warning/10 px-5 py-2 text-center text-small font-medium text-warning">
                     {t('Draft preview — this vacancy is not publicly visible.')}
                 </div>
             )}
@@ -73,7 +73,7 @@ export default function Show({
 
                 <div className="mt-8 flex flex-col gap-10 lg:grid lg:grid-cols-[1fr_22.5rem] lg:items-start lg:gap-16">
                     <div className="lg:col-start-1">
-                        <h1 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{vacancy.title}</h1>
+                        <h1 className="text-balance text-h2 text-navy-900">{vacancy.title}</h1>
                         {!open && (
                             <p className="mt-3 text-small font-medium text-danger">{t('Closed — no longer accepting applications.')}</p>
                         )}
@@ -117,17 +117,17 @@ export default function Show({
                                 <div>
                                     <Label htmlFor="name">{t('Full Name')}</Label>
                                     <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
-                                    {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
+                                    {errors.name && <p className="mt-1 text-small text-danger">{errors.name}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="email">{t('Email')}</Label>
                                     <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
-                                    {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
+                                    {errors.email && <p className="mt-1 text-small text-danger">{errors.email}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="phone">{t('Phone')}</Label>
                                     <Input id="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} className="mt-1.5" />
-                                    {errors.phone && <p className="mt-1 text-sm text-danger">{errors.phone}</p>}
+                                    {errors.phone && <p className="mt-1 text-small text-danger">{errors.phone}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="address">{t('Address')}</Label>
@@ -135,12 +135,12 @@ export default function Show({
                                 </div>
                                 <div>
                                     <Label htmlFor="cover_letter">{t('Cover Letter')}</Label>
-                                    <textarea id="cover_letter" value={data.cover_letter} onChange={(e) => setData('cover_letter', e.target.value)} rows={4} className="mt-1.5 w-full border border-border bg-surface px-3 py-2 text-sm" />
+                                    <textarea id="cover_letter" value={data.cover_letter} onChange={(e) => setData('cover_letter', e.target.value)} rows={4} className="mt-1.5 w-full border border-border bg-surface px-3 py-2 text-small" />
                                 </div>
                                 <div>
                                     <Label htmlFor="cv">{t('CV (PDF preferred, max 5MB)')}</Label>
-                                    <input id="cv" type="file" accept=".pdf,.doc,.docx" onChange={(e) => setData('cv', e.target.files?.[0] ?? null)} className="mt-1.5 block text-sm" />
-                                    {errors.cv && <p className="mt-1 text-sm text-danger">{errors.cv}</p>}
+                                    <input id="cv" type="file" accept=".pdf,.doc,.docx" onChange={(e) => setData('cv', e.target.files?.[0] ?? null)} className="mt-1.5 block text-small" />
+                                    {errors.cv && <p className="mt-1 text-small text-danger">{errors.cv}</p>}
                                 </div>
                                 <Button type="submit" disabled={processing} className="w-full">{t('Submit Application')}</Button>
                             </form>

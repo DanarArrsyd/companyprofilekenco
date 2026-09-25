@@ -35,7 +35,7 @@ export default function Show({
             <SeoHead seo={seo} schema={schema} />
 
             {preview && (
-                <div className="bg-warning/10 px-5 py-2 text-center text-sm font-medium text-warning">
+                <div className="bg-warning/10 px-5 py-2 text-center text-small font-medium text-warning">
                     {t('Draft preview — this capability is not publicly visible.')}
                 </div>
             )}
@@ -45,7 +45,7 @@ export default function Show({
 
                 <div className="mt-8 grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
                     <div data-reveal="auto">
-                        <h1 className="text-h1 text-navy-900" style={{ textWrap: 'balance' }}>{capability.name}</h1>
+                        <h1 className="text-balance text-h1 text-navy-900">{capability.name}</h1>
                         {capability.summary && <p className="mt-4 text-body-lg text-slate-700">{capability.summary}</p>}
                         {capability.description && <p className="mt-6 text-body text-slate-700">{capability.description}</p>}
                     </div>
@@ -64,7 +64,7 @@ export default function Show({
                         <ol data-reveal-group className="mt-6 space-y-6">
                             {capability.steps.map((step, index) => (
                                 <li key={step.id} className="flex gap-5">
-                                    <span className="text-caption font-semibold text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                    <span className="tabular-nums text-caption font-semibold text-muted-foreground">
                                         {String(index + 1).padStart(2, '0')}
                                     </span>
                                     <div>
@@ -89,7 +89,7 @@ export default function Show({
                                             <span className="text-muted-foreground"> — {[machine.brand, machine.model].filter(Boolean).join(' ')}</span>
                                         )}
                                     </dt>
-                                    <dd className="text-small text-muted-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                                    <dd className="tabular-nums text-small text-muted-foreground">
                                         {[machine.capacity, machine.quantity ? `×${machine.quantity}` : null].filter(Boolean).join(' · ') || '—'}
                                     </dd>
                                 </div>
