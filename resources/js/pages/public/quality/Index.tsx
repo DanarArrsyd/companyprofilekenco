@@ -5,6 +5,7 @@ import { revealClass, useInView } from '@/hooks/use-in-view';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 interface QualityRow {
     id: number; title: string; summary: string | null; content: string | null; image: string | null;
@@ -40,24 +41,22 @@ export default function Index({ items, seo }: { items: QualityRow[]; seo: Resolv
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('Quality')}
-                        heading={t('Built on a formal quality system')}
-                        description={t('Every production run is inspected against documented process controls.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('Quality')}
+                    heading={t('Built on a formal quality system')}
+                    description={t('Every production run is inspected against documented process controls.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content divide-y divide-border px-5 sm:px-6 lg:px-8">
+            <Container className="divide-y divide-border">
                 {items.length === 0 ? (
                     <p className="py-16 text-small text-muted-foreground">{t('Quality content coming soon.')}</p>
                 ) : (
                     items.map((item, index) => <QualityBlock key={item.id} item={item} reverse={index % 2 === 1} />)
                 )}
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

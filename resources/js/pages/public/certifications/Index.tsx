@@ -4,6 +4,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 export default function Index({ certifications, seo }: { certifications: CertificationItemData[]; seo: ResolvedSeo }) {
     const { t } = useLocale();
@@ -15,18 +16,16 @@ export default function Index({ certifications, seo }: { certifications: Certifi
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('Compliance')}
-                        heading={t('Certifications')}
-                        description={t('Our quality certifications and accreditations, kept current.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('Compliance')}
+                    heading={t('Certifications')}
+                    description={t('Our quality certifications and accreditations, kept current.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 {certifications.length === 0 ? (
                     <p className="text-small text-muted-foreground">{t('No certifications published yet.')}</p>
                 ) : showGrouped ? (
@@ -47,7 +46,7 @@ export default function Index({ certifications, seo }: { certifications: Certifi
                 ) : (
                     <CertificationItem items={certifications} variant="detailed" />
                 )}
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useInView } from '@/hooks/use-in-view';
 import { useLocale } from '@/hooks/use-locale';
 import { intlLocale } from '@/lib/i18n';
+import { Section } from '@/components/public/Section';
 
 interface Metric {
     label: string;
@@ -58,23 +59,21 @@ export function MetricStrip({ items }: { items: Metric[] }) {
     if (items.length === 0) return null;
 
     return (
-        <section className="border-y border-border bg-navy-900" ref={ref}>
-            <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                <div data-reveal-group className="grid grid-cols-2 lg:grid-cols-4">
-                    {items.map((item, index) => (
-                        <div
-                            key={index}
-                            // 2-up grid: rule between columns and between rows; 4-up: column rules only.
-                            className="border-white/15 px-2 py-6 text-center even:border-l [&:nth-child(n+3)]:border-t lg:border-l lg:py-4 lg:first:border-l-0 lg:[&:nth-child(n+3)]:border-t-0"
-                        >
-                            <p className="text-h2 text-white">
-                                <Figure value={item.value} animate={inView} />
-                            </p>
-                            <p className="mt-2 text-caption uppercase text-white/60">{item.label}</p>
-                        </div>
-                    ))}
-                </div>
+        <Section className="border-y border-border bg-navy-900" ref={ref} spacing="intro">
+            <div data-reveal-group className="grid grid-cols-2 lg:grid-cols-4">
+                {items.map((item, index) => (
+                    <div
+                        key={index}
+                        // 2-up grid: rule between columns and between rows; 4-up: column rules only.
+                        className="border-white/15 px-2 py-6 text-center even:border-l [&:nth-child(n+3)]:border-t lg:border-l lg:py-4 lg:first:border-l-0 lg:[&:nth-child(n+3)]:border-t-0"
+                    >
+                        <p className="text-h2 text-white">
+                            <Figure value={item.value} animate={inView} />
+                        </p>
+                        <p className="mt-2 text-caption uppercase text-white/60">{item.label}</p>
+                    </div>
+                ))}
             </div>
-        </section>
+        </Section>
     );
 }

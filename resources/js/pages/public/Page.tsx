@@ -4,6 +4,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CmsPage, ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 /**
  * Generic renderer for any admin-created standard Page under company/* that
@@ -34,18 +35,16 @@ export default function Page({
                 </div>
             )}
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader as="h1" heading={page?.title ?? slug} />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader as="h1" heading={page?.title ?? slug} />
+            </Section>
 
             {sections.length > 0 ? (
                 sections.map((section) => <SectionRenderer key={section.id} section={section} />)
             ) : (
-                <p className="mx-auto max-w-content px-5 py-16 text-small text-muted-foreground sm:px-6 lg:px-8">
+                <Container as="p" spacing="content" className="text-small text-muted-foreground">
                     {t('No content published yet.')}
-                </p>
+                </Container>
             )}
         </PublicLayout>
     );

@@ -10,6 +10,7 @@ import { revealClass, useInView } from '@/hooks/use-in-view';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CmsPage, ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 /** Fallback hero copy (English source, shown through t()) until an admin adds a real 'hero' PageSection to the 'company' Page record. */
 const ABOUT_HERO_DEFAULTS: AboutHeroContent = {
@@ -88,50 +89,44 @@ export default function CompanyIndex({
                     just duplicate that. Only show the generic banner when the page
                     doesn't have that section (e.g. before an admin has set it up). */}
                 {!visionSections.some((section) => section.section_type === 'vision_mission') && (
-                    <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+                    <Container spacing="intro">
                         <SectionHeader
                             eyebrow={t('Our Direction')}
                             heading={t('Vision & Mission')}
                             description={t('The principles that guide how we manufacture, and where we aim to be.')}
                         />
-                    </div>
+                    </Container>
                 )}
                 {visionSections.map((section) => <SectionRenderer key={section.id} section={section} />)}
             </section>
 
-            <section id="facilities" className="scroll-mt-20 border-t border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        eyebrow={t('Where We Manufacture')}
-                        heading={t('Facilities')}
-                        description={t('Our production sites and the equipment that runs on them.')}
-                    />
-                </div>
+            <Section id="facilities" className="scroll-mt-20 border-t border-border">
+                <SectionHeader
+                    eyebrow={t('Where We Manufacture')}
+                    heading={t('Facilities')}
+                    description={t('Our production sites and the equipment that runs on them.')}
+                />
 
                 {facilities.length === 0 ? (
-                    <p className="mx-auto max-w-content px-5 pb-16 text-small text-muted-foreground sm:px-6 lg:px-8">
-                        {t('No facilities published yet.')}
-                    </p>
+                    <p className="mt-12 text-small text-muted-foreground md:mt-16">{t('No facilities published yet.')}</p>
                 ) : (
-                    <div data-reveal-group className="mx-auto max-w-content space-y-16 px-5 pb-16 sm:px-6 lg:px-8">
+                    <div data-reveal-group className="mt-12 space-y-16 md:mt-16">
                         {facilities.map((facility) => <FacilityRow key={facility.id} facility={facility} />)}
                     </div>
                 )}
-            </section>
+            </Section>
 
-            <section id="industries" className="scroll-mt-20 border-t border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries')} description={t('Sectors we manufacture for.')} />
-                </div>
+            <Section id="industries" className="scroll-mt-20 border-t border-border">
+                <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries')} description={t('Sectors we manufacture for.')} />
 
-                <div className="mx-auto max-w-content px-5 pb-16 sm:px-6 lg:px-8">
+                <div className="mt-12 md:mt-16">
                     {industries.length === 0 ? (
                         <p className="text-small text-muted-foreground">{t('No industries published yet.')}</p>
                     ) : (
                         <IndustryGrid items={industries} showDescription />
                     )}
                 </div>
-            </section>
+            </Section>
         </PublicLayout>
     );
 }

@@ -4,6 +4,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 export default function Index({ capabilities, seo }: { capabilities: CapabilityFeatureItem[]; seo: ResolvedSeo }) {
     const { t } = useLocale();
@@ -11,24 +12,22 @@ export default function Index({ capabilities, seo }: { capabilities: CapabilityF
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('What We Do')}
-                        heading={t('Capabilities')}
-                        description={t('Manufacturing competency built on real process discipline and equipment.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('What We Do')}
+                    heading={t('Capabilities')}
+                    description={t('Manufacturing competency built on real process discipline and equipment.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content px-5 sm:px-6 lg:px-8">
+            <Container>
                 {capabilities.length === 0 ? (
                     <p className="py-16 text-small text-muted-foreground">{t('No capabilities published yet.')}</p>
                 ) : (
                     <CapabilityFeature items={capabilities} />
                 )}
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

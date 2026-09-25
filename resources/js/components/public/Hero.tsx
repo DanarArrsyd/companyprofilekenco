@@ -5,6 +5,7 @@ import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/use-locale';
 import { mediaUrl } from '@/lib/media';
+import { Container } from '@/components/public/Section';
 
 export interface HeroContent {
     eyebrow?: string;
@@ -62,7 +63,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
             <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-navy-900/70 to-transparent sm:h-40" aria-hidden="true" />
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-navy-900/80 via-navy-900/30 to-transparent" aria-hidden="true" />
 
-            <div className="relative mx-auto flex min-h-[35rem] max-w-content flex-col justify-end px-5 pb-16 pt-28 sm:min-h-[40rem] sm:px-6 sm:pt-32 lg:min-h-[47.5rem] lg:px-8 lg:pb-24 lg:pt-36">
+            <Container className="relative flex min-h-[35rem] flex-col justify-end pb-16 pt-28 sm:min-h-[40rem] sm:pt-32 lg:min-h-[47.5rem] lg:pb-24 lg:pt-36">
                 <div className={`max-w-xl transition-all duration-500 ease-out ${textState}`}>
                     {content.eyebrow && (
                         <p className="text-caption uppercase text-white/70">{content.eyebrow}</p>
@@ -86,7 +87,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
                         )}
                     </div>
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

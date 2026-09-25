@@ -7,6 +7,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 export default function Index({
     products, categories, filters, seo,
@@ -21,18 +22,16 @@ export default function Index({
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('What We Make')}
-                        heading={t('Products')}
-                        description={t('Precision components produced for our manufacturing partners.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('What We Make')}
+                    heading={t('Products')}
+                    description={t('Precision components produced for our manufacturing partners.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 {categories.length > 0 && (
                     <div className="mb-10 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
@@ -62,7 +61,7 @@ export default function Index({
                 <div className="mt-12">
                     <Pagination links={products.links} />
                 </div>
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

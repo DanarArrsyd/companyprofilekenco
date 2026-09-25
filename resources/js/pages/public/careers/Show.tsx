@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container } from '@/components/public/Section';
 
 interface Vacancy {
     id: number; title: string; slug: string; department: string | null; location: string | null;
@@ -67,7 +68,7 @@ export default function Show({
                 </div>
             )}
 
-            <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 <Breadcrumb items={breadcrumb} />
 
                 <div className="mt-8 flex flex-col gap-10 lg:grid lg:grid-cols-[1fr_22.5rem] lg:items-start lg:gap-16">
@@ -146,7 +147,7 @@ export default function Show({
                         )}
                     </div>
                 </div>
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

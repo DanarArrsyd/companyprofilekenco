@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 export default function Index({ seo }: { seo: ResolvedSeo }) {
     const { localizedRoute, t } = useLocale();
@@ -33,18 +34,16 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('Get In Touch')}
-                        heading={t('Contact Us')}
-                        description={t('Send us a message and our team will get back to you.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('Get In Touch')}
+                    heading={t('Contact Us')}
+                    description={t('Send us a message and our team will get back to you.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_23.75rem] lg:gap-16">
                     <div data-reveal="auto">
                         {submitted ? (
@@ -105,7 +104,7 @@ export default function Index({ seo }: { seo: ResolvedSeo }) {
                         <ContactInfoPanel />
                     </div>
                 </div>
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

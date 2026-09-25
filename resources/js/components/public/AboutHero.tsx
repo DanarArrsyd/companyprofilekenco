@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
+import { Container } from '@/components/public/Section';
 
 export interface AboutHeroContent {
     heading: string;
@@ -71,7 +72,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
                 aria-hidden="true"
             />
 
-            <div className="relative mx-auto flex min-h-[35rem] max-w-content flex-col justify-between px-5 pb-12 pt-28 sm:min-h-[40rem] sm:px-6 sm:pt-32 lg:min-h-[45rem] lg:px-8 lg:pb-20 lg:pt-36">
+            <Container className="relative flex min-h-[35rem] flex-col justify-between pb-12 pt-28 sm:min-h-[40rem] sm:pt-32 lg:min-h-[45rem] lg:pb-20 lg:pt-36">
                 <h1
                     className="mx-auto max-w-4xl text-center text-h1 text-navy-900 sm:text-display lg:text-[4.75rem] lg:leading-[1.05]"
                     style={{ textWrap: 'balance' }}
@@ -89,7 +90,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
                         </p>
                     )}
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }

@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 
 import { useLocale } from '@/hooks/use-locale';
+import { Container } from '@/components/public/Section';
 
 const NAV_GROUPS: { heading: string; links: { label: string; href: string }[] }[] = [
     {
@@ -38,7 +39,7 @@ export function PublicFooter() {
 
     return (
         <footer className="border-t border-border bg-navy-900 text-white">
-            <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
+            <Container spacing="intro">
                 <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr_1fr]">
                     <div>
                         <p className="text-h4 text-white">{companyName}</p>
@@ -84,7 +85,7 @@ export function PublicFooter() {
                 <div className="mt-12 flex flex-col gap-3 border-t border-navy-700 pt-6 text-caption text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                     <p>&copy; {new Date().getFullYear()} {companyName}. {t('All rights reserved.')}</p>
                 </div>
-            </div>
+            </Container>
         </footer>
     );
 }

@@ -11,6 +11,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { PageSection, ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 interface MilestoneItem {
     id: number;
@@ -139,14 +140,12 @@ function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
     if (items.length === 0) return null;
 
     return (
-        <section className="border-t border-border">
-            <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries Served')} cta={{ label: t('View All Industries'), href: '/company#industries' }} />
-                <div className="mt-10">
-                    <IndustryGrid items={items} />
-                </div>
+        <Section className="border-t border-border">
+            <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries Served')} cta={{ label: t('View All Industries'), href: '/company#industries' }} />
+            <div className="mt-10">
+                <IndustryGrid items={items} />
             </div>
-        </section>
+        </Section>
     );
 }
 
@@ -207,9 +206,9 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
 
     return (
         <section className="border-t border-border bg-background">
-            <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+            <Container spacing="section">
                 <SectionHeader eyebrow={t('Since Day One')} heading={t('Company Milestones')} />
-            </div>
+            </Container>
 
             <div className="relative mt-14">
                 <div
@@ -250,7 +249,7 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                 />
             </div>
 
-            <div className="scrollbar-hide mx-auto mt-6 max-w-content overflow-x-auto px-5 sm:px-6 lg:px-8">
+            <Container className="scrollbar-hide mt-6 overflow-x-auto">
                 <div className="flex w-max min-w-full justify-center gap-x-6 sm:gap-x-8">
                     {items.map((item, index) => (
                         <button
@@ -267,7 +266,7 @@ function MilestonesSection({ items }: { items: MilestoneItem[] }) {
                         </button>
                     ))}
                 </div>
-            </div>
+            </Container>
         </section>
     );
 }
@@ -277,12 +276,12 @@ function NewsSection({ articles }: { articles: ArticlePreviewItem[] }) {
     if (articles.length === 0) return null;
 
     return (
-        <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+        <Container as="section" spacing="section">
             <SectionHeader eyebrow={t('Newsroom')} heading={t('Latest News')} cta={{ label: t('View All News'), href: '/news' }} />
             <div data-reveal-group className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-3">
                 {articles.map((article) => <ArticlePreview key={article.id} article={article} />)}
             </div>
-        </section>
+        </Container>
     );
 }
 
@@ -312,12 +311,12 @@ export default function Home({
         return (
             <PublicLayout>
                 <SeoHead seo={seo} schema={schema} />
-                <div className="mx-auto max-w-content px-5 py-24 text-center sm:px-6 lg:px-8">
+                <Container spacing="section" className="text-center">
                     <h1 className="text-h1 text-navy-900">{siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia'}</h1>
                     <p className="mt-4 text-slate-500">
                         {t('Homepage content is being prepared. Check back soon.')}
                     </p>
-                </div>
+                </Container>
             </PublicLayout>
         );
     }

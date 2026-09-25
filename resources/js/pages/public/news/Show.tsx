@@ -5,6 +5,7 @@ import { SeoHead } from '@/components/public/SeoHead';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container } from '@/components/public/Section';
 
 interface Article {
     id: number; title: string; excerpt: string | null; content: string | null;
@@ -34,7 +35,7 @@ export default function Show({
                 </div>
             )}
 
-            <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 <Breadcrumb items={breadcrumb} />
 
                 <article className="mx-auto mt-8 max-w-[47.5rem]">
@@ -72,7 +73,7 @@ export default function Show({
                         </div>
                     </div>
                 )}
-            </div>
+            </Container>
         </PublicLayout>
     );
 }

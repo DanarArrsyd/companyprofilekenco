@@ -18,6 +18,7 @@ import { PageSection } from '@/types/cms';
 import paperTape1 from '../../../img/paper_tape1.png';
 import paperTape2 from '../../../img/paper_tape2.png';
 import { getTextSectionPresentation } from './text-section-presentation';
+import { Container, Section } from '@/components/public/Section';
 
 interface CtaContent {
     heading?: string;
@@ -64,25 +65,23 @@ export function SectionRenderer({
             if (!section.title && !section.subtitle && !c.body && !c.image) return null;
 
             return (
-                <section className="border-t border-border">
-                    <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
-                            <div data-reveal="auto" className="order-2 lg:order-1">
-                                {section.title && <h2 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{section.title}</h2>}
-                                {(section.subtitle || c.body) && (
-                                    <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
-                                )}
-                            </div>
-                            <div data-reveal="image" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
-                                {c.image ? (
-                                    <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
-                                ) : (
-                                    <ImagePlaceholder />
-                                )}
-                            </div>
+                <Section className="border-t border-border">
+                    <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[0.85fr_1fr] lg:gap-16">
+                        <div data-reveal="auto" className="order-2 lg:order-1">
+                            {section.title && <h2 className="text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{section.title}</h2>}
+                            {(section.subtitle || c.body) && (
+                                <p className="mt-4 text-body-lg text-slate-700">{section.subtitle ?? c.body}</p>
+                            )}
+                        </div>
+                        <div data-reveal="image" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
+                            {c.image ? (
+                                <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
+                            ) : (
+                                <ImagePlaceholder />
+                            )}
                         </div>
                     </div>
-                </section>
+                </Section>
             );
         }
 
@@ -93,7 +92,7 @@ export function SectionRenderer({
             if (presentation.variant === 'taped_image') {
                 return (
                     <section className="overflow-hidden bg-background">
-                        <div className="mx-auto grid max-w-content grid-cols-1 items-center gap-12 px-5 py-16 sm:px-6 md:py-20 lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:gap-20 lg:px-8 lg:py-24">
+                        <Container spacing="section" className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:gap-20">
                             <div data-reveal="auto" className="relative z-10 text-navy-900">
                                 {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
                                 {(section.subtitle || presentation.body) && (
@@ -130,25 +129,25 @@ export function SectionRenderer({
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </Container>
                     </section>
                 );
             }
 
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     {section.title && <h2 className={getSectionHeadingClass(section.settings_json)}>{section.title}</h2>}
                     {(section.subtitle || presentation.body) && (
                         <p className="mt-4 max-w-2xl text-slate-700">{section.subtitle ?? presentation.body}</p>
                     )}
-                </section>
+                </Container>
             );
         }
 
         case 'image_text': {
             const c = content as { image?: string; body?: string };
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
                         <div data-reveal="auto">
                             {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
@@ -164,7 +163,7 @@ export function SectionRenderer({
                             </div>
                         )}
                     </div>
-                </section>
+                </Container>
             );
         }
 
@@ -296,7 +295,7 @@ export function SectionRenderer({
         case 'gallery': {
             const images = (content as { images?: string[] }).images ?? [];
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     {section.title && <h2 className="text-h2 text-navy-900">{section.title}</h2>}
                     {images.length === 0 ? (
                         <p className="mt-4 text-sm text-slate-500">{t('Gallery coming soon.')}</p>
@@ -307,26 +306,24 @@ export function SectionRenderer({
                             ))}
                         </div>
                     )}
-                </section>
+                </Container>
             );
         }
 
         case 'call_to_action': {
             const c = content as CtaContent;
             return (
-                <section className="border-t border-border bg-muted">
-                    <div className="mx-auto max-w-content px-5 py-16 text-center sm:px-6 lg:px-8">
-                        <h2 className="text-h3 text-navy-900">{c.heading ?? section.title}</h2>
-                        {(c.description || section.subtitle) && (
-                            <p className="mx-auto mt-3 max-w-xl text-slate-700">{c.description ?? section.subtitle}</p>
-                        )}
-                        {c.cta_label && c.cta_url && (
-                            <div className="mt-6 flex justify-center">
-                                <Button asChild><a href={localize(c.cta_url)}>{c.cta_label}</a></Button>
-                            </div>
-                        )}
-                    </div>
-                </section>
+                <Section className="border-t border-border bg-muted" spacing="intro" containerClassName="text-center">
+                    <h2 className="text-h3 text-navy-900">{c.heading ?? section.title}</h2>
+                    {(c.description || section.subtitle) && (
+                        <p className="mx-auto mt-3 max-w-xl text-slate-700">{c.description ?? section.subtitle}</p>
+                    )}
+                    {c.cta_label && c.cta_url && (
+                        <div className="mt-6 flex justify-center">
+                            <Button asChild><a href={localize(c.cta_url)}>{c.cta_label}</a></Button>
+                        </div>
+                    )}
+                </Section>
             );
         }
 
@@ -337,7 +334,7 @@ export function SectionRenderer({
             if (items.length === 0) return null;
 
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     <SectionHeader
                         eyebrow={t('What We Do')}
                         heading={c.heading ?? section.title}
@@ -347,7 +344,7 @@ export function SectionRenderer({
                     <div className="mt-4">
                         <CapabilityFeature items={items} />
                     </div>
-                </section>
+                </Container>
             );
         }
 
@@ -357,7 +354,7 @@ export function SectionRenderer({
             if (items.length === 0) return null;
 
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     <SectionHeader
                         heading={c.heading ?? section.title}
                         description={c.description ?? section.subtitle ?? undefined}
@@ -366,7 +363,7 @@ export function SectionRenderer({
                     <div className="mt-10">
                         <ProductShowcase items={items} />
                     </div>
-                </section>
+                </Container>
             );
         }
 
@@ -376,12 +373,12 @@ export function SectionRenderer({
             if (!facility) return null;
 
             return (
-                <section className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
+                <Container as="section" spacing="section">
                     <SectionHeader heading={c.heading ?? section.title} description={c.description ?? section.subtitle ?? undefined} />
                     <div className="mt-10">
                         <FacilityFeature facility={facility} />
                     </div>
-                </section>
+                </Container>
             );
         }
 
@@ -391,24 +388,22 @@ export function SectionRenderer({
             if (!c.heading && !section.title && certs.length === 0) return null;
 
             return (
-                <section className="border-t border-border">
-                    <div className="mx-auto max-w-content px-5 py-20 sm:px-6 lg:px-8">
-                        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
-                            <div data-reveal="auto">
-                                <p className="text-caption uppercase text-muted-foreground">{t('Quality')}</p>
-                                <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
-                                {(c.description || section.subtitle) && (
-                                    <p className="mt-4 text-body text-slate-700">{c.description ?? section.subtitle}</p>
-                                )}
-                            </div>
-                            {certs.length > 0 && (
-                                <div data-reveal="auto" className="flex items-start">
-                                    <CertificationItem items={certs} />
-                                </div>
+                <Section className="border-t border-border">
+                    <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1fr_1.4fr]">
+                        <div data-reveal="auto">
+                            <p className="text-caption uppercase text-muted-foreground">{t('Quality')}</p>
+                            <h2 className="mt-2 text-h2 text-navy-900" style={{ textWrap: 'balance' }}>{c.heading ?? section.title}</h2>
+                            {(c.description || section.subtitle) && (
+                                <p className="mt-4 text-body text-slate-700">{c.description ?? section.subtitle}</p>
                             )}
                         </div>
+                        {certs.length > 0 && (
+                            <div data-reveal="auto" className="flex items-start">
+                                <CertificationItem items={certs} />
+                            </div>
+                        )}
                     </div>
-                </section>
+                </Section>
             );
         }
 
@@ -417,19 +412,17 @@ export function SectionRenderer({
             if (!c.heading && !section.title) return null;
 
             return (
-                <section className="bg-charcoal">
-                    <div className="mx-auto flex max-w-content flex-col items-start gap-6 px-5 py-14 sm:px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-                        <div>
-                            <h2 className="text-h3 text-white">{c.heading ?? section.title}</h2>
-                            {typeof openJobCount === 'number' && openJobCount > 0 && (
-                                <p className="mt-2 text-body text-white/70">{openJobCount === 1 ? t(':count open position right now.', { count: openJobCount }) : t(':count open positions right now.', { count: openJobCount })}</p>
-                            )}
-                        </div>
-                        <Button asChild variant="secondary" className="border-white/30 text-white hover:bg-white/10">
-                            <Link href={localize('/careers')}>{c.cta_label ?? t('View Openings')}</Link>
-                        </Button>
+                <Section className="bg-charcoal" spacing="intro" containerClassName="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-h3 text-white">{c.heading ?? section.title}</h2>
+                        {typeof openJobCount === 'number' && openJobCount > 0 && (
+                            <p className="mt-2 text-body text-white/70">{openJobCount === 1 ? t(':count open position right now.', { count: openJobCount }) : t(':count open positions right now.', { count: openJobCount })}</p>
+                        )}
                     </div>
-                </section>
+                    <Button asChild variant="secondary" className="border-white/30 text-white hover:bg-white/10">
+                        <Link href={localize('/careers')}>{c.cta_label ?? t('View Openings')}</Link>
+                    </Button>
+                </Section>
             );
         }
 

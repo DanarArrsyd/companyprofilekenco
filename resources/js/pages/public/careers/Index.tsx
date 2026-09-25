@@ -8,6 +8,7 @@ import { revealClass, useInView } from '@/hooks/use-in-view';
 import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
+import { Container, Section } from '@/components/public/Section';
 
 interface VacancyRow {
     id: number; title: string; slug: string; department: string | null; location: string | null;
@@ -56,18 +57,16 @@ export default function Index({
         <PublicLayout>
             <SeoHead seo={seo} />
 
-            <section className="border-b border-border">
-                <div className="mx-auto max-w-content px-5 py-16 sm:px-6 lg:px-8">
-                    <SectionHeader
-                        as="h1"
-                        eyebrow={t('Join Our Team')}
-                        heading={t('Careers')}
-                        description={t('Open positions across our manufacturing operations.')}
-                    />
-                </div>
-            </section>
+            <Section className="border-b border-border" spacing="intro">
+                <SectionHeader
+                    as="h1"
+                    eyebrow={t('Join Our Team')}
+                    heading={t('Careers')}
+                    description={t('Open positions across our manufacturing operations.')}
+                />
+            </Section>
 
-            <div className="mx-auto max-w-content px-5 py-12 sm:px-6 lg:px-8">
+            <Container spacing="content">
                 {departments.length > 0 && (
                     <div className="mb-4 flex flex-wrap gap-2 border-b border-border pb-8">
                         <button
@@ -99,7 +98,7 @@ export default function Index({
                 <div className="mt-12">
                     <Pagination links={vacancies.links} />
                 </div>
-            </div>
+            </Container>
         </PublicLayout>
     );
 }
