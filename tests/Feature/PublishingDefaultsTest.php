@@ -65,3 +65,16 @@ test('clearing a translatable field stores null instead of an empty locale map',
     // The Indonesian text survives; only the empty English entry is dropped.
     expect(json_decode($product->fresh()->getRawOriginal('material'), true))->toBe(['id' => 'Baja']);
 });
+
+test('the data fix gives published rows without a date their last save time', function () {
+    $article = Article::factory()->create(['status' => ContentStatus::Published]);
+    $draft = Article::factory()->create(['status' => ContentStatus::Draft, 'published_at' => null]);
+    // Rows written before the model fix: bypass the saving hook.
+    Article::whereKey($article->id)->update(['published_at' => null, 'updated_at' => now()->subDay()]);
+
+    (require database_path('migrations/2026_09_26_000001_stamp_published_at_for_published_content.php'))->up();
+
+    expect($article->fresh()->published_at->equalTo(now()->subDay()->startOfSecond()))->toBeTrue()
+        ->and($article->fresh()->isPublished())->toBeTrue()
+        ->and($draft->fresh()->published_at)->toBeNull();
+});
