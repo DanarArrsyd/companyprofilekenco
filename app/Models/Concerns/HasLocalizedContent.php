@@ -2,6 +2,8 @@
 
 namespace App\Models\Concerns;
 
+use App\Actions\Translation\AutoTranslateChanges;
+use App\Services\Translation\TranslationFailed;
 use App\Support\LocalizedContent;
 use Spatie\Translatable\HasTranslations;
 
@@ -16,12 +18,26 @@ trait HasLocalizedContent
     use HasTranslations;
 
     /**
-     * Clearing a field stores NULL instead of an empty locale map such as
-     * {"en":null}, and empty locales are dropped from partially filled maps.
+     * On save: fill the other language when auto-translate is on, then store
+     * NULL instead of an empty locale map such as {"en":null} and drop empty
+     * locales from partially filled maps.
      */
     public static function bootHasLocalizedContent(): void
     {
         static::saving(function ($model) {
+            if (LocalizedContent::$autoTranslate) {
+                try {
+                    app(AutoTranslateChanges::class)->handle($model);
+                } catch (TranslationFailed $exception) {
+                    // The admin's own text is still saved; only the other language is skipped.
+                    report($exception);
+
+                    if (request()->hasSession()) {
+                        request()->session()->flash('warning', 'Automatic translation failed; the other language was not changed.');
+                    }
+                }
+            }
+
             foreach ($model->getTranslatableAttributes() as $key) {
                 $raw = $model->getAttributes()[$key] ?? null;
 

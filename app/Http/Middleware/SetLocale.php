@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Translation\Translator;
 use App\Support\Locale;
 use App\Support\LocalizedContent;
 use Closure;
@@ -21,7 +22,12 @@ class SetLocale
 
         app()->setLocale($locale);
         Carbon::setLocale($locale);
-        LocalizedContent::$serializeAllLocales = $request->is('admin', 'admin/*');
+        $isAdmin = $request->is('admin', 'admin/*');
+
+        LocalizedContent::$serializeAllLocales = $isAdmin;
+        LocalizedContent::$autoTranslate = $isAdmin
+            && $request->header('X-Auto-Translate') === '1'
+            && app(Translator::class)->isConfigured();
 
         return $next($request);
     }

@@ -20,6 +20,13 @@ final class LocalizedContent
      */
     public static bool $serializeAllLocales = false;
 
+    /**
+     * When true (admin saves sent with X-Auto-Translate: 1 and a configured
+     * translator, set by SetLocale), translatable models fill the other
+     * language on save — see App\Actions\Translation\AutoTranslateChanges.
+     */
+    public static bool $autoTranslate = false;
+
     public static function resolve(mixed $value, ?string $locale = null): mixed
     {
         if (! is_array($value)) {
