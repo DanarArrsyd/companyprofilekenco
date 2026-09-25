@@ -63,7 +63,7 @@ export default function Edit({ facility, categories, statusOptions }: { facility
                     </div>
                     <div>
                         <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/{facility.slug}</p>
+                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{facility.slug}</p>
                     </div>
                     <div>
                         <Label htmlFor="facility_category_id">Category</Label>

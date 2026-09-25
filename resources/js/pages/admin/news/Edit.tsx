@@ -113,7 +113,7 @@ export default function Edit({
                     </div>
                     <div>
                         <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/news/{article.slug}</p>
+                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/news/{article.slug}</p>
                     </div>
                     <div>
                         <Label htmlFor="news_category_id">Category</Label>

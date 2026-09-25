@@ -13,7 +13,7 @@ export function AdminHeader({ onOpenMobileNav }: { onOpenMobileNav: () => void }
             <button
                 type="button"
                 onClick={onOpenMobileNav}
-                className="rounded p-2 text-slate-600 hover:bg-muted sm:hidden"
+                className="rounded p-2 text-slate-700 hover:bg-muted sm:hidden"
                 aria-label="Open navigation menu"
             >
                 <MenuIcon className="h-5 w-5" />

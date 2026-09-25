@@ -96,8 +96,9 @@ export function SeoFields({
             <div className="border border-border bg-muted/40 p-4">
                 <p className="text-xs font-medium uppercase text-muted-foreground">Search Preview</p>
                 <p className="mt-2 truncate text-sm text-navy-700">{pageUrl}</p>
+                {/* Google-blue title on purpose: the preview mimics a search result. */}
                 <p className="mt-0.5 truncate text-base text-blue-800">{previewTitle}</p>
-                <p className="mt-0.5 line-clamp-2 text-sm text-slate-600">{previewDescription}</p>
+                <p className="mt-0.5 line-clamp-2 text-sm text-slate-700">{previewDescription}</p>
             </div>
 
             <div>

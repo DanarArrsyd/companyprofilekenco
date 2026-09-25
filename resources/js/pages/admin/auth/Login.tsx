@@ -87,7 +87,7 @@ export default function Login({
                     {canResetPassword && (
                         <Link
                             href={route('password.request')}
-                            className="text-sm text-slate-600 underline hover:text-navy-900"
+                            className="text-sm text-slate-700 underline hover:text-navy-900"
                         >
                             Forgot your password?
                         </Link>

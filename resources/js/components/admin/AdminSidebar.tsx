@@ -94,7 +94,7 @@ export function SidebarNav({ collapsed = false }: { collapsed?: boolean }) {
                                                     'block rounded px-2 py-1.5 text-sm transition-colors',
                                                     isItemActive(item)
                                                         ? 'font-medium text-primary'
-                                                        : 'text-slate-600 hover:text-foreground',
+                                                        : 'text-slate-700 hover:text-foreground',
                                                 )}
                                             >
                                                 {item.name}

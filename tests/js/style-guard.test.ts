@@ -16,16 +16,23 @@ function sourceFiles(dir: string): string[] {
     });
 }
 
-// Public site only — admin still carries Breeze defaults until it is migrated.
 const publicFiles = [
     ...sourceFiles(join(root, 'resources/js/pages/public')),
     ...sourceFiles(join(root, 'resources/js/components/public')),
     join(root, 'resources/js/layouts/PublicLayout.tsx'),
 ];
 
-/** Every `pattern` match in public code, as `path:line match` (first capture group when present). */
-function violations(pattern: RegExp): string[] {
-    return publicFiles.flatMap((file) =>
+const adminFiles = [
+    ...sourceFiles(join(root, 'resources/js/pages/admin')),
+    ...sourceFiles(join(root, 'resources/js/components/admin')),
+    ...sourceFiles(join(root, 'resources/js/components/ui')),
+    join(root, 'resources/js/layouts/AdminLayout.tsx'),
+    join(root, 'resources/js/layouts/AuthLayout.tsx'),
+];
+
+/** Every `pattern` match in `files`, as `path:line match` (first capture group when present). */
+function violations(pattern: RegExp, files: string[] = publicFiles): string[] {
+    return files.flatMap((file) =>
         readFileSync(file, 'utf8')
             .split('\n')
             .flatMap((line, index) => [...line.matchAll(pattern)].map((match) => `${relative(root, file)}:${index + 1} ${match[1] ?? match[0]}`)),
@@ -36,10 +43,25 @@ function violations(pattern: RegExp): string[] {
 // default colours, so anything else silently renders an off-brand hue.
 const COLOR_UTILITY = /\b(?:bg|text|border|ring|ring-offset|from|via|to|fill|stroke|outline|divide|decoration|placeholder|caret|accent|shadow)-((?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|navy)-\d{2,3})\b/g;
 const PALETTE = new Set(['navy-950', 'navy-900', 'navy-800', 'navy-700', 'slate-700', 'slate-500', 'gray-200', 'gray-100']);
+// The SEO search preview mimics a Google result title on purpose.
+const ADMIN_EXCEPTIONS = new Set(['resources/js/components/admin/SeoFields.tsx blue-800']);
+
+const offPalette = (files: string[]) =>
+    violations(COLOR_UTILITY, files).filter((hit) => {
+        const [location, color] = hit.split(' ');
+        return !PALETTE.has(color) && !ADMIN_EXCEPTIONS.has(`${location.replace(/:\d+$/, '')} ${color}`);
+    });
 
 test('public code only uses DESIGN.md palette colours', () => {
-    const offPalette = violations(COLOR_UTILITY).filter((hit) => !PALETTE.has(hit.split(' ')[1]));
-    assert.deepEqual(offPalette, []);
+    assert.deepEqual(offPalette(publicFiles), []);
+});
+
+test('admin code only uses DESIGN.md palette colours', () => {
+    assert.deepEqual(offPalette(adminFiles), []);
+});
+
+test('admin text is never smaller than text-xs', () => {
+    assert.deepEqual(violations(/\btext-\[\d+(?:\.\d+)?px\]/g, adminFiles), []);
 });
 
 test('public code uses the design type scale, not Tailwind defaults', () => {

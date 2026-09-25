@@ -62,7 +62,7 @@ export default function Edit({ user, roles, isSelf }: { user: UserDetail; roles:
                         </div>
                         <div>
                             <Label>Last login</Label>
-                            <p className="mt-1.5 text-sm text-slate-600">{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'Never'}</p>
+                            <p className="mt-1.5 text-sm text-slate-700">{user.last_login_at ? new Date(user.last_login_at).toLocaleString() : 'Never'}</p>
                         </div>
                     </FormSection>
 

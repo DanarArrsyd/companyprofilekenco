@@ -191,7 +191,7 @@ function Modal({
                         }}
                         onDrop={onDrop}
                         className={cn(
-                            'flex cursor-pointer items-center justify-center gap-3 rounded border border-dashed border-border bg-muted/40 px-4 py-4 text-sm text-slate-600 transition-colors hover:border-primary hover:bg-muted',
+                            'flex cursor-pointer items-center justify-center gap-3 rounded border border-dashed border-border bg-muted/40 px-4 py-4 text-sm text-slate-700 transition-colors hover:border-primary hover:bg-muted',
                             dragActive && 'border-primary bg-muted text-foreground',
                             uploading && 'cursor-wait opacity-60',
                         )}
@@ -245,7 +245,7 @@ function Modal({
                         </div>
                     ) : items.length === 0 ? (
                         <div className="flex min-h-64 flex-col items-center justify-center text-center">
-                            <FileText className="h-9 w-9 text-slate-300" />
+                            <FileText className="h-9 w-9 text-slate-500/60" />
                             <p className="mt-3 text-sm font-medium text-foreground">No matching images</p>
                             <p className="mt-1 text-sm text-slate-500">Try another search or upload a new image.</p>
                         </div>
@@ -269,14 +269,14 @@ function Modal({
                                             {item.is_image && item.url ? (
                                                 <img src={item.url} alt={item.alt_text ?? ''} className="h-full w-full object-cover" />
                                             ) : (
-                                                <FileText className="h-8 w-8 text-slate-400" />
+                                                <FileText className="h-8 w-8 text-slate-500" />
                                             )}
                                         </div>
                                         <div className="p-2">
                                             <p className="truncate text-xs font-medium text-foreground">
                                                 {item.original_name ?? item.filename}
                                             </p>
-                                            <p className="mt-0.5 text-[11px] text-slate-400">
+                                            <p className="mt-0.5 text-xs text-slate-500">
                                                 Used in {item.usage_count} {item.usage_count === 1 ? 'place' : 'places'}
                                             </p>
                                         </div>
@@ -457,7 +457,7 @@ export function MediaPickerField({
                 {previewUrl ? (
                     <img src={previewUrl} alt="" className="h-24 w-full rounded border border-border object-cover sm:w-32" />
                 ) : (
-                    <div className="flex h-24 w-full items-center justify-center rounded border border-dashed border-border text-xs text-slate-400 sm:w-32">
+                    <div className="flex h-24 w-full items-center justify-center rounded border border-dashed border-border text-xs text-slate-500 sm:w-32">
                         No image
                     </div>
                 )}
@@ -473,7 +473,7 @@ export function MediaPickerField({
                     </div>
 
                     <label className={cn(
-                        'inline-flex w-fit items-center gap-2 text-xs text-slate-600',
+                        'inline-flex w-fit items-center gap-2 text-xs text-slate-700',
                         uploadState === 'uploading' ? 'cursor-wait opacity-60' : 'cursor-pointer',
                     )}>
                         <Upload className="h-3.5 w-3.5" />

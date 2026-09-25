@@ -50,7 +50,7 @@ export default function Edit({ category }: { category: Category }) {
                     </div>
                     <div>
                         <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/{category.slug}</p>
+                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{category.slug}</p>
                     </div>
                     <div>
                         <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>

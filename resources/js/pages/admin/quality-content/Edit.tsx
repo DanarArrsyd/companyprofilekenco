@@ -61,7 +61,7 @@ export default function Edit({ item, statusOptions }: { item: Item; statusOption
                     </div>
                     <div>
                         <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/{item.slug}</p>
+                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{item.slug}</p>
                     </div>
                     <div>
                         <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>

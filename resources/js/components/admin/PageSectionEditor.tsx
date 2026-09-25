@@ -69,7 +69,7 @@ export function PageSectionEditor({
         <div className="rounded-lg border border-border bg-surface">
             <div className="flex items-center justify-between border-b border-border px-6 py-4 sm:px-8">
                 <div className="flex items-center gap-2">
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium uppercase text-slate-600">
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium uppercase text-slate-700">
                         {label ?? section.section_type.replace('_', ' ')}
                     </span>
                     {!data.is_active && (

@@ -91,7 +91,7 @@ function MediaCard({
         <article
             className={cn(
                 'group relative overflow-hidden rounded border bg-surface transition-colors',
-                selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-slate-400',
+                selected ? 'border-primary ring-1 ring-primary' : 'border-border hover:border-slate-500',
             )}
         >
             <button
@@ -104,14 +104,14 @@ function MediaCard({
                     {item.is_image && item.url ? (
                         <img src={item.url} alt={item.alt_text ?? ''} className="h-full w-full object-cover" />
                     ) : (
-                        <FileText className="h-10 w-10 text-slate-400" />
+                        <FileText className="h-10 w-10 text-slate-500" />
                     )}
                 </div>
                 <div className="space-y-1 p-3">
                     <p className="truncate text-xs font-medium text-foreground">
                         {item.original_name ?? item.filename}
                     </p>
-                    <div className="flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                    <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
                         <span>{formatSize(item.size)}</span>
                         <span className="inline-flex items-center gap-1">
                             <Link2 className="h-3 w-3" />{item.usage_count}
@@ -204,7 +204,7 @@ function DetailPanel({
                                     <img src={item.url} alt={item.alt_text ?? ''} className="max-h-[34rem] max-w-full rounded object-contain" />
                                 ) : (
                                     <div className="text-center">
-                                        <FileText className="mx-auto h-16 w-16 text-slate-400" />
+                                        <FileText className="mx-auto h-16 w-16 text-slate-500" />
                                         <p className="mt-3 text-sm text-slate-500">Document preview unavailable</p>
                                     </div>
                                 )}
@@ -281,7 +281,7 @@ function DetailPanel({
                                         type="file"
                                         accept="image/jpeg,image/png,image/webp,application/pdf"
                                         onChange={(event) => replaceForm.setData('file', event.target.files?.[0] ?? null)}
-                                        className="mt-3 block w-full text-sm text-slate-600 file:mr-3 file:rounded file:border file:border-border file:bg-surface file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
+                                        className="mt-3 block w-full text-sm text-slate-700 file:mr-3 file:rounded file:border file:border-border file:bg-surface file:px-3 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
                                     />
                                     {replaceForm.data.file && <p className="mt-2 truncate text-xs text-slate-500">Selected: {replaceForm.data.file.name}</p>}
                                     {replaceForm.errors.file && <p role="alert" className="mt-2 text-sm text-danger">{replaceForm.errors.file}</p>}
@@ -443,7 +443,7 @@ export default function Index({
                         </Label>
 
                         <div className="flex flex-col justify-center">
-                            <Label htmlFor="upload_alt_text">Alt text <span className="font-normal text-slate-400">(images only)</span></Label>
+                            <Label htmlFor="upload_alt_text">Alt text <span className="font-normal text-slate-500">(images only)</span></Label>
                             <Input
                                 id="upload_alt_text"
                                 value={uploadForm.data.alt_text}

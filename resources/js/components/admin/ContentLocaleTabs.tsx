@@ -44,12 +44,12 @@ export function ContentLocaleTabs({
                                 onClick={() => onChange(tab.locale)}
                                 className={cn(
                                     'inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                                    active ? 'bg-surface text-foreground shadow-sm' : 'text-slate-600 hover:text-foreground',
+                                    active ? 'bg-surface text-foreground shadow-sm' : 'text-slate-700 hover:text-foreground',
                                 )}
                             >
                                 {tab.label}
                                 {tab.locale === 'id' && typeof translated === 'number' && typeof total === 'number' && (
-                                    <span className={cn('rounded px-1.5 py-0.5 text-xs', translated === total ? 'bg-success/15 text-success' : 'bg-slate-200 text-slate-600')}>
+                                    <span className={cn('rounded px-1.5 py-0.5 text-xs', translated === total ? 'bg-success/15 text-success' : 'bg-gray-200 text-slate-700')}>
                                         {translated}/{total}
                                     </span>
                                 )}
@@ -74,7 +74,7 @@ export function LocaleBadge({ locale }: { locale: ContentLocale }) {
     if (locale === 'en') return null;
 
     return (
-        <span className="ml-2 rounded bg-navy-900/10 px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-navy-700">
+        <span className="ml-2 rounded bg-navy-900/10 px-1.5 py-0.5 align-middle text-xs font-semibold uppercase tracking-wide text-navy-700">
             {locale}
         </span>
     );

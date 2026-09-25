@@ -135,7 +135,7 @@ export default function Edit({
 
                         <div>
                             <Label>Slug</Label>
-                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">
+                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">
                                 /{page.slug}
                             </p>
                             <p className="mt-1 text-xs text-slate-500">

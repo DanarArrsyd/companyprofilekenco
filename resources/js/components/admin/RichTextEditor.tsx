@@ -19,7 +19,7 @@ function ToolbarButton({
             type="button"
             aria-label={label}
             onClick={onClick}
-            className={`rounded p-1.5 hover:bg-slate-100 ${active ? 'bg-slate-200 text-foreground' : 'text-slate-600'}`}
+            className={`rounded p-1.5 hover:bg-muted ${active ? 'bg-gray-200 text-foreground' : 'text-slate-700'}`}
         >
             {children}
         </button>

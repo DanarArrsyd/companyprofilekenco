@@ -42,9 +42,9 @@ export default function Index({
             key: 'image', header: '', className: 'w-16',
             render: (row) => row.image
                 ? <img src={`/storage/${row.image}`} alt="" className="h-12 w-12 rounded-sm border border-border object-cover" />
-                : <div className="flex h-12 w-12 items-center justify-center rounded-sm border border-dashed border-border text-[10px] text-slate-400">None</div>,
+                : <div className="flex h-12 w-12 items-center justify-center rounded-sm border border-dashed border-border text-xs text-slate-500">None</div>,
         },
-        { key: 'year', header: 'Year', render: (row) => <span className="font-semibold text-foreground" style={{ fontVariantNumeric: 'tabular-nums' }}>{row.year}</span> },
+        { key: 'year', header: 'Year', render: (row) => <span className="tabular-nums font-semibold text-foreground">{row.year}</span> },
         {
             key: 'title', header: 'Title',
             render: (row) => (
@@ -54,7 +54,7 @@ export default function Index({
                 </div>
             ),
         },
-        { key: 'order', header: 'Sort Order', render: (row) => <span className="text-slate-600" style={{ fontVariantNumeric: 'tabular-nums' }}>{row.order}</span> },
+        { key: 'order', header: 'Sort Order', render: (row) => <span className="tabular-nums text-slate-700">{row.order}</span> },
         { key: 'updated_at', header: 'Updated', render: (row) => <span className="text-slate-500">{new Date(row.updated_at).toLocaleDateString()}</span> },
         {
             key: 'actions', header: '', className: 'text-right',

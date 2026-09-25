@@ -170,7 +170,7 @@ export default function Edit({
                         </div>
                         <div>
                             <Label>Slug</Label>
-                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-600">/products/{product.slug}</p>
+                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/products/{product.slug}</p>
                         </div>
                         <div>
                             <Label htmlFor="product_category_id">Category</Label>
