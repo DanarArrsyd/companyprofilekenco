@@ -160,3 +160,27 @@ test('the Indonesian drafts migration fills untranslated known text only and rol
             'items' => [['label' => 'Founded', 'value' => '2017']],
         ]);
 });
+
+test('the draft revision migration only rewrites untouched drafts', function () {
+    $migration = require collect(glob(database_path('migrations/*_revise_indonesian_drafts.php')))->sole();
+
+    $draftId = DB::table('statistics')->insertGetId(['label' => '{"en":"Metal Stamping","id":"Stamping Logam"}', 'value' => '1', 'order' => 0]);
+    $editedId = DB::table('statistics')->insertGetId(['label' => '{"en":"Metal Stamping","id":"Stamping Logam Presisi"}', 'value' => '2', 'order' => 1]);
+    $section = PageSection::factory()->create([
+        'title' => ['en' => 'Join Our Team', 'id' => 'Bergabung dengan Tim Kami'],
+        'content' => ['heading' => ['en' => 'Where We Manufacture', 'id' => 'Tempat Kami Berproduksi'], 'url' => '/careers'],
+    ]);
+
+    $migration->up();
+    $migration->up();
+
+    expect(DB::table('statistics')->where('id', $draftId)->value('label'))->toBe('{"en":"Metal Stamping","id":"Metal Stamping"}')
+        ->and(DB::table('statistics')->where('id', $editedId)->value('label'))->toBe('{"en":"Metal Stamping","id":"Stamping Logam Presisi"}')
+        ->and($section->fresh()->getTranslation('title', 'id'))->toBe('Bergabunglah dengan Tim Kami')
+        ->and($section->fresh()->content)->toBe(['heading' => ['en' => 'Where We Manufacture', 'id' => 'Lokasi Produksi Kami'], 'url' => '/careers']);
+
+    $migration->down();
+
+    expect(DB::table('statistics')->where('id', $draftId)->value('label'))->toBe('{"en":"Metal Stamping","id":"Stamping Logam"}')
+        ->and($section->fresh()->getTranslation('title', 'id'))->toBe('Bergabung dengan Tim Kami');
+});
