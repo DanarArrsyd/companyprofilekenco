@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['title', 'description'];
 
@@ -51,12 +53,13 @@ export default function Create() {
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="year">Year</Label>
-                        <Input id="year" type="number" value={data.year} onChange={(e) => setData('year', Number(e.target.value))} className="mt-1.5" autoFocus />
+                        <Input id="year" aria-describedby="year-help" type="number" value={data.year} onChange={(e) => setData('year', Number(e.target.value))} className="mt-1.5" autoFocus />
+                        <FieldHint id="year-help">{fieldHelp('milestones', 'year').hint}</FieldHint>
                         {errors.year && <p className="mt-1 text-sm text-danger">{errors.year}</p>}
                     </div>
                     <div>
                         <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="title" {...bind('title')} className="mt-1.5" />
+                        <Input id="title" {...bind('title', fieldHelp('milestones', 'title').example)} className="mt-1.5" />
                         {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
@@ -79,7 +82,8 @@ export default function Create() {
                 <FormSection title="Ordering">
                     <div>
                         <Label htmlFor="order">Sort order</Label>
-                        <Input id="order" type="number" value={data.order} onChange={(e) => setData('order', Number(e.target.value))} className="mt-1.5" />
+                        <Input id="order" aria-describedby="order-help" type="number" value={data.order} onChange={(e) => setData('order', Number(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="order-help">{fieldHelp('milestones', 'order').hint}</FieldHint>
                     </div>
                 </FormSection>
 

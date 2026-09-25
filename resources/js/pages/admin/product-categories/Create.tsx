@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['name', 'description'];
 
@@ -44,12 +46,13 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="name" {...bind('name')} className="mt-1.5" autoFocus />
+                        <Input id="name" {...bind('name', fieldHelp('product-categories', 'name').example)} className="mt-1.5" autoFocus />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
-                        <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" placeholder="Auto-generated from name" />
+                        <Input id="slug" aria-describedby="slug-help" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" placeholder="Auto-generated from name" />
+                        <FieldHint id="slug-help">{fieldHelp('product-categories', 'slug').hint}</FieldHint>
                         {errors.slug && <p className="mt-1 text-sm text-danger">{errors.slug}</p>}
                     </div>
                     <div>
@@ -61,13 +64,15 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 <FormSection title="Display" description="Ordering and visibility.">
                     <div>
                         <Label htmlFor="sort_order">Sort order</Label>
-                        <Input id="sort_order" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <Input id="sort_order" aria-describedby="sort_order-help" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="sort_order-help">{fieldHelp('product-categories', 'sort_order').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="status">Status</Label>
-                        <select id="status" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
+                        <select id="status" aria-describedby="status-help" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
                             {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
+                        <FieldHint id="status-help">{fieldHelp('product-categories', 'status').hint}</FieldHint>
                     </div>
                 </FormSection>
 

@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['title'];
 
@@ -52,7 +54,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                         <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
                         <Input
                             id="title"
-                            {...bind('title')}
+                            {...bind('title', fieldHelp('pages', 'title').example)}
                             className="mt-1.5"
                             autoFocus
                         />
@@ -62,12 +64,13 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
                         <Input
-                            id="slug"
+                            id="slug" aria-describedby="slug-help"
                             value={data.slug}
                             onChange={(e) => setData('slug', e.target.value)}
                             className="mt-1.5"
                             placeholder="Auto-generated from title if left blank"
                         />
+                        <FieldHint id="slug-help">{fieldHelp('pages', 'slug').hint}</FieldHint>
                         {errors.slug && <p className="mt-1 text-sm text-danger">{errors.slug}</p>}
                     </div>
                 </FormSection>
@@ -76,7 +79,7 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                     <div>
                         <Label htmlFor="status">Status</Label>
                         <select
-                            id="status"
+                            id="status" aria-describedby="status-help"
                             value={data.status}
                             onChange={(e) => setData('status', e.target.value)}
                             className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm"
@@ -87,17 +90,19 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                                 </option>
                             ))}
                         </select>
+                        <FieldHint id="status-help">{fieldHelp('pages', 'status').hint}</FieldHint>
                     </div>
 
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
                         <Input
-                            id="published_at"
+                            id="published_at" aria-describedby="published_at-help"
                             type="datetime-local"
                             value={toDateTimeInput(data.published_at)}
                             onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))}
                             className="mt-1.5"
                         />
+                        <FieldHint id="published_at-help">{fieldHelp('pages', 'published_at').hint}</FieldHint>
                         <p className="mt-1 text-xs text-slate-500">
                             Leave blank to publish immediately when status is set to Published.
                         </p>

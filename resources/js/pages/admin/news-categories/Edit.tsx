@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 interface Category {
     id: number;
@@ -45,7 +46,7 @@ export default function Edit({ category }: { category: Category }) {
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="name" {...bind('name')} className="mt-1.5" />
+                        <Input id="name" {...bind('name', fieldHelp('news-categories', 'name').example)} className="mt-1.5" />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>

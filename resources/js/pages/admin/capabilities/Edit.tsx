@@ -17,6 +17,8 @@ import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 interface Step {
     id: number;
@@ -185,7 +187,7 @@ export default function Edit({
                     <FormSection title="General">
                         <div>
                             <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
-                            <Input id="name" {...bind('name')} className="mt-1.5" />
+                            <Input id="name" {...bind('name', fieldHelp('capabilities', 'name').example)} className="mt-1.5" />
                             {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                         </div>
                         <div>
@@ -194,7 +196,8 @@ export default function Edit({
                         </div>
                         <div>
                             <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
-                            <Input id="summary" {...bind('summary')} className="mt-1.5" />
+                            <Input id="summary" aria-describedby="summary-help" {...bind('summary', fieldHelp('capabilities', 'summary').example)} className="mt-1.5" />
+                            <FieldHint id="summary-help">{fieldHelp('capabilities', 'summary').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
@@ -202,7 +205,8 @@ export default function Edit({
                         </div>
                         <div>
                             <Label htmlFor="icon">Icon</Label>
-                            <Input id="icon" value={data.icon} onChange={(e) => setData('icon', e.target.value)} className="mt-1.5" />
+                            <Input id="icon" aria-describedby="icon-help" placeholder={fieldHelp('capabilities', 'icon').example} value={data.icon} onChange={(e) => setData('icon', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="icon-help">{fieldHelp('capabilities', 'icon').hint}</FieldHint>
                         </div>
                     </FormSection>
 
@@ -217,23 +221,29 @@ export default function Edit({
                     </FormSection>
 
                     <FormSection title="Publishing">
-                        <label className="flex items-center gap-2 text-sm text-slate-700">
-                            <input type="checkbox" checked={data.is_featured} onChange={(e) => setData('is_featured', e.target.checked)} className="rounded border-border" />
-                            Featured capability
-                        </label>
+                        <div>
+                            <label className="flex items-center gap-2 text-sm text-slate-700">
+                                <input type="checkbox" checked={data.is_featured} onChange={(e) => setData('is_featured', e.target.checked)} className="rounded border-border" />
+                                Featured capability
+                            </label>
+                            <FieldHint>{fieldHelp('capabilities', 'is_featured').hint}</FieldHint>
+                        </div>
                         <div>
                             <Label htmlFor="sort_order">Sort order</Label>
-                            <Input id="sort_order" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                            <Input id="sort_order" aria-describedby="sort_order-help" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                            <FieldHint id="sort_order-help">{fieldHelp('capabilities', 'sort_order').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="status">Status</Label>
-                            <select id="status" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
+                            <select id="status" aria-describedby="status-help" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
                                 {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                             </select>
+                            <FieldHint id="status-help">{fieldHelp('capabilities', 'status').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="published_at">Published at</Label>
-                            <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                            <Input id="published_at" aria-describedby="published_at-help" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                            <FieldHint id="published_at-help">{fieldHelp('capabilities', 'published_at').hint}</FieldHint>
                         </div>
                     </FormSection>
 

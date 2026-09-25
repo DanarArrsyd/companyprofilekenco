@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 interface Certification {
     id: number; name: string; issuer: string | null; certificate_number: string | null;
@@ -65,25 +67,27 @@ export default function Edit({ certification, statusOptions }: { certification: 
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
+                        <Input id="name" placeholder={fieldHelp('certifications', 'name').example} value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
                         {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                     </div>
                     <div>
                         <Label htmlFor="issuer">Issuer</Label>
-                        <Input id="issuer" value={data.issuer} onChange={(e) => setData('issuer', e.target.value)} className="mt-1.5" />
+                        <Input id="issuer" placeholder={fieldHelp('certifications', 'issuer').example} value={data.issuer} onChange={(e) => setData('issuer', e.target.value)} className="mt-1.5" />
                     </div>
                     <div>
                         <Label htmlFor="certificate_number">Certificate Number</Label>
-                        <Input id="certificate_number" value={data.certificate_number} onChange={(e) => setData('certificate_number', e.target.value)} className="mt-1.5" />
+                        <Input id="certificate_number" placeholder={fieldHelp('certifications', 'certificate_number').example} value={data.certificate_number} onChange={(e) => setData('certificate_number', e.target.value)} className="mt-1.5" />
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                             <Label htmlFor="issued_at">Issue Date</Label>
-                            <Input id="issued_at" type="date" value={data.issued_at} onChange={(e) => setData('issued_at', e.target.value)} className="mt-1.5" />
+                            <Input id="issued_at" aria-describedby="issued_at-help" type="date" value={data.issued_at} onChange={(e) => setData('issued_at', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="issued_at-help">{fieldHelp('certifications', 'issued_at').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="expires_at">Expiry Date</Label>
-                            <Input id="expires_at" type="date" value={data.expires_at} onChange={(e) => setData('expires_at', e.target.value)} className="mt-1.5" />
+                            <Input id="expires_at" aria-describedby="expires_at-help" type="date" value={data.expires_at} onChange={(e) => setData('expires_at', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="expires_at-help">{fieldHelp('certifications', 'expires_at').hint}</FieldHint>
                             {errors.expires_at && <p className="mt-1 text-sm text-danger">{errors.expires_at}</p>}
                         </div>
                     </div>
@@ -121,17 +125,20 @@ export default function Edit({ certification, statusOptions }: { certification: 
                 <FormSection title="Publishing">
                     <div>
                         <Label htmlFor="sort_order">Sort order</Label>
-                        <Input id="sort_order" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <Input id="sort_order" aria-describedby="sort_order-help" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="sort_order-help">{fieldHelp('certifications', 'sort_order').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="status">Status</Label>
-                        <select id="status" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
+                        <select id="status" aria-describedby="status-help" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
                             {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
+                        <FieldHint id="status-help">{fieldHelp('certifications', 'status').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                        <Input id="published_at" aria-describedby="published_at-help" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="published_at-help">{fieldHelp('certifications', 'published_at').hint}</FieldHint>
                     </div>
                 </FormSection>
 

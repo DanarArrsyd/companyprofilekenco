@@ -17,6 +17,8 @@ import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { CmsPage } from '@/types/cms';
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['title'];
 
@@ -128,7 +130,7 @@ export default function Edit({
                             <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
                             <Input
                                 id="title"
-                                {...bind('title')}
+                                {...bind('title', fieldHelp('pages', 'title').example)}
                                 className="mt-1.5"
                             />
                             {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
@@ -149,7 +151,7 @@ export default function Edit({
                         <div>
                             <Label htmlFor="status">Status</Label>
                             <select
-                                id="status"
+                                id="status" aria-describedby="status-help"
                                 value={data.status}
                                 onChange={(e) => setData('status', e.target.value as typeof data.status)}
                                 className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm"
@@ -160,17 +162,19 @@ export default function Edit({
                                     </option>
                                 ))}
                             </select>
+                            <FieldHint id="status-help">{fieldHelp('pages', 'status').hint}</FieldHint>
                         </div>
 
                         <div>
                             <Label htmlFor="published_at">Published at</Label>
                             <Input
-                                id="published_at"
+                                id="published_at" aria-describedby="published_at-help"
                                 type="datetime-local"
                                 value={toDateTimeInput(data.published_at)}
                                 onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))}
                                 className="mt-1.5"
                             />
+                            <FieldHint id="published_at-help">{fieldHelp('pages', 'published_at').hint}</FieldHint>
                         </div>
                     </FormSection>
 

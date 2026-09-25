@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['name', 'description'];
 
@@ -42,12 +44,13 @@ export default function Create() {
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="name" {...bind('name')} className="mt-1.5" autoFocus />
+                        <Input id="name" {...bind('name', fieldHelp('news-categories', 'name').example)} className="mt-1.5" autoFocus />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
-                        <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" placeholder="Auto-generated from name" />
+                        <Input id="slug" aria-describedby="slug-help" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" placeholder="Auto-generated from name" />
+                        <FieldHint id="slug-help">{fieldHelp('news-categories', 'slug').hint}</FieldHint>
                         {errors.slug && <p className="mt-1 text-sm text-danger">{errors.slug}</p>}
                     </div>
                     <div>

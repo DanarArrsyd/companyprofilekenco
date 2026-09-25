@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 export default function Create({ roles }: { roles: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
@@ -34,12 +36,13 @@ export default function Create({ roles }: { roles: string[] }) {
                 <FormSection title="Account">
                     <div>
                         <Label htmlFor="name">Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
+                        <Input id="name" placeholder={fieldHelp('users', 'name').example} value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
                         {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                     </div>
                     <div>
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
+                        <Input id="email" aria-describedby="email-help" placeholder={fieldHelp('users', 'email').example} type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
+                        <FieldHint id="email-help">{fieldHelp('users', 'email').hint}</FieldHint>
                         {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
                     </div>
                     <div>

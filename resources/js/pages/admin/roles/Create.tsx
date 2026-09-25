@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 interface PermissionGroup {
     label: string;
@@ -42,7 +43,7 @@ export default function Create({ permissionGroups }: { permissionGroups: Permiss
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="name">Role Name</Label>
-                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
+                        <Input id="name" placeholder={fieldHelp('roles', 'name').example} value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" autoFocus />
                         {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                     </div>
                 </FormSection>

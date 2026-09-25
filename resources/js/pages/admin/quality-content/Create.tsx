@@ -13,6 +13,8 @@ import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 const TRANSLATABLE_FIELDS = ['title', 'summary', 'content'];
 
@@ -45,16 +47,18 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 <FormSection title="General">
                     <div>
                         <Label htmlFor="title">Title<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="title" {...bind('title')} className="mt-1.5" autoFocus />
+                        <Input id="title" {...bind('title', fieldHelp('quality-content', 'title').example)} className="mt-1.5" autoFocus />
                         {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
                     <div>
                         <Label htmlFor="slug">Slug (optional)</Label>
-                        <Input id="slug" value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" />
+                        <Input id="slug" aria-describedby="slug-help" placeholder={fieldHelp('quality-content', 'slug').example} value={data.slug} onChange={(e) => setData('slug', e.target.value)} className="mt-1.5" />
+                        <FieldHint id="slug-help">{fieldHelp('quality-content', 'slug').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
-                        <Input id="summary" {...bind('summary')} className="mt-1.5" />
+                        <Input id="summary" aria-describedby="summary-help" {...bind('summary', fieldHelp('quality-content', 'summary').example)} className="mt-1.5" />
+                        <FieldHint id="summary-help">{fieldHelp('quality-content', 'summary').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="content">Content<LocaleBadge locale={contentLocale} /></Label>
@@ -77,17 +81,20 @@ export default function Create({ statusOptions }: { statusOptions: string[] }) {
                 <FormSection title="Publishing">
                     <div>
                         <Label htmlFor="sort_order">Sort order</Label>
-                        <Input id="sort_order" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <Input id="sort_order" aria-describedby="sort_order-help" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="sort_order-help">{fieldHelp('quality-content', 'sort_order').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="status">Status</Label>
-                        <select id="status" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
+                        <select id="status" aria-describedby="status-help" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
                             {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
                         </select>
+                        <FieldHint id="status-help">{fieldHelp('quality-content', 'status').hint}</FieldHint>
                     </div>
                     <div>
                         <Label htmlFor="published_at">Published at</Label>
-                        <Input id="published_at" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                        <Input id="published_at" aria-describedby="published_at-help" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
+                        <FieldHint id="published_at-help">{fieldHelp('quality-content', 'published_at').hint}</FieldHint>
                     </div>
                 </FormSection>
 

@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
+import { FieldHint } from '@/components/admin/FieldHint';
+import { fieldHelp } from '@/lib/admin-field-help';
 
 interface Settings {
     company_name: string | null; legal_name: string | null; tagline: string | null; company_description: string | null;
@@ -95,16 +97,17 @@ export default function Edit({ settings }: { settings: Settings }) {
                     <FormSection title="General">
                         <div>
                             <Label htmlFor="company_name">Company Name</Label>
-                            <Input id="company_name" value={data.company_name} onChange={(e) => setData('company_name', e.target.value)} className="mt-1.5" />
+                            <Input id="company_name" placeholder={fieldHelp('settings', 'company_name').example} value={data.company_name} onChange={(e) => setData('company_name', e.target.value)} className="mt-1.5" />
                             {errors.company_name && <p className="mt-1 text-sm text-danger">{errors.company_name}</p>}
                         </div>
                         <div>
                             <Label htmlFor="legal_name">Legal Name</Label>
-                            <Input id="legal_name" value={data.legal_name} onChange={(e) => setData('legal_name', e.target.value)} className="mt-1.5" />
+                            <Input id="legal_name" aria-describedby="legal_name-help" placeholder={fieldHelp('settings', 'legal_name').example} value={data.legal_name} onChange={(e) => setData('legal_name', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="legal_name-help">{fieldHelp('settings', 'legal_name').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="tagline">Tagline</Label>
-                            <Input id="tagline" value={data.tagline} onChange={(e) => setData('tagline', e.target.value)} className="mt-1.5" />
+                            <Input id="tagline" placeholder={fieldHelp('settings', 'tagline').example} value={data.tagline} onChange={(e) => setData('tagline', e.target.value)} className="mt-1.5" />
                         </div>
                         <div>
                             <Label htmlFor="company_description">Company Description</Label>
@@ -145,15 +148,17 @@ export default function Edit({ settings }: { settings: Settings }) {
                     <FormSection title="Contact">
                         <div>
                             <Label htmlFor="address">Address</Label>
-                            <textarea id="address" value={data.address} onChange={(e) => setData('address', e.target.value)} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                            <textarea id="address" aria-describedby="address-help" value={data.address} onChange={(e) => setData('address', e.target.value)} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                            <FieldHint id="address-help">{fieldHelp('settings', 'address').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="phone">Phone</Label>
-                            <Input id="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} className="mt-1.5" />
+                            <Input id="phone" aria-describedby="phone-help" placeholder={fieldHelp('settings', 'phone').example} value={data.phone} onChange={(e) => setData('phone', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="phone-help">{fieldHelp('settings', 'phone').hint}</FieldHint>
                         </div>
                         <div>
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
+                            <Input id="email" placeholder={fieldHelp('settings', 'email').example} type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
                             {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
                         </div>
                         <div>
@@ -162,7 +167,8 @@ export default function Edit({ settings }: { settings: Settings }) {
                         </div>
                         <div>
                             <Label htmlFor="map_embed_url">Map Embed URL</Label>
-                            <Input id="map_embed_url" value={data.map_embed_url} onChange={(e) => setData('map_embed_url', e.target.value)} className="mt-1.5" />
+                            <Input id="map_embed_url" aria-describedby="map_embed_url-help" placeholder={fieldHelp('settings', 'map_embed_url').example} value={data.map_embed_url} onChange={(e) => setData('map_embed_url', e.target.value)} className="mt-1.5" />
+                            <FieldHint id="map_embed_url-help">{fieldHelp('settings', 'map_embed_url').hint}</FieldHint>
                             {errors.map_embed_url && <p className="mt-1 text-sm text-danger">{errors.map_embed_url}</p>}
                         </div>
                     </FormSection>
@@ -172,17 +178,17 @@ export default function Edit({ settings }: { settings: Settings }) {
                     <FormSection title="Social Media">
                         <div>
                             <Label htmlFor="social_linkedin">LinkedIn</Label>
-                            <Input id="social_linkedin" value={data.social_linkedin} onChange={(e) => setData('social_linkedin', e.target.value)} className="mt-1.5" />
+                            <Input id="social_linkedin" placeholder={fieldHelp('settings', 'social_linkedin').example} value={data.social_linkedin} onChange={(e) => setData('social_linkedin', e.target.value)} className="mt-1.5" />
                             {errors.social_linkedin && <p className="mt-1 text-sm text-danger">{errors.social_linkedin}</p>}
                         </div>
                         <div>
                             <Label htmlFor="social_youtube">YouTube</Label>
-                            <Input id="social_youtube" value={data.social_youtube} onChange={(e) => setData('social_youtube', e.target.value)} className="mt-1.5" />
+                            <Input id="social_youtube" placeholder={fieldHelp('settings', 'social_youtube').example} value={data.social_youtube} onChange={(e) => setData('social_youtube', e.target.value)} className="mt-1.5" />
                             {errors.social_youtube && <p className="mt-1 text-sm text-danger">{errors.social_youtube}</p>}
                         </div>
                         <div>
                             <Label htmlFor="social_instagram">Instagram</Label>
-                            <Input id="social_instagram" value={data.social_instagram} onChange={(e) => setData('social_instagram', e.target.value)} className="mt-1.5" />
+                            <Input id="social_instagram" placeholder={fieldHelp('settings', 'social_instagram').example} value={data.social_instagram} onChange={(e) => setData('social_instagram', e.target.value)} className="mt-1.5" />
                             {errors.social_instagram && <p className="mt-1 text-sm text-danger">{errors.social_instagram}</p>}
                         </div>
                     </FormSection>

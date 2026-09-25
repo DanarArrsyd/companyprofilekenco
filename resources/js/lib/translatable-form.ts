@@ -35,15 +35,16 @@ type SetData<TData> = (updater: (previous: TData) => TData) => void;
 /**
  * Binds a translatable field to the English value or to its translation,
  * depending on the active content tab. In the translation tab the English
- * text is offered as the placeholder so translators see the source.
+ * text is offered as the placeholder so translators see the source; the
+ * optional example is the placeholder otherwise.
  */
 export function translatableBinder<TData extends TranslatableFormData>(data: TData, setData: SetData<TData>, locale: ContentLocale) {
-    return (field: Extract<keyof TData, string>) => {
+    return (field: Extract<keyof TData, string>, example?: string) => {
         const english = String(data[field] ?? '');
 
         return {
             value: locale === 'en' ? english : (data.translations.id[field] ?? ''),
-            placeholder: locale === 'en' ? undefined : english || undefined,
+            placeholder: locale === 'en' ? example : english || example,
             onChange: (next: ChangeValue) => {
                 const value = typeof next === 'string' ? next : next.target.value;
 
