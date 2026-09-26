@@ -65,6 +65,11 @@ export default {
                     700: 'rgb(var(--color-navy-700) / <alpha-value>)',
                 },
                 charcoal: 'rgb(var(--color-charcoal) / <alpha-value>)',
+                brand: {
+                    linkedin: 'rgb(var(--color-brand-linkedin) / <alpha-value>)',
+                    instagram: 'rgb(var(--color-brand-instagram) / <alpha-value>)',
+                    youtube: 'rgb(var(--color-brand-youtube) / <alpha-value>)',
+                },
                 gray: {
                     200: 'rgb(var(--color-gray-200) / <alpha-value>)',
                     100: 'rgb(var(--color-gray-100) / <alpha-value>)',

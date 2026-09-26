@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronRight, Instagram, Linkedin, Youtube, type LucideIcon } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
+import { BrandIcon, type Brand } from '@/components/public/BrandIcon';
 import { Container } from '@/components/public/Section';
 import { useLocale } from '@/hooks/use-locale';
 
@@ -23,18 +24,22 @@ export function PublicFooter() {
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
     const socials = [
-        { label: 'LinkedIn', href: siteSettings?.social?.linkedin, icon: Linkedin },
-        { label: 'Instagram', href: siteSettings?.social?.instagram, icon: Instagram },
-        { label: 'YouTube', href: siteSettings?.social?.youtube, icon: Youtube },
-    ].filter((social): social is { label: string; href: string; icon: LucideIcon } => Boolean(social.href));
+        { label: 'LinkedIn', brand: 'linkedin', href: siteSettings?.social?.linkedin, color: 'text-brand-linkedin' },
+        { label: 'Instagram', brand: 'instagram', href: siteSettings?.social?.instagram, color: 'text-brand-instagram' },
+        { label: 'YouTube', brand: 'youtube', href: siteSettings?.social?.youtube, color: 'text-brand-youtube' },
+    ].filter((social): social is { label: string; brand: Brand; href: string; color: string } => Boolean(social.href));
 
     return (
-        <footer className="relative isolate overflow-x-clip text-white">
-            {/* overflow-x-clip, not hidden: the mascot's head may rise above the footer's top edge. */}
+        <footer className="relative isolate overflow-hidden text-white">
             <img src={wave} alt="" aria-hidden="true" className="pointer-events-none block h-auto w-full select-none" draggable={false} />
 
-            {/* flow-root: the content's negative top margin must not drag this navy background up over the wave's arc and star. -mt-0.5 hides the resampled bottom edge of the wave image. */}
-            <div className="relative -mt-0.5 flow-root bg-navy-950">
+            {/*
+              flow-root: the content's negative top margin must not drag this navy background up over the wave's arc and star.
+              -mt-0.5 hides the resampled bottom edge of the wave image.
+              lg:min-h: wave (29.6vw) + this block always fit the 36rem mascot, so nothing sticks out of the footer —
+              Safari clips overflowing content once a hover transition composites the footer.
+            */}
+            <div className="relative -mt-0.5 flow-root bg-navy-950 lg:min-h-[calc(37rem_-_29.6vw)]">
                 {/* Desktop mascot: stands on the footer's bottom edge, head rising past the wave. */}
                 <div
                     data-reveal="up"
@@ -57,16 +62,16 @@ export function PublicFooter() {
                             <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
                                 {socials.length > 0 && (
                                     <ul className="flex items-center gap-3">
-                                        {socials.map(({ label, href, icon: Icon }) => (
+                                        {socials.map(({ label, brand, href, color }) => (
                                             <li key={label}>
                                                 <a
                                                     href={href}
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     aria-label={label}
-                                                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy-950 transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950"
+                                                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-white ${color} transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950`}
                                                 >
-                                                    <Icon className="h-5 w-5" strokeWidth={2.25} aria-hidden="true" />
+                                                    <BrandIcon brand={brand} className="h-6 w-6" />
                                                 </a>
                                             </li>
                                         ))}
