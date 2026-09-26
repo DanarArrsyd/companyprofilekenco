@@ -10,7 +10,6 @@ use App\Models\Certification;
 use App\Models\Facility;
 use App\Models\Industry;
 use App\Models\JobVacancy;
-use App\Models\Milestone;
 use App\Models\Page;
 use App\Models\Product;
 use App\Services\SeoService;
@@ -67,10 +66,6 @@ class HomeController extends Controller
                 ->orderBy('sort_order')
                 ->limit(6)
                 ->get(['id', 'name', 'slug', 'image']),
-            'milestones' => Milestone::query()
-                ->orderBy('year')
-                ->orderBy('order')
-                ->get(['id', 'year', 'title', 'description', 'image']),
             'openJobCount' => JobVacancy::query()
                 ->published()
                 ->where(fn ($q) => $q->whereNull('closes_at')->orWhere('closes_at', '>', now()))

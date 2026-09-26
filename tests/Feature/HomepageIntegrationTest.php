@@ -177,7 +177,7 @@ test('homepage only exposes published certifications and industries', function (
     );
 });
 
-test('homepage stays safe with no certifications, industries, or milestones configured', function () {
+test('homepage stays safe with no certifications or industries configured', function () {
     publishedHomepage($this);
 
     $response = $this->get('/');
@@ -187,6 +187,12 @@ test('homepage stays safe with no certifications, industries, or milestones conf
         ->component('public/Home')
         ->where('certifications', [])
         ->where('industries', [])
-        ->where('milestones', [])
     );
+});
+
+test('the homepage no longer shows the company milestones timeline', function () {
+    publishedHomepage($this);
+    App\Models\Milestone::factory()->create(['year' => 2005]);
+
+    $this->get('/')->assertOk()->assertInertia(fn ($assert) => $assert->missing('milestones'));
 });
