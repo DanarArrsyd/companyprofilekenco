@@ -29,7 +29,8 @@ export function PublicFooter() {
     ].filter((social): social is { label: string; href: string; icon: LucideIcon } => Boolean(social.href));
 
     return (
-        <footer className="relative isolate overflow-hidden text-white">
+        {/* overflow-x-clip, not hidden: the mascot's head may rise above the footer's top edge. */}
+        <footer className="relative isolate overflow-x-clip text-white">
             <img src={wave} alt="" aria-hidden="true" className="pointer-events-none block h-auto w-full select-none" draggable={false} />
 
             {/* flow-root: the content's negative top margin must not drag this navy background up over the wave's arc and star. -mt-0.5 hides the resampled bottom edge of the wave image. */}
