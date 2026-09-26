@@ -7,21 +7,12 @@ import { useLocale } from '@/hooks/use-locale';
 import mascot from '../../../img/footer_maskot1.webp';
 import wave from '../../../img/element_footer.webp';
 
-const QUICK_LINKS: { label: string; href: string }[] = [
-    { label: 'Company', href: '/company' },
-    { label: 'Capabilities', href: '/capabilities' },
-    { label: 'Products', href: '/products' },
-    { label: 'News', href: '/news' },
-    { label: 'Careers', href: '/careers' },
-    { label: 'Contact', href: '/contact' },
-];
-
 /**
  * "Connect With Us" footer (user reference, 2026-09-26): a navy wave
  * (resources/img/element_footer — its navy is the navy-950 token) rising to
  * the right, the KMI mascot standing on the left with his head above the
- * wave, the call to action on the right, and a slim info strip with links,
- * address and copyright below.
+ * wave, and the call to action on the right. The info strip (links,
+ * address, copyright) was removed on 2026-09-26 pending a redesign.
  *
  * The wave image scales with the viewport width, so the content overlaps it
  * by a vw amount; everything else is rem so desktop scaling still applies.
@@ -43,7 +34,7 @@ export function PublicFooter() {
 
             {/* flow-root: the content's negative top margin must not drag this navy background up over the wave's arc and star. -mt-0.5 hides the resampled bottom edge of the wave image. */}
             <div className="relative -mt-0.5 flow-root bg-navy-950">
-                {/* Desktop mascot: stands on the info strip, head rising past the wave. */}
+                {/* Desktop mascot: stands on the footer's bottom edge, head rising past the wave. */}
                 <div
                     data-reveal="up"
                     aria-hidden="true"
@@ -96,35 +87,6 @@ export function PublicFooter() {
                 {/* Mobile/tablet mascot: below the call to action, cut at the waist. */}
                 <div aria-hidden="true" className="pointer-events-none mx-auto -mt-4 h-[19rem] w-[20rem] overflow-hidden sm:h-[23rem] sm:w-[24rem] lg:hidden">
                     <img src={mascot} alt="" className="w-full select-none" draggable={false} />
-                </div>
-
-                <div className="relative z-10 border-t border-white/10 bg-navy-950">
-                    <Container className="flex flex-col gap-4 py-6 text-small text-white/60 lg:flex-row lg:items-center lg:justify-between">
-                        <nav aria-label={t('Footer')}>
-                            <ul className="flex flex-wrap gap-x-5 gap-y-2">
-                                {QUICK_LINKS.map((link) => (
-                                    <li key={link.href}>
-                                        <Link href={localize(link.href)} className="transition-colors hover:text-white">
-                                            {t(link.label)}
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
-
-                        <div className="flex flex-col gap-1 lg:items-end lg:text-right">
-                            {siteSettings?.address && <p className="max-w-xl">{siteSettings.address}</p>}
-                            {(siteSettings?.email || siteSettings?.phone) && (
-                                <p className="flex flex-wrap gap-x-4 gap-y-1">
-                                    {siteSettings?.email && <a href={`mailto:${siteSettings.email}`} className="transition-colors hover:text-white">{siteSettings.email}</a>}
-                                    {siteSettings?.phone && <a href={`tel:${siteSettings.phone}`} className="transition-colors hover:text-white">{siteSettings.phone}</a>}
-                                </p>
-                            )}
-                            <p className="text-caption normal-case tracking-normal text-white/45">
-                                &copy; {new Date().getFullYear()} {companyName}. {t('All rights reserved.')}
-                            </p>
-                        </div>
-                    </Container>
                 </div>
             </div>
         </footer>
