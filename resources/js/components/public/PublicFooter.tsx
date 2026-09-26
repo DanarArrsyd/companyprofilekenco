@@ -44,13 +44,13 @@ export function PublicFooter() {
                 <div
                     data-reveal="up"
                     aria-hidden="true"
-                    className="pointer-events-none absolute bottom-0 left-[max(0rem,calc(50%_-_45rem))] z-0 hidden h-[36rem] w-[40rem] overflow-hidden lg:block"
+                    className="pointer-events-none absolute bottom-0 left-[calc(50%_-_49rem)] z-0 hidden h-[36rem] w-[40rem] overflow-hidden lg:block"
                 >
                     <img src={mascot} alt="" className="w-full select-none" draggable={false} />
                 </div>
 
                 <Container className="relative z-10 -mt-[2vw] pb-6 sm:-mt-[8vw] lg:-mt-[19vw] lg:pb-20">
-                    <div className="lg:ml-auto lg:w-[26rem] xl:w-[28rem]">
+                    <div className="lg:-mr-6 lg:ml-auto lg:w-[26rem] xl:-mr-12 xl:w-[28rem]">
                         <div data-reveal-group>
                             <h2 className="text-balance font-montserrat text-[2.75rem] font-bold leading-[1.02] tracking-tight sm:text-[3.5rem] lg:text-[4rem]">
                                 {t('Connect With Us')}
