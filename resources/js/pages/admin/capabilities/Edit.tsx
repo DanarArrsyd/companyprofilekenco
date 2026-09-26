@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
@@ -98,7 +99,7 @@ export default function Edit({
     const [selectedMachines, setSelectedMachines] = useState<number[]>(capability.machines.map((m) => m.id));
 
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; name: string; summary: string; description: string; icon: string;
+        _method: string; slug: string; name: string; summary: string; description: string; icon: string;
         featured_image: File | null; featured_image_path: string; is_featured: boolean; sort_order: number;
         status: string; published_at: string;
         seo: SeoFieldsData;
@@ -106,6 +107,7 @@ export default function Edit({
     }>({
         translations: initialTranslations(capability, TRANSLATABLE_FIELDS),
         _method: 'put',
+        slug: capability.slug,
         name: capability.name,
         summary: capability.summary ?? '',
         description: capability.description ?? '',
@@ -190,10 +192,7 @@ export default function Edit({
                             <Input id="name" {...bind('name', fieldHelp('capabilities', 'name').example)} className="mt-1.5" />
                             {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                         </div>
-                        <div>
-                            <Label>Slug</Label>
-                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/capabilities/{capability.slug}</p>
-                        </div>
+                        <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} prefix="/capabilities/" hint="Lowercase letters, numbers and hyphens. The page address is the same in both languages; if you change it, links to the old address redirect here automatically." error={errors.slug} />
                         <div>
                             <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
                             <Input id="summary" aria-describedby="summary-help" {...bind('summary', fieldHelp('capabilities', 'summary').example)} className="mt-1.5" />

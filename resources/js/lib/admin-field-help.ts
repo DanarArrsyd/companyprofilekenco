@@ -12,7 +12,7 @@ export interface FieldHelp {
 
 const SHARED: Record<string, FieldHelp> = {
     slug: {
-        hint: 'The page address. Leave empty to build it from the name. Lowercase letters, numbers and hyphens only; it cannot be changed later.',
+        hint: 'The page address. Leave empty to build it from the name. Lowercase letters, numbers and hyphens only; you can change it later on the edit page.',
         example: 'progressive-die-stamping',
     },
     status: {

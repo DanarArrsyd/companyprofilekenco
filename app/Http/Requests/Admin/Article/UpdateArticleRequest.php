@@ -20,6 +20,7 @@ class UpdateArticleRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('articles', 'slug')->ignore($this->route('article'))],
             'news_category_id' => ['nullable', 'integer', Rule::exists('news_categories', 'id')],
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string', 'max:255'],

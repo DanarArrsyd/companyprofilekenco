@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
@@ -25,12 +26,13 @@ const TRANSLATABLE_FIELDS = ['name', 'description'];
 
 export default function Edit({ industry, statusOptions }: { industry: Industry; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; name: string; description: string; image: File | null; image_path: string;
+        _method: string; slug: string; name: string; description: string; image: File | null; image_path: string;
         sort_order: number; status: string; published_at: string;
         translations: { id: TranslationValues };
     }>({
         translations: initialTranslations(industry, TRANSLATABLE_FIELDS),
         _method: 'put',
+        slug: industry.slug,
         name: industry.name,
         description: industry.description ?? '',
         image: null,
@@ -61,10 +63,7 @@ export default function Edit({ industry, statusOptions }: { industry: Industry; 
                         <Input id="name" {...bind('name', fieldHelp('industries', 'name').example)} className="mt-1.5" />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
-                    <div>
-                        <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{industry.slug}</p>
-                    </div>
+                    <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} hint="Lowercase letters, numbers and hyphens. Internal identifier; it is not part of a public page address." error={errors.slug} />
                     <div>
                         <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
                         <textarea id="description" {...bind('description')} rows={4} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />

@@ -9,6 +9,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
@@ -26,12 +27,13 @@ const TRANSLATABLE_FIELDS = ['name', 'description'];
 
 export default function Edit({ facility, categories, statusOptions }: { facility: Facility; categories: { id: number; name: string }[]; statusOptions: string[] }) {
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; facility_category_id: string; name: string; location: string; description: string;
+        _method: string; slug: string; facility_category_id: string; name: string; location: string; description: string;
         image: File | null; image_path: string; sort_order: number; status: string; published_at: string;
         translations: { id: TranslationValues };
     }>({
         translations: initialTranslations(facility, TRANSLATABLE_FIELDS),
         _method: 'put',
+        slug: facility.slug,
         facility_category_id: facility.facility_category_id ? String(facility.facility_category_id) : '',
         name: facility.name,
         location: facility.location ?? '',
@@ -64,10 +66,7 @@ export default function Edit({ facility, categories, statusOptions }: { facility
                         <Input id="name" {...bind('name', fieldHelp('facilities', 'name').example)} className="mt-1.5" />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
-                    <div>
-                        <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{facility.slug}</p>
-                    </div>
+                    <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} hint="Lowercase letters, numbers and hyphens. Internal identifier; it is not part of a public page address." error={errors.slug} />
                     <div>
                         <Label htmlFor="facility_category_id">Category</Label>
                         <select id="facility_category_id" aria-describedby="facility_category_id-help" value={data.facility_category_id} onChange={(e) => setData('facility_category_id', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">

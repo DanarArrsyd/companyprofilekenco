@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { fieldHelp } from '@/lib/admin-field-help';
@@ -25,6 +26,7 @@ export default function Edit({ category }: { category: Category }) {
     const { data, setData, put, processing, errors } = useForm({
         translations: initialTranslations(category, TRANSLATABLE_FIELDS),
         name: category.name,
+        slug: category.slug,
         description: category.description ?? '',
     });
 
@@ -49,10 +51,7 @@ export default function Edit({ category }: { category: Category }) {
                         <Input id="name" {...bind('name', fieldHelp('news-categories', 'name').example)} className="mt-1.5" />
                         {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
                     </div>
-                    <div>
-                        <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/{category.slug}</p>
-                    </div>
+                    <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} hint="Lowercase letters, numbers and hyphens. Used in the category filter link (?category=…); old filter links show all items after a change." error={errors.slug} />
                     <div>
                         <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
                         <textarea id="description" {...bind('description')} rows={3} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />

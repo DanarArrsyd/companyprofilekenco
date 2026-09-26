@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin\JobVacancy;
 use App\Enums\ContentStatus;
 use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateJobVacancyRequest extends FormRequest
@@ -19,6 +20,7 @@ class UpdateJobVacancyRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('job_vacancies', 'slug')->ignore($this->route('vacancy'))],
             'title' => ['required', 'string', 'max:255'],
             'department' => ['nullable', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],

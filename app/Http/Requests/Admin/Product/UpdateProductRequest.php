@@ -20,6 +20,7 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('products', 'slug')->ignore($this->route('product'))],
             'product_category_id' => ['nullable', 'integer', Rule::exists('product_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
             'short_description' => ['nullable', 'string', 'max:255'],

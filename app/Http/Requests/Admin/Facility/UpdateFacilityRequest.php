@@ -20,6 +20,7 @@ class UpdateFacilityRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('facilities', 'slug')->ignore($this->route('facility'))],
             'facility_category_id' => ['nullable', 'integer', Rule::exists('facility_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],

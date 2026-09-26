@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { mediaUrl } from '@/lib/media';
@@ -68,7 +69,7 @@ export default function Edit({
     const galleryInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string;
+        _method: string; slug: string;
         product_category_id: string;
         name: string;
         short_description: string;
@@ -86,6 +87,7 @@ export default function Edit({
     }>({
         translations: initialTranslations(product, TRANSLATABLE_FIELDS),
         _method: 'put',
+        slug: product.slug,
         product_category_id: product.product_category_id ? String(product.product_category_id) : '',
         name: product.name,
         short_description: product.short_description ?? '',
@@ -171,10 +173,7 @@ export default function Edit({
                             <Input id="name" placeholder={fieldHelp('products', 'name').example} value={data.name} onChange={(e) => setData('name', e.target.value)} className="mt-1.5" />
                             {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                         </div>
-                        <div>
-                            <Label>Slug</Label>
-                            <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/products/{product.slug}</p>
-                        </div>
+                        <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} prefix="/products/" hint="Lowercase letters, numbers and hyphens. The page address is the same in both languages; if you change it, links to the old address redirect here automatically." error={errors.slug} />
                         <div>
                             <Label htmlFor="product_category_id">Category</Label>
                             <select id="product_category_id" aria-describedby="product_category_id-help" value={data.product_category_id} onChange={(e) => setData('product_category_id', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">

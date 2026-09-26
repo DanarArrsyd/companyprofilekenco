@@ -22,6 +22,7 @@ class UpdateJobVacancy
         return DB::transaction(function () use ($vacancy, $data) {
             $vacancy->update([
                 'translations' => $data['translations'] ?? [],
+                'slug' => $data['slug'] ?? $vacancy->slug,
                 'title' => $data['title'],
                 'department' => $data['department'] ?? null,
                 'location' => $data['location'] ?? null,

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin\ProductCategory;
 use App\Enums\ContentStatus;
 use App\Http\Requests\Concerns\ValidatesTranslations;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class UpdateProductCategoryRequest extends FormRequest
@@ -19,6 +20,7 @@ class UpdateProductCategoryRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/', Rule::unique('product_categories', 'slug')->ignore($this->route('category'))],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

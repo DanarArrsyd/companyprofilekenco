@@ -7,6 +7,7 @@ use App\Models\Concerns\HasAuditedBy;
 use App\Models\Concerns\HasLocalizedContent;
 use App\Models\Concerns\HasPublishingLifecycle;
 use App\Models\Concerns\HasSeoMetadata;
+use App\Models\Concerns\RedirectsOldSlugs;
 use App\Services\RichTextSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -31,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Article extends Model
 {
-    use HasAuditedBy, HasFactory, HasLocalizedContent, HasPublishingLifecycle, HasSeoMetadata, SoftDeletes;
+    use HasAuditedBy, HasFactory, HasLocalizedContent, HasPublishingLifecycle, HasSeoMetadata, RedirectsOldSlugs, SoftDeletes;
 
     /** @var list<string> CMS text stored per locale (see HasLocalizedContent). */
     public array $translatable = ['title', 'excerpt', 'content'];

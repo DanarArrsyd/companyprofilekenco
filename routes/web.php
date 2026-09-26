@@ -12,6 +12,10 @@ use App\Http\Controllers\Public\ProductController;
 use App\Http\Controllers\Public\QualityController;
 use App\Http\Controllers\Public\RobotsController;
 use App\Http\Controllers\Public\SitemapController;
+use App\Models\Article;
+use App\Models\Capability;
+use App\Models\JobVacancy;
+use App\Models\Product;
 use App\Support\Locale;
 use Illuminate\Support\Facades\Route;
 
@@ -43,20 +47,28 @@ $registerPublicRoutes = function (string $locale): void {
         ->name('public.company');
 
     Route::get('products', [ProductController::class, 'index'])->name('public.products');
-    Route::get('products/{slug}', [ProductController::class, 'show'])->name('public.products.show');
+    Route::get('products/{slug}', [ProductController::class, 'show'])
+        ->middleware('slug.redirect:'.Product::class.',products')
+        ->name('public.products.show');
 
     Route::get('capabilities', [CapabilityController::class, 'index'])->name('public.capabilities');
-    Route::get('capabilities/{slug}', [CapabilityController::class, 'show'])->name('public.capabilities.show');
+    Route::get('capabilities/{slug}', [CapabilityController::class, 'show'])
+        ->middleware('slug.redirect:'.Capability::class.',capabilities')
+        ->name('public.capabilities.show');
 
     Route::get('quality', [QualityController::class, 'index'])->name('public.quality');
 
     Route::get('certifications', [CertificationController::class, 'index'])->name('public.certifications');
 
     Route::get('news', [NewsController::class, 'index'])->name('public.news');
-    Route::get('news/{slug}', [NewsController::class, 'show'])->name('public.news.show');
+    Route::get('news/{slug}', [NewsController::class, 'show'])
+        ->middleware('slug.redirect:'.Article::class.',news')
+        ->name('public.news.show');
 
     Route::get('careers', [CareerController::class, 'index'])->name('public.careers');
-    Route::get('careers/{slug}', [CareerController::class, 'show'])->name('public.careers.show');
+    Route::get('careers/{slug}', [CareerController::class, 'show'])
+        ->middleware('slug.redirect:'.JobVacancy::class.',careers')
+        ->name('public.careers.show');
     Route::post('careers/{slug}/apply', [CareerController::class, 'apply'])
         ->middleware('throttle:5,1')
         ->name('public.careers.apply');

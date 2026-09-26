@@ -11,6 +11,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SlugField } from '@/components/admin/SlugField';
 import { usePermissions } from '@/hooks/use-permissions';
 import AdminLayout from '@/layouts/AdminLayout';
 import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
@@ -35,13 +36,14 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
     const { can } = usePermissions();
 
     const { data, setData, post, processing, errors } = useForm<{
-        _method: string; title: string; department: string; location: string; employment_type: string;
+        _method: string; slug: string; title: string; department: string; location: string; employment_type: string;
         description: string; requirements: string; status: string; published_at: string; closes_at: string;
         seo: SeoFieldsData;
         translations: { id: TranslationValues };
     }>({
         translations: initialTranslations(vacancy, TRANSLATABLE_FIELDS),
         _method: 'put',
+        slug: vacancy.slug,
         title: vacancy.title,
         department: vacancy.department ?? '',
         location: vacancy.location ?? '',
@@ -104,10 +106,7 @@ export default function Edit({ vacancy, statusOptions }: { vacancy: Vacancy; sta
                         <Input id="title" {...bind('title', fieldHelp('careers', 'title').example)} className="mt-1.5" />
                         {translatableError(errors, 'title', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'title', contentLocale)}</p>}
                     </div>
-                    <div>
-                        <Label>Slug</Label>
-                        <p className="mt-1.5 rounded border border-border bg-muted px-3 py-2 text-sm text-slate-700">/careers/{vacancy.slug}</p>
-                    </div>
+                    <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.title} prefix="/careers/" hint="Lowercase letters, numbers and hyphens. The page address is the same in both languages; if you change it, links to the old address redirect here automatically." error={errors.slug} />
                     <div>
                         <Label htmlFor="department">Department</Label>
                         <Input id="department" placeholder={fieldHelp('careers', 'department').example} value={data.department} onChange={(e) => setData('department', e.target.value)} className="mt-1.5" />
