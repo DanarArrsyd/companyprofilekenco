@@ -5,26 +5,29 @@ namespace App\Actions\Translation;
 use App\Models\Contracts\HasTranslatableContent;
 use App\Services\Translation\TranslationFailed;
 use App\Services\Translation\Translator;
+use App\Support\LocalizedContent;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Fills the other language of a translatable model before it is saved. Each
- * text — a translatable attribute, or a text value inside `content` for
- * HasTranslatableContent models — is compared with the stored value:
+ * Fills the other language of a translatable model before it is saved. The
+ * language tab the admin saved from is the source (LocalizedContent::
+ * $autoTranslateSource); for each text — a translatable attribute, or a text
+ * value inside `content` for HasTranslatableContent models:
  *
- * - English changed only      -> Indonesian regenerated from English
- * - Indonesian changed only   -> English regenerated from Indonesian
- * - both changed              -> both kept as typed
- * - neither, Indonesian empty -> Indonesian filled from English
+ * - the other language was edited in this save -> kept as typed
+ * - otherwise, source filled                   -> other language regenerated
+ *   from the source, even when neither changed, so both tabs always match
+ * - source empty                               -> other language left alone
  *
- * An empty source is never translated, so clearing one language does not
- * wipe the other. One request per direction.
+ * One request per save and direction.
  */
 class AutoTranslateChanges
 {
     private const SOURCE = 'en';
 
     private const TARGET = 'id';
+
+    private const LOCALES = [self::SOURCE, self::TARGET];
 
     public function __construct(private readonly Translator $translator) {}
 
@@ -86,20 +89,14 @@ class AutoTranslateChanges
      */
     private function queue(array &$pending, array $now, array $before, callable $apply): void
     {
-        $en = $now[self::SOURCE] ?? '';
-        $id = $now[self::TARGET] ?? '';
-        $enChanged = $en !== ($before[self::SOURCE] ?? '');
-        $idChanged = $id !== ($before[self::TARGET] ?? '');
+        $from = in_array(LocalizedContent::$autoTranslateSource, self::LOCALES, true) ? LocalizedContent::$autoTranslateSource : self::SOURCE;
+        $to = $from === self::SOURCE ? self::TARGET : self::SOURCE;
 
-        $direction = match (true) {
-            $enChanged && ! $idChanged && $en !== '' => [self::SOURCE, self::TARGET],
-            $idChanged && ! $enChanged && $id !== '' => [self::TARGET, self::SOURCE],
-            ! $enChanged && ! $idChanged && $en !== '' && $id === '' => [self::SOURCE, self::TARGET],
-            default => null,
-        };
+        $sourceText = $now[$from] ?? '';
+        $targetEdited = ($now[$to] ?? '') !== ($before[$to] ?? '');
 
-        if ($direction !== null) {
-            $pending[implode('>', $direction)][] = ['text' => $now[$direction[0]], 'apply' => $apply];
+        if ($sourceText !== '' && ! $targetEdited) {
+            $pending["{$from}>{$to}"][] = ['text' => $sourceText, 'apply' => $apply];
         }
     }
 

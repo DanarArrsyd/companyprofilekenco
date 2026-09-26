@@ -1,8 +1,8 @@
 import { usePage } from '@inertiajs/react';
 import { Languages } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { autoTranslateEnabled, setAutoTranslateEnabled } from '@/lib/auto-translate';
+import { autoTranslateEnabled, setAutoTranslateEnabled, setAutoTranslateSource } from '@/lib/auto-translate';
 import type { ContentLocale } from '@/lib/translatable-form';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,9 @@ export function ContentLocaleTabs({
 }) {
     const { autoTranslate } = usePage().props;
     const [translateOnSave, setTranslateOnSave] = useState(autoTranslateEnabled);
+
+    // The tab the admin saves from is the source for the other language.
+    useEffect(() => setAutoTranslateSource(value), [value]);
 
     return (
         <div className={inline ? '' : 'sticky top-0 z-20 -mx-6 border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:-mx-8 sm:px-8'}>
@@ -74,7 +77,7 @@ export function ContentLocaleTabs({
                     {autoTranslate && !inline && (
                         <label
                             className="flex items-center gap-2 text-xs font-medium text-slate-700"
-                            title="Edit one language and save: the other language is translated for you. Turn off to keep both languages exactly as typed."
+                            title="Saving regenerates the other language from the tab you are on, except fields you also edited there. Turn off to keep both languages exactly as typed."
                         >
                             <input
                                 type="checkbox"
@@ -85,7 +88,7 @@ export function ContentLocaleTabs({
                                 }}
                                 className="rounded border-border text-primary focus:ring-primary"
                             />
-                            Auto-translate the other language on save
+                            {value === 'en' ? 'Translate to Bahasa Indonesia on save' : 'Translate to English on save'}
                         </label>
                     )}
                 </div>

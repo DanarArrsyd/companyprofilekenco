@@ -28,6 +28,7 @@ class SetLocale
         LocalizedContent::$autoTranslate = $isAdmin
             && $request->header('X-Auto-Translate') === '1'
             && app(Translator::class)->isConfigured();
+        LocalizedContent::$autoTranslateSource = $request->header('X-Auto-Translate-Source') === 'id' ? 'id' : 'en';
 
         return $next($request);
     }

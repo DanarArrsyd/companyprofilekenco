@@ -15,5 +15,6 @@ abstract class TestCase extends BaseTestCase
         // not leak into factories and assertions of the next one.
         LocalizedContent::$serializeAllLocales = false;
         LocalizedContent::$autoTranslate = false;
+        LocalizedContent::$autoTranslateSource = 'en';
     }
 }

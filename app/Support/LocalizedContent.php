@@ -27,6 +27,9 @@ final class LocalizedContent
      */
     public static bool $autoTranslate = false;
 
+    /** The language tab the admin saved from ("en" or "id"); the other language follows it. */
+    public static string $autoTranslateSource = 'en';
+
     public static function resolve(mixed $value, ?string $locale = null): mixed
     {
         if (! is_array($value)) {

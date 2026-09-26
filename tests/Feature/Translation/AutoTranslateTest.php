@@ -28,11 +28,11 @@ beforeEach(function () {
     $this->admin = tap(User::factory()->create())->assignRole('Super Admin');
 });
 
-/** Save a product the way its Edit form does, with auto-translate on. */
-function saveProduct(Product $product, array $fields, bool $autoTranslate = true)
+/** Save a product the way its Edit form does, with auto-translate on and the given tab active. */
+function saveProduct(Product $product, array $fields, bool $autoTranslate = true, string $source = 'en')
 {
     return test()->actingAs(test()->admin)
-        ->withHeaders($autoTranslate ? ['X-Auto-Translate' => '1'] : [])
+        ->withHeaders($autoTranslate ? ['X-Auto-Translate' => '1', 'X-Auto-Translate-Source' => $source] : [])
         ->put(route('admin.products.update', $product), [
             'name' => $product->name,
             'status' => 'draft',
@@ -57,10 +57,10 @@ test('an English edit regenerates the Indonesian text', function () {
     expect($product->fresh()->getTranslations('short_description'))->toBe(['en' => 'New bracket', 'id' => '[id] New bracket']);
 });
 
-test('an Indonesian edit regenerates the English text', function () {
+test('saving from the Indonesian tab regenerates the English text', function () {
     $product = productWith(['en' => 'Old', 'id' => 'Lama']);
 
-    saveProduct($product, ['short_description' => 'Old', 'translations' => ['id' => ['short_description' => 'Braket baru']]]);
+    saveProduct($product, ['short_description' => 'Old', 'translations' => ['id' => ['short_description' => 'Braket baru']]], source: 'id');
 
     expect($product->fresh()->getTranslations('short_description'))->toBe(['en' => '[en] Braket baru', 'id' => 'Braket baru']);
 });
@@ -82,12 +82,20 @@ test('an untouched field with no Indonesian yet is filled in', function () {
     expect($product->fresh()->getTranslation('short_description', 'id', false))->toBe('[id] Bracket');
 });
 
-test('untouched fields that already have both languages make no request', function () {
+test('saving from the English tab re-syncs Indonesian text that no longer matches', function () {
+    $product = productWith(['en' => 'ISO 9001 certified bracket', 'id' => 'Braket bersertifikat IATF']);
+
+    saveProduct($product, ['short_description' => 'ISO 9001 certified bracket', 'translations' => ['id' => ['short_description' => 'Braket bersertifikat IATF']]]);
+
+    expect($product->fresh()->getTranslation('short_description', 'id', false))->toBe('[id] ISO 9001 certified bracket');
+});
+
+test('an Indonesian edit made before switching to the English tab is kept', function () {
     $product = productWith(['en' => 'Bracket', 'id' => 'Braket']);
 
-    saveProduct($product, ['short_description' => 'Bracket', 'translations' => ['id' => ['short_description' => 'Braket']]]);
+    saveProduct($product, ['short_description' => 'Bracket', 'translations' => ['id' => ['short_description' => 'Braket baja']]]);
 
-    Http::assertNotSent(fn (Request $request) => collect($request->data())->contains(fn ($item) => str_contains($item['Text'], 'Bracket')));
+    expect($product->fresh()->getTranslations('short_description'))->toBe(['en' => 'Bracket', 'id' => 'Braket baja']);
 });
 
 test('clearing the source does not wipe the other language', function () {

@@ -38,10 +38,10 @@ function sectionWith(SectionType $type, array $content): PageSection
 }
 
 /** Save the section the way PageSectionEditor does. */
-function saveSection(PageSection $section, array $content, bool $autoTranslate = true)
+function saveSection(PageSection $section, array $content, bool $autoTranslate = true, string $source = 'en')
 {
     return test()->actingAs(test()->admin)
-        ->withHeaders($autoTranslate ? ['X-Auto-Translate' => '1'] : [])
+        ->withHeaders($autoTranslate ? ['X-Auto-Translate' => '1', 'X-Auto-Translate-Source' => $source] : [])
         ->put(route('admin.pages.sections.update', [$section->page_id, $section->id]), [
             'section_type' => $section->section_type->value,
             'title' => 'Section',
@@ -64,10 +64,10 @@ test('an English edit of section text regenerates the Indonesian text', function
     ]);
 });
 
-test('an Indonesian edit regenerates the English text', function () {
+test('saving from the Indonesian tab regenerates the English text', function () {
     $section = sectionWith(SectionType::Hero, ['heading' => ['en' => 'Old', 'id' => 'Lama']]);
 
-    saveSection($section, ['heading' => ['en' => 'Old', 'id' => 'Komponen presisi']]);
+    saveSection($section, ['heading' => ['en' => 'Old', 'id' => 'Komponen presisi']], source: 'id');
 
     expect($section->fresh()->content['heading'])->toBe(['en' => '[en] Komponen presisi', 'id' => 'Komponen presisi']);
 });
@@ -78,7 +78,9 @@ test('stat labels are translated and shared values are never sent', function () 
     saveSection($section, ['items' => [['value' => '25+', 'label' => 'Years of experience']]]);
 
     expect($section->fresh()->content['items'][0])->toBe(['value' => '25+', 'label' => ['en' => 'Years of experience', 'id' => '[id] Years of experience']]);
-    Http::assertSent(fn (Request $request) => $request->data() === [['Text' => 'Years of experience']]);
+    // Only text is sent: the section title and the stat label, never the value.
+    Http::assertSent(fn (Request $request) => in_array(['Text' => 'Years of experience'], $request->data(), true)
+        && ! in_array(['Text' => '25+'], $request->data(), true));
 });
 
 test('untouched section text without Indonesian is filled in', function () {
@@ -98,7 +100,7 @@ test('section text edited in both languages is kept as typed', function () {
     saveSection($section, ['heading' => ['en' => 'New', 'id' => 'Baru']]);
 
     expect($section->fresh()->content['heading'])->toBe(['en' => 'New', 'id' => 'Baru']);
-    Http::assertNothingSent();
+    Http::assertNotSent(fn (Request $request) => in_array(['Text' => 'New'], $request->data(), true));
 });
 
 test('without the header section content is saved as sent', function () {
