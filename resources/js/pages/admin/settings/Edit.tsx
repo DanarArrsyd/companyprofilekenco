@@ -1,4 +1,5 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { CheckCircle2, CircleOff, Languages } from 'lucide-react';
 import { FormEventHandler, useRef, useState } from 'react';
 
 import { FormActions } from '@/components/admin/FormActions';
@@ -27,8 +28,16 @@ interface Settings {
 const TABS = ['General', 'Branding', 'Contact', 'Social Media', 'SEO Defaults', 'System'] as const;
 type Tab = (typeof TABS)[number];
 
-export default function Edit({ settings }: { settings: Settings }) {
-    const [tab, setTab] = useState<Tab>('General');
+/** `?tab=System` (e.g. from the auto-translate status link) opens that tab. */
+function initialTab(): Tab {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+
+    return TABS.find((name) => name === requested) ?? 'General';
+}
+
+export default function Edit({ settings, translator }: { settings: Settings; translator: { configured: boolean; region: string | null } }) {
+    const [tab, setTab] = useState<Tab>(initialTab);
+    const [testingTranslator, setTestingTranslator] = useState(false);
     const faviconInputRef = useRef<HTMLInputElement>(null);
 
     const { data, setData, post, processing, errors } = useForm<{
@@ -243,12 +252,47 @@ export default function Edit({ settings }: { settings: Settings }) {
                 )}
 
                 {tab === 'System' && (
-                    <FormSection title="System">
-                        <label className="flex items-center gap-2 text-sm text-slate-700">
-                            <input type="checkbox" checked={data.maintenance_mode} onChange={(e) => setData('maintenance_mode', e.target.checked)} className="rounded border-border" />
-                            Maintenance mode
-                        </label>
-                    </FormSection>
+                    <>
+                        <FormSection title="System">
+                            <label className="flex items-center gap-2 text-sm text-slate-700">
+                                <input type="checkbox" checked={data.maintenance_mode} onChange={(e) => setData('maintenance_mode', e.target.checked)} className="rounded border-border" />
+                                Maintenance mode
+                            </label>
+                        </FormSection>
+
+                        <FormSection
+                            title="Machine translation"
+                            description="Azure Translator fills the other language when content is saved with auto-translate on. The key and region live in the server .env; deploy after changing them."
+                        >
+                            <div className="flex flex-wrap items-center gap-3">
+                                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${translator.configured ? 'bg-success/10 text-success' : 'bg-muted text-slate-700'}`}>
+                                    {translator.configured ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : <CircleOff className="h-3.5 w-3.5" aria-hidden="true" />}
+                                    {translator.configured ? 'Key configured' : 'Not configured'}
+                                </span>
+                                <span className="text-sm text-slate-700">
+                                    Region: <span className="font-medium text-foreground">{translator.region || 'not set (global resource)'}</span>
+                                </span>
+                            </div>
+                            <div>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={testingTranslator}
+                                    onClick={() => router.post(route('admin.settings.translator-test'), {}, {
+                                        preserveScroll: true,
+                                        preserveState: true,
+                                        onStart: () => setTestingTranslator(true),
+                                        onFinish: () => setTestingTranslator(false),
+                                    })}
+                                >
+                                    <Languages className="mr-2 h-4 w-4" aria-hidden="true" />
+                                    {testingTranslator ? 'Testing…' : 'Test connection'}
+                                </Button>
+                                <FieldHint>Translates a sample sentence into Bahasa Indonesia and shows the result or Azure&apos;s reason for refusing.</FieldHint>
+                            </div>
+                        </FormSection>
+                    </>
                 )}
 
                 <FormActions>

@@ -9,6 +9,8 @@ use App\Services\FaviconFileService;
 use App\Services\MediaLifecycleService;
 use App\Services\MediaUploadService;
 use App\Services\SettingsService;
+use App\Services\Translation\TranslationFailed;
+use App\Services\Translation\Translator;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,7 +36,27 @@ class SettingsController extends Controller
     {
         return Inertia::render('admin/settings/Edit', [
             'settings' => $this->settings->all(),
+            'translator' => [
+                'configured' => app(Translator::class)->isConfigured(),
+                'region' => config('translation.azure.region'),
+            ],
         ]);
+    }
+
+    /** Translate a sample sentence so the admin can check the Azure key and region from the CMS. */
+    public function testTranslator(Translator $translator): RedirectResponse
+    {
+        if (! $translator->isConfigured()) {
+            return back()->with('error', 'Machine translation is off: AZURE_TRANSLATOR_KEY is not set in the server .env (run a deploy after changing it).');
+        }
+
+        try {
+            [$sample] = $translator->translate(['Precision parts for the automotive industry.'], 'en', 'id');
+        } catch (TranslationFailed $exception) {
+            return back()->with('error', 'Azure Translator test failed. '.$exception->getMessage());
+        }
+
+        return back()->with('success', "Azure Translator works. Sample: \"{$sample}\"");
     }
 
     public function update(UpdateSettingsRequest $request): RedirectResponse

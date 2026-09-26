@@ -54,7 +54,11 @@ final class AzureTranslator implements Translator
         }
 
         if ($response->failed()) {
-            throw new TranslationFailed("Azure Translator returned HTTP {$response->status()}.");
+            // Azure explains itself, e.g. 401000 (wrong key), 401001/401015 (region), 403001 (free quota used up).
+            $error = $response->json('error');
+            $detail = is_array($error) ? trim(($error['code'] ?? '').': '.($error['message'] ?? ''), ': ') : '';
+
+            throw new TranslationFailed("Azure Translator rejected the request (HTTP {$response->status()}".($detail !== '' ? ", error {$detail}" : '').').');
         }
 
         $translated = array_map(fn ($item) => $item['translations'][0]['text'] ?? null, (array) $response->json());

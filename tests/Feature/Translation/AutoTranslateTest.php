@@ -147,7 +147,8 @@ test('a translator failure still saves the edit and warns the admin', function (
     $product = productWith(['en' => 'Old', 'id' => 'Lama']);
 
     saveProduct($product, ['short_description' => 'New', 'translations' => ['id' => ['short_description' => 'Lama']]])
-        ->assertSessionHas('warning', 'Automatic translation failed; the other language was not changed.');
+        ->assertSessionHas('autoTranslate', fn (array $report) => $report['status'] === 'failed')
+        ->assertSessionHas('warning', fn (string $message) => str_contains($message, 'HTTP 500'));
 
     expect($product->fresh()->getTranslations('short_description'))->toBe(['en' => 'New', 'id' => 'Lama']);
 });

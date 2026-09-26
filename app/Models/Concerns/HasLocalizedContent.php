@@ -4,6 +4,7 @@ namespace App\Models\Concerns;
 
 use App\Actions\Translation\AutoTranslateChanges;
 use App\Services\Translation\TranslationFailed;
+use App\Support\AutoTranslateReport;
 use App\Support\LocalizedContent;
 use Spatie\Translatable\HasTranslations;
 
@@ -31,10 +32,7 @@ trait HasLocalizedContent
                 } catch (TranslationFailed $exception) {
                     // The admin's own text is still saved; only the other language is skipped.
                     report($exception);
-
-                    if (request()->hasSession()) {
-                        request()->session()->flash('warning', 'Automatic translation failed; the other language was not changed.');
-                    }
+                    AutoTranslateReport::failed($exception->getMessage());
                 }
             }
 

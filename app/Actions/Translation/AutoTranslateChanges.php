@@ -5,6 +5,7 @@ namespace App\Actions\Translation;
 use App\Models\Contracts\HasTranslatableContent;
 use App\Services\Translation\TranslationFailed;
 use App\Services\Translation\Translator;
+use App\Support\AutoTranslateReport;
 use App\Support\LocalizedContent;
 use Illuminate\Database\Eloquent\Model;
 
@@ -38,6 +39,8 @@ class AutoTranslateChanges
      */
     public function handle(Model $model): void
     {
+        AutoTranslateReport::attempted();
+
         $pending = [];
         $content = null;
 
@@ -75,6 +78,8 @@ class AutoTranslateChanges
             foreach ($jobs as $index => $job) {
                 ($job['apply'])($to, $translated[$index]);
             }
+
+            AutoTranslateReport::translated(count($jobs));
         }
 
         if ($content !== null && $pending !== []) {

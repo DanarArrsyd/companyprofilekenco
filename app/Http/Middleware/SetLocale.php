@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Services\Translation\Translator;
+use App\Support\AutoTranslateReport;
 use App\Support\Locale;
 use App\Support\LocalizedContent;
 use Closure;
@@ -29,7 +30,19 @@ class SetLocale
             && $request->header('X-Auto-Translate') === '1'
             && app(Translator::class)->isConfigured();
         LocalizedContent::$autoTranslateSource = $request->header('X-Auto-Translate-Source') === 'id' ? 'id' : 'en';
+        AutoTranslateReport::reset();
 
-        return $next($request);
+        $response = $next($request);
+
+        // Tell the admin what auto-translate did on this save (shown under the language tabs).
+        if (LocalizedContent::$autoTranslate && $request->hasSession() && ($report = AutoTranslateReport::summary(LocalizedContent::$autoTranslateSource))) {
+            $request->session()->flash('autoTranslate', $report);
+
+            if ($report['status'] === 'failed') {
+                $request->session()->flash('warning', 'Saved, but the other language was not translated: '.$report['reason']);
+            }
+        }
+
+        return $response;
     }
 }

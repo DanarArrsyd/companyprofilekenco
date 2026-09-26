@@ -254,6 +254,7 @@ Route::prefix('admin')->group(function () {
         // Website Settings
         Route::get('settings', [SettingsController::class, 'edit'])->name('admin.settings')->middleware('permission:settings.manage');
         Route::put('settings', [SettingsController::class, 'update'])->name('admin.settings.update')->middleware('permission:settings.manage');
+        Route::post('settings/translator-test', [SettingsController::class, 'testTranslator'])->name('admin.settings.translator-test')->middleware(['permission:settings.manage', 'throttle:10,1']);
 
         // Users
         Route::get('users', [UserController::class, 'index'])->name('admin.users')->middleware('permission:users.manage');

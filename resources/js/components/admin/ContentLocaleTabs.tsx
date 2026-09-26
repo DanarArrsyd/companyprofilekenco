@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 import { Languages } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import { AutoTranslateStatus } from '@/components/admin/AutoTranslateStatus';
 import { autoTranslateEnabled, setAutoTranslateEnabled, setAutoTranslateSource } from '@/lib/auto-translate';
 import type { ContentLocale } from '@/lib/translatable-form';
 import { cn } from '@/lib/utils';
@@ -90,6 +91,10 @@ export function ContentLocaleTabs({
                             />
                             {value === 'en' ? 'Translate to Bahasa Indonesia on save' : 'Translate to English on save'}
                         </label>
+                    )}
+                    {autoTranslate && !inline && translateOnSave && <AutoTranslateStatus />}
+                    {autoTranslate && !inline && !translateOnSave && (
+                        <p className="text-xs text-slate-500">Both languages are saved exactly as typed.</p>
                     )}
                 </div>
             </div>

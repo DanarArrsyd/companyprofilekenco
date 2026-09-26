@@ -10,6 +10,16 @@ export interface FlashMessages {
     error?: string | null;
     warning?: string | null;
     info?: string | null;
+    /** What auto-translate did on the last admin save (App\\Support\\AutoTranslateReport). */
+    autoTranslate?: AutoTranslateReport | null;
+}
+
+export interface AutoTranslateReport {
+    status: 'translated' | 'unchanged' | 'failed';
+    count: number;
+    from: 'en' | 'id';
+    to: 'en' | 'id';
+    reason?: string;
 }
 
 export interface SiteSettings {
