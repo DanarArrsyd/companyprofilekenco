@@ -18,6 +18,7 @@ import paperTape1 from '../../../img/paper_tape1.png';
 import paperTape2 from '../../../img/paper_tape2.png';
 import { getTextSectionPresentation } from './text-section-presentation';
 import { Container, Section } from '@/components/public/Section';
+import { OperatingValues, type OperatingValuesContent } from '@/components/public/OperatingValues';
 
 interface CtaContent {
     heading?: string;
@@ -283,6 +284,9 @@ export function SectionRenderer({
                 </section>
             );
         }
+
+        case 'operating_values':
+            return <OperatingValues content={content as OperatingValuesContent} />;
 
         case 'stats': {
             const c = content as StatsContent;

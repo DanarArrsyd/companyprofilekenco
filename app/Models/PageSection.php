@@ -33,7 +33,7 @@ class PageSection extends Model implements HasTranslatableContent
             'eyebrow', 'heading', 'highlight', 'description', 'body',
             'primary_cta_label', 'secondary_cta_label', 'cta_label',
             'visi_title', 'visi_text', 'misi_title', 'misi_text',
-            'items.*.label',
+            'items.*.label', 'items.*.description',
         ];
     }
 

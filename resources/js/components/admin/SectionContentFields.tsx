@@ -237,6 +237,105 @@ export function SectionContentFields({
                 </div>
             );
 
+        case 'operating_values': {
+            const items = Array.isArray(content.items)
+                ? (content.items as { letter?: string; title?: string; description?: unknown; icon?: string | null }[])
+                : [];
+
+            // Letter, title and icon are shared by both languages (the titles spell the acronym); the description is translated.
+            const updateItem = (index: number, key: 'letter' | 'title' | 'description' | 'icon', value: string | null) => {
+                const next = [...items];
+                next[index] = { ...next[index], [key]: key === 'description' ? writeText(next[index].description, locale, value ?? '') : value };
+                set('items', next);
+            };
+
+            return (
+                <div className="space-y-5">
+                    <div>
+                        <Label htmlFor="heading">Heading<LocaleBadge locale={locale} /></Label>
+                        <Input id="heading" value={text('heading')} placeholder={hint('heading') ?? 'Operating Values'} onChange={(e) => setText('heading', e.target.value)} className="mt-1.5" />
+                    </div>
+                    <div>
+                        <Label htmlFor="description">Introduction<LocaleBadge locale={locale} /></Label>
+                        <TextArea id="description" value={text('description')} placeholder={hint('description')} onChange={(v) => setText('description', v)} />
+                    </div>
+                    <div>
+                        <Label htmlFor="eyebrow">Handwritten line above the acronym<LocaleBadge locale={locale} /></Label>
+                        <Input id="eyebrow" value={text('eyebrow')} placeholder={hint('eyebrow') ?? 'What is??'} onChange={(e) => setText('eyebrow', e.target.value)} className="mt-1.5" />
+                    </div>
+
+                    <div className="space-y-3">
+                        <Label>Values</Label>
+                        <p className="text-xs leading-relaxed text-slate-500">
+                            The letters, in order, form the acronym (K.E.N.C.O). Titles stay as typed in both languages; only the description is translated.
+                            Icons are optional: until one is set, the wheel shows the letter.
+                        </p>
+                        {items.map((item, index) => (
+                            <div key={index} className="space-y-4 rounded-lg border border-border p-4">
+                                <div className="flex items-end gap-3">
+                                    <div className="w-20">
+                                        <Label htmlFor={`value_letter_${index}`}>Letter</Label>
+                                        <Input
+                                            id={`value_letter_${index}`}
+                                            value={item.letter ?? ''}
+                                            maxLength={1}
+                                            onChange={(e) => updateItem(index, 'letter', e.target.value.toUpperCase())}
+                                            className="mt-1.5 text-center font-semibold"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <Label htmlFor={`value_title_${index}`}>Title</Label>
+                                        <Input
+                                            id={`value_title_${index}`}
+                                            value={item.title ?? ''}
+                                            placeholder="Keep Safety First"
+                                            onChange={(e) => updateItem(index, 'title', e.target.value)}
+                                            className="mt-1.5"
+                                        />
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        className="h-11"
+                                        onClick={() => set('items', items.filter((_, i) => i !== index))}
+                                        aria-label={`Remove value ${item.title ?? index + 1}`}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                <div>
+                                    <Label htmlFor={`value_description_${index}`}>Description<LocaleBadge locale={locale} /></Label>
+                                    <TextArea
+                                        id={`value_description_${index}`}
+                                        value={readText(item.description, locale)}
+                                        placeholder={locale === 'en' ? undefined : englishOf(item.description) || undefined}
+                                        onChange={(v) => updateItem(index, 'description', v)}
+                                    />
+                                </div>
+                                <MediaPickerField
+                                    label="Icon (optional)"
+                                    currentUrl={mediaUrl(item.icon ?? '')}
+                                    uploadToLibrary
+                                    onSelectPath={(path) => updateItem(index, 'icon', path)}
+                                    onClear={() => updateItem(index, 'icon', null)}
+                                />
+                            </div>
+                        ))}
+                        <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => set('items', [...items, { letter: '', title: '', description: '', icon: null }])}
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add value
+                        </Button>
+                    </div>
+                </div>
+            );
+        }
+
         case 'stats': {
             const items = Array.isArray(content.items) ? (content.items as { label: unknown; value: string }[]) : [];
 

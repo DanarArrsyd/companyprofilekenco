@@ -9,7 +9,7 @@ test('PageSection::translatableContentPaths matches the section editor text keys
     const model = readFileSync(new URL('../../app/Models/PageSection.php', import.meta.url), 'utf8');
 
     const editorKeys = new Set([...editor.matchAll(/setText\('(\w+)'/g)].map((match) => match[1]));
-    if (/writeText\(next\[index\]\.label/.test(editor)) editorKeys.add('items.*.label');
+    for (const [, key] of editor.matchAll(/writeText\(next\[index\]\.(\w+)/g)) editorKeys.add(`items.*.${key}`);
 
     const body = model.match(/function translatableContentPaths\(\): array\s*\{([\s\S]*?)\n    \}/)?.[1] ?? '';
     const modelKeys = new Set([...body.matchAll(/'([\w.*]+)'/g)].map((match) => match[1]));
