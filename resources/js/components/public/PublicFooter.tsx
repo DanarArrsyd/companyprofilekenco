@@ -23,7 +23,7 @@ export function PublicFooter() {
     const { siteSettings } = usePage().props;
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
-    // Dark circles with a white mark; hover fills the brand colour and drops the mark in from above.
+    // White circles with a navy mark; hover fills the brand colour and drops the mark in from above.
     const socials = [
         { label: 'LinkedIn', brand: 'linkedin', href: siteSettings?.social?.linkedin, hover: 'hover:bg-brand-linkedin focus-visible:bg-brand-linkedin' },
         { label: 'Instagram', brand: 'instagram', href: siteSettings?.social?.instagram, hover: 'hover:bg-brand-instagram focus-visible:bg-brand-instagram' },
@@ -70,7 +70,7 @@ export function PublicFooter() {
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     aria-label={label}
-                                                    className={`group/social flex h-[3.25rem] w-[3.25rem] items-center justify-center overflow-hidden rounded-full bg-navy-800 text-white ring-1 ring-white/15 transition-[background-color,transform] duration-300 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${hover}`}
+                                                    className={`group/social flex h-[3.25rem] w-[3.25rem] items-center justify-center overflow-hidden rounded-full bg-white text-navy-950 transition-[background-color,color,transform] hover:text-white focus-visible:text-white duration-300 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${hover}`}
                                                 >
                                                     <BrandIcon
                                                         brand={brand}
