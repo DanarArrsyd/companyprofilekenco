@@ -39,7 +39,7 @@
     </head>
     <body class="font-sans antialiased">
         @if ($pageLoader)
-            <div id="page-loader" class="page-loader is-running" aria-hidden="true">
+            <div id="page-loader" class="page-loader is-booting" aria-hidden="true">
                 <div class="page-loader__inner">
                     <img class="page-loader__brush" src="{{ asset('images/loader/brush.webp') }}" alt="" width="1400" height="1092" draggable="false">
                     <div class="page-loader__center">

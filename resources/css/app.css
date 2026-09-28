@@ -340,9 +340,11 @@
  * it. States:
  *   (none)  covering the screen      data-state="enter"  off-screen left
  *   cover   sliding in from the left data-state="leave"  sliding out right
- * The runner laps the rail (left end -> right end) in loading stages, with a
- * progress fill lighting the rail behind it, until the page is
- * ready, then the curtain follows it out to the right. The logo and brush
+ * The runner's position IS the load progress: page-loader.ts moves it every
+ * frame from real milestones (HTML, app, fonts, images; request, response,
+ * new page's images), creeping while the network is slow and dashing when
+ * data lands, with a progress fill lighting the rail behind it. One pass
+ * only: when it leaves the right end the curtain follows it out. The logo and brush
  * lag the panel and fade, so both slides read as depth, not a flat wipe.
  * Kept outside @layer so the runtime-only state classes are never purged.
  */
@@ -353,7 +355,6 @@ html.page-loading {
 .page-loader {
     /* easeInOutQuint: slow start, decisive middle, soft landing. */
     --pl-ease: cubic-bezier(0.83, 0, 0.17, 1);
-    --pl-lap: 1.7s;
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -473,8 +474,9 @@ html.page-loading {
     transform-origin: left center;
 }
 
-.page-loader.is-running .page-loader__fill {
-    animation: pl-fill var(--pl-lap) linear infinite;
+/* Before the app's JS runs, the first stretch is CSS; page-loader.ts takes over from wherever it got to. */
+.page-loader.is-booting .page-loader__fill {
+    animation: pl-boot-fill 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Parked just past the left end of the rail. */
@@ -484,8 +486,8 @@ html.page-loading {
     transform: translate3d(-100%, 0, 0);
 }
 
-.page-loader.is-running .page-loader__mover {
-    animation: pl-lap var(--pl-lap) linear infinite;
+.page-loader.is-booting .page-loader__mover {
+    animation: pl-boot-run 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .page-loader__lines {
@@ -602,33 +604,15 @@ html.page-loading {
     to { opacity: 1; transform: none; }
 }
 
-/*
- * A lap loads in stages, like a progress bar: dash, brake, hold, dash again.
- * The runner's head sits at p of the rail (x = p*100cqw - its own width),
- * the fill is scaleX(p); both share the lap's timing so they stay locked.
- * Each dash eases out (quick start, soft brake), the last one carries it off the rail.
- */
-@keyframes pl-lap {
-    0% { transform: translate3d(-100%, 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    20% { transform: translate3d(calc(30cqw - 100%), 0, 0); }
-    30% { transform: translate3d(calc(30cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    46% { transform: translate3d(calc(55cqw - 100%), 0, 0); }
-    58% { transform: translate3d(calc(55cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    70% { transform: translate3d(calc(78cqw - 100%), 0, 0); }
-    78% { transform: translate3d(calc(78cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.55, 0, 0.45, 1); }
-    100% { transform: translate3d(100cqw, 0, 0); }
+/* Pre-JS stretch: head from the left end to 12% of the rail (x = p*100cqw - own width). */
+@keyframes pl-boot-run {
+    from { transform: translate3d(-100%, 0, 0); }
+    to { transform: translate3d(calc(12cqw - 100%), 0, 0); }
 }
 
-@keyframes pl-fill {
-    0% { transform: scaleX(0); opacity: 1; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    20% { transform: scaleX(0.3); }
-    30% { transform: scaleX(0.3); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    46% { transform: scaleX(0.55); }
-    58% { transform: scaleX(0.55); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
-    70% { transform: scaleX(0.78); }
-    78% { transform: scaleX(0.78); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.45, 1); }
-    94% { transform: scaleX(1); opacity: 1; }
-    100% { transform: scaleX(1); opacity: 0; }
+@keyframes pl-boot-fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(0.12); }
 }
 
 @keyframes pl-streak {
