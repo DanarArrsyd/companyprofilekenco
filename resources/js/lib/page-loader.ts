@@ -7,9 +7,9 @@ type Router = typeof inertiaRouter;
 
 /**
  * Public page loader (user reference, 2026-09-28). The curtain in
- * resources/views/app.blade.php covers the first paint; a runner crosses the
- * screen under the logo, edge to edge, while the page loads. Every lap ends
- * off-screen right: when the page is ready by then, the curtain follows the
+ * resources/views/app.blade.php covers the first paint; a runner glides along
+ * a rail as wide as the logo while the page loads, fading in at the left end
+ * and out at the right end. Every lap ends past the right end: when the page is ready by then, the curtain follows the
  * runner out to the right, otherwise the runner starts another lap. The
  * motion never stops or jumps, it only decides at the end of a lap.
  *
@@ -26,8 +26,8 @@ const BOOT_CAP_MS = 3000;
 const COVER_MS = 750;
 const OPEN_MS = 950;
 const FADE_MS = 200;
-// One lap is 1.25s (--pl-lap in app.css).
-const LAP_FALLBACK_MS = 1500;
+// One lap is 1.1s (--pl-lap in app.css).
+const LAP_FALLBACK_MS = 1400;
 
 let loader: HTMLElement | null = null;
 let busy = false;
@@ -46,7 +46,7 @@ function lock(): void {
     pauseSmoothScroll();
 }
 
-/** Start lapping from off-screen left. */
+/** Start lapping from the left end of the rail. */
 function startRun(): void {
     const element = mover();
     if (!loader || !element) return;
@@ -58,7 +58,7 @@ function startRun(): void {
 
 /**
  * Resolves at the end of the first lap that finishes after `ready`, with the
- * runner off-screen right. Without a running lap (reduced motion, or the
+ * runner past the right end of the rail. Without a running lap (reduced motion, or the
  * animation never started) it resolves as soon as `ready` does.
  */
 function lapAfter(ready: Promise<void>): Promise<void> {
@@ -125,7 +125,11 @@ async function navigate(router: Router, url: URL, visit: Record<string, unknown>
     busy = true;
 
     try {
-        const loaded = cover().then(
+        void cover();
+
+        // Request the page once the curtain is ~93% across (easeInOutQuint at 2/3 of its time): the
+        // response always lands after it has closed, and slow servers still fit in a single lap.
+        const loaded = wait(reducedMotion() ? FADE_MS : Math.round(COVER_MS * 0.67)).then(
             () =>
                 new Promise<void>((resolve) => {
                     bypassNext = true;
