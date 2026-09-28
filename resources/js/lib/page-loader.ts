@@ -9,7 +9,7 @@ type Router = typeof inertiaRouter;
  * Public page loader (user reference, 2026-09-28). The curtain in
  * resources/views/app.blade.php covers the first paint; a runner crosses
  * under the logo while the page loads, and once it reaches the right edge
- * the curtain slides out to the right (the direction it runs).
+ * the curtain zooms through and fades away, like astra.co.id.
  *
  * - Full load / refresh: the curtain is already up; it opens when the app has
  *   mounted and the window has loaded (at least BOOT_MIN_MS from navigation
@@ -27,7 +27,7 @@ const NAV_MIN_MS = 600;
 const NAV_RUN = '1.1s';
 const FINISH_MS = 300;
 const COVER_MS = 550;
-const OPEN_MS = 850;
+const OPEN_MS = 600;
 const FADE_MS = 200;
 
 let loader: HTMLElement | null = null;

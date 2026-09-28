@@ -337,7 +337,7 @@
  * in the initial HTML (resources/views/app.blade.php) so it paints before the
  * app boots; resources/js/lib/page-loader.ts drives it. States:
  *   (none)  covering the screen      data-state="enter"  off-screen left
- *   cover   sliding in from the left data-state="leave"  sliding out right
+ *   cover   sliding in from the left data-state="leave"  zooming through (scale 5 + fade)
  * Kept outside @layer so the runtime-only state classes are never purged.
  */
 html.page-loading {
@@ -381,14 +381,14 @@ html.page-loading {
     --pl-slide: 550ms;
 }
 
+/* Opening: zoom-through like astra.co.id (scale 5 + fade), the page shows through. */
 .page-loader[data-state='leave'] {
-    --pl-slide: 850ms;
-    transform: translate3d(100%, 0, 0);
+    opacity: 0;
+    transform: scale(5);
     pointer-events: none;
-}
-
-.page-loader[data-state='leave'] .page-loader__inner {
-    transform: translate3d(-40%, 0, 0);
+    transition:
+        transform 600ms cubic-bezier(0.55, 0, 0.1, 1),
+        opacity 600ms cubic-bezier(0.55, 0, 0.1, 1);
 }
 
 .page-loader__brush {
@@ -596,6 +596,7 @@ html.page-loading {
     .page-loader[data-state='enter'],
     .page-loader[data-state='leave'] {
         opacity: 0;
+        transition: opacity 200ms linear;
     }
 
     .page-loader *,
