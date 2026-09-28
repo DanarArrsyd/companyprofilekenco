@@ -5,10 +5,12 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
 import { registerAutoTranslateHeader } from '@/lib/auto-translate';
+import { bootPageLoader, registerPageLoader } from '@/lib/page-loader';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 registerAutoTranslateHeader(router);
+registerPageLoader(router);
 
 createInertiaApp({
     // Public pages resolve their own full title (via SeoService, including
@@ -26,6 +28,7 @@ createInertiaApp({
         const root = createRoot(el);
 
         root.render(<App {...props} />);
+        bootPageLoader();
     },
     progress: {
         color: '#4B5563',

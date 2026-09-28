@@ -6,11 +6,11 @@ use Spatie\Permission\Models\Permission;
 
 test('the root serves Bahasa Indonesia and /en serves English', function () {
     $this->get('/')->assertOk()
-        ->assertSee('<html lang="id">', false)
+        ->assertSee('<html lang="id"', false)
         ->assertInertia(fn ($page) => $page->where('locale', 'id'));
 
     $this->get('/en')->assertOk()
-        ->assertSee('<html lang="en">', false)
+        ->assertSee('<html lang="en"', false)
         ->assertInertia(fn ($page) => $page->where('locale', 'en'));
 });
 

@@ -17,6 +17,8 @@ export function startSmoothScroll(): () => void {
 
     const lenis = new Lenis({ autoRaf: true });
     instance = lenis;
+    // The page loader still covers the screen; it resumes scrolling when it opens.
+    if (document.documentElement.classList.contains('page-loading')) lenis.stop();
 
     return () => {
         lenis.destroy();
