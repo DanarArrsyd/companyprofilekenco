@@ -8,7 +8,8 @@ type Router = typeof inertiaRouter;
 /**
  * Public page loader (user reference, 2026-09-28). The curtain in
  * resources/views/app.blade.php covers the first paint; a runner glides along
- * a rail as wide as the logo while the page loads, fading in at the left end
+ * a rail as wide as the logo in loading stages (dash, brake, hold) while the
+ * page loads, a progress fill lighting the rail behind it, fading in at the left end
  * and out at the right end. Every lap ends past the right end: when the page is ready by then, the curtain follows the
  * runner out to the right, otherwise the runner starts another lap. The
  * motion never stops or jumps, it only decides at the end of a lap.
@@ -26,8 +27,8 @@ const BOOT_CAP_MS = 3000;
 const COVER_MS = 750;
 const OPEN_MS = 950;
 const FADE_MS = 200;
-// One lap is 1.1s (--pl-lap in app.css).
-const LAP_FALLBACK_MS = 1400;
+// One lap is 1.7s (--pl-lap in app.css).
+const LAP_FALLBACK_MS = 2000;
 
 let loader: HTMLElement | null = null;
 let busy = false;

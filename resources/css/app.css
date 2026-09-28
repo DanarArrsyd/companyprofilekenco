@@ -340,7 +340,8 @@
  * it. States:
  *   (none)  covering the screen      data-state="enter"  off-screen left
  *   cover   sliding in from the left data-state="leave"  sliding out right
- * The runner laps the rail (left end -> right end) until the page is
+ * The runner laps the rail (left end -> right end) in loading stages, with a
+ * progress fill lighting the rail behind it, until the page is
  * ready, then the curtain follows it out to the right. The logo and brush
  * lag the panel and fade, so both slides read as depth, not a flat wipe.
  * Kept outside @layer so the runtime-only state classes are never purged.
@@ -352,7 +353,7 @@ html.page-loading {
 .page-loader {
     /* easeInOutQuint: slow start, decisive middle, soft landing. */
     --pl-ease: cubic-bezier(0.83, 0, 0.17, 1);
-    --pl-lap: 1.1s;
+    --pl-lap: 1.7s;
     position: fixed;
     inset: 0;
     z-index: 9999;
@@ -458,6 +459,24 @@ html.page-loading {
     background-color: rgb(255 255 255 / 0.14);
 }
 
+/* Progress fill: lights the rail up to the runner's head, stage by stage. */
+.page-loader__fill {
+    position: absolute;
+    bottom: 12%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    margin-bottom: -0.5px;
+    border-radius: 9999px;
+    background-color: rgb(255 255 255 / 0.55);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+.page-loader.is-running .page-loader__fill {
+    animation: pl-fill var(--pl-lap) linear infinite;
+}
+
 /* Parked just past the left end of the rail. */
 .page-loader__mover {
     position: absolute;
@@ -466,7 +485,7 @@ html.page-loading {
 }
 
 .page-loader.is-running .page-loader__mover {
-    animation: pl-lap var(--pl-lap) cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    animation: pl-lap var(--pl-lap) linear infinite;
 }
 
 .page-loader__lines {
@@ -583,9 +602,33 @@ html.page-loading {
     to { opacity: 1; transform: none; }
 }
 
+/*
+ * A lap loads in stages, like a progress bar: dash, brake, hold, dash again.
+ * The runner's head sits at p of the rail (x = p*100cqw - its own width),
+ * the fill is scaleX(p); both share the lap's timing so they stay locked.
+ * Each dash eases out (quick start, soft brake), the last one carries it off the rail.
+ */
 @keyframes pl-lap {
-    from { transform: translate3d(-100%, 0, 0); }
-    to { transform: translate3d(100cqw, 0, 0); }
+    0% { transform: translate3d(-100%, 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    20% { transform: translate3d(calc(30cqw - 100%), 0, 0); }
+    30% { transform: translate3d(calc(30cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    46% { transform: translate3d(calc(55cqw - 100%), 0, 0); }
+    58% { transform: translate3d(calc(55cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    70% { transform: translate3d(calc(78cqw - 100%), 0, 0); }
+    78% { transform: translate3d(calc(78cqw - 100%), 0, 0); animation-timing-function: cubic-bezier(0.55, 0, 0.45, 1); }
+    100% { transform: translate3d(100cqw, 0, 0); }
+}
+
+@keyframes pl-fill {
+    0% { transform: scaleX(0); opacity: 1; animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    20% { transform: scaleX(0.3); }
+    30% { transform: scaleX(0.3); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    46% { transform: scaleX(0.55); }
+    58% { transform: scaleX(0.55); animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+    70% { transform: scaleX(0.78); }
+    78% { transform: scaleX(0.78); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.45, 1); }
+    94% { transform: scaleX(1); opacity: 1; }
+    100% { transform: scaleX(1); opacity: 0; }
 }
 
 @keyframes pl-streak {

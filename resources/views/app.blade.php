@@ -46,6 +46,7 @@
                         <img class="page-loader__logo" src="{{ asset('images/loader/logo-white.webp') }}" alt="" width="984" height="116" draggable="false">
                         <div class="page-loader__track">
                             <div class="page-loader__lines"><span></span><span></span><span></span><span></span></div>
+                            <div class="page-loader__fill"></div>
                             <div class="page-loader__mover">
                                 <div class="speeder">
                                     <div class="speeder__body">
