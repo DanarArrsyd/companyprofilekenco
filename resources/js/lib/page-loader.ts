@@ -7,28 +7,27 @@ type Router = typeof inertiaRouter;
 
 /**
  * Public page loader (user reference, 2026-09-28). The curtain in
- * resources/views/app.blade.php covers the first paint; a runner crosses
- * under the logo while the page loads, and once it reaches the right edge
- * the curtain zooms through and fades away, like astra.co.id.
+ * resources/views/app.blade.php covers the first paint; a runner crosses the
+ * screen under the logo, edge to edge, while the page loads. Every lap ends
+ * off-screen right: when the page is ready by then, the curtain follows the
+ * runner out to the right, otherwise the runner starts another lap. The
+ * motion never stops or jumps, it only decides at the end of a lap.
  *
- * - Full load / refresh: the curtain is already up; it opens when the app has
- *   mounted and the window has loaded (at least BOOT_MIN_MS from navigation
- *   start so the run reads, at most BOOT_CAP_MS so a slow asset never traps
- *   the visitor).
+ * - Full load / refresh: the curtain is already up and the first lap starts
+ *   with the first paint; "ready" is app mounted + window load (capped at
+ *   BOOT_CAP_MS so a slow asset never traps the visitor).
  * - Inertia visits to another public page: the curtain slides in from the
- *   left first, then the visit runs behind it and it opens when the new page
- *   is in (at least NAV_MIN_MS of running).
+ *   left while the runner starts, the visit is replayed behind it, and it
+ *   opens at the end of the first lap after the new page is in.
  * - Filters, pagination, same-page hashes, language switches, prefetches and
  *   partial reloads never show it (same path once the /en prefix is removed).
  */
-const BOOT_MIN_MS = 1200;
 const BOOT_CAP_MS = 3000;
-const NAV_MIN_MS = 600;
-const NAV_RUN = '1.1s';
-const FINISH_MS = 300;
-const COVER_MS = 550;
-const OPEN_MS = 600;
+const COVER_MS = 750;
+const OPEN_MS = 950;
 const FADE_MS = 200;
+// One lap is 1.25s (--pl-lap in app.css).
+const LAP_FALLBACK_MS = 1500;
 
 let loader: HTMLElement | null = null;
 let busy = false;
@@ -47,31 +46,51 @@ function lock(): void {
     pauseSmoothScroll();
 }
 
-/** Restart the run from the left edge. */
-function startRun(duration: string): void {
+/** Start lapping from off-screen left. */
+function startRun(): void {
     const element = mover();
     if (!loader || !element) return;
 
-    loader.style.setProperty('--pl-run', duration);
-    element.style.transition = '';
-    element.style.transform = '';
     loader.classList.remove('is-running');
     void element.offsetWidth;
     loader.classList.add('is-running');
 }
 
-/** Take the runner from wherever the run animation left it to the right edge. */
-async function finishRun(): Promise<void> {
+/**
+ * Resolves at the end of the first lap that finishes after `ready`, with the
+ * runner off-screen right. Without a running lap (reduced motion, or the
+ * animation never started) it resolves as soon as `ready` does.
+ */
+function lapAfter(ready: Promise<void>): Promise<void> {
     const element = mover();
-    if (!loader || !element || reducedMotion()) return;
 
-    const current = getComputedStyle(element).transform;
-    element.style.transform = current === 'none' ? '' : current;
-    loader.classList.remove('is-running');
-    void element.offsetWidth;
-    element.style.transition = `transform ${FINISH_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`;
-    element.style.transform = 'translateX(100%)';
-    await wait(FINISH_MS);
+    return new Promise((resolve) => {
+        let isReady = false;
+        let done = false;
+
+        const finish = () => {
+            if (done) return;
+            done = true;
+            element?.removeEventListener('animationiteration', onLap);
+            loader?.classList.remove('is-running');
+            resolve();
+        };
+
+        // The runner's own shake and speed-line animations bubble their laps too; only the crossing counts.
+        const onLap = (event: AnimationEvent) => {
+            if (isReady && event.target === element && event.animationName === 'pl-lap') finish();
+        };
+
+        element?.addEventListener('animationiteration', onLap);
+
+        void ready.then(() => {
+            isReady = true;
+            const running = element?.getAnimations().some((animation) => (animation as CSSAnimation).animationName === 'pl-lap' && animation.playState === 'running');
+            if (!running) finish();
+            // Safety net (e.g. a throttled background tab never fires the event): at most one more lap.
+            else window.setTimeout(finish, LAP_FALLBACK_MS);
+        });
+    });
 }
 
 async function open(): Promise<void> {
@@ -87,21 +106,17 @@ async function open(): Promise<void> {
     resumeSmoothScroll();
 }
 
+/** Slide in from the left; the runner sets off as the curtain arrives. */
 async function cover(): Promise<void> {
     if (!loader) return;
 
     lock();
-    // Back to the start line before the curtain shows (the last run left the runner at the right edge).
-    const element = mover();
     loader.classList.remove('is-running');
-    if (element) {
-        element.style.transition = '';
-        element.style.transform = '';
-    }
     loader.dataset.state = 'enter';
     loader.hidden = false;
     void loader.offsetWidth;
     loader.dataset.state = 'cover';
+    startRun();
     await wait(reducedMotion() ? FADE_MS : COVER_MS);
     delete loader.dataset.state;
 }
@@ -110,22 +125,21 @@ async function navigate(router: Router, url: URL, visit: Record<string, unknown>
     busy = true;
 
     try {
-        await cover();
-        startRun(NAV_RUN);
+        const loaded = cover().then(
+            () =>
+                new Promise<void>((resolve) => {
+                    bypassNext = true;
+                    router.visit(url.href, {
+                        replace: Boolean(visit.replace),
+                        preserveScroll: Boolean(visit.preserveScroll),
+                        preserveState: Boolean(visit.preserveState),
+                        headers: (visit.headers as Record<string, string>) ?? {},
+                        onFinish: () => resolve(),
+                    });
+                }),
+        );
 
-        const loaded = new Promise<void>((resolve) => {
-            bypassNext = true;
-            router.visit(url.href, {
-                replace: Boolean(visit.replace),
-                preserveScroll: Boolean(visit.preserveScroll),
-                preserveState: Boolean(visit.preserveState),
-                headers: (visit.headers as Record<string, string>) ?? {},
-                onFinish: () => resolve(),
-            });
-        });
-
-        await Promise.all([loaded, wait(NAV_MIN_MS)]);
-        await finishRun();
+        await lapAfter(loaded);
         await open();
     } finally {
         busy = false;
@@ -139,10 +153,9 @@ async function boot(): Promise<void> {
 
     const loaded =
         document.readyState === 'complete' ? Promise.resolve() : new Promise<void>((resolve) => window.addEventListener('load', () => resolve(), { once: true }));
+    const ready = Promise.race([loaded, wait(Math.max(0, BOOT_CAP_MS - performance.now()))]);
 
-    await Promise.race([loaded, wait(Math.max(0, BOOT_CAP_MS - performance.now()))]);
-    await wait(Math.max(0, BOOT_MIN_MS - performance.now()));
-    await finishRun();
+    await lapAfter(ready);
     await open();
 }
 
