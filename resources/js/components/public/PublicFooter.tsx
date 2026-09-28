@@ -23,11 +23,12 @@ export function PublicFooter() {
     const { siteSettings } = usePage().props;
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
+    // Dark circles with a white mark; hover fills the brand colour and drops the mark in from above.
     const socials = [
-        { label: 'LinkedIn', brand: 'linkedin', href: siteSettings?.social?.linkedin, color: 'text-brand-linkedin' },
-        { label: 'Instagram', brand: 'instagram', href: siteSettings?.social?.instagram, color: 'text-brand-instagram' },
-        { label: 'YouTube', brand: 'youtube', href: siteSettings?.social?.youtube, color: 'text-brand-youtube' },
-    ].filter((social): social is { label: string; brand: Brand; href: string; color: string } => Boolean(social.href));
+        { label: 'LinkedIn', brand: 'linkedin', href: siteSettings?.social?.linkedin, hover: 'hover:bg-brand-linkedin focus-visible:bg-brand-linkedin' },
+        { label: 'Instagram', brand: 'instagram', href: siteSettings?.social?.instagram, hover: 'hover:bg-brand-instagram focus-visible:bg-brand-instagram' },
+        { label: 'YouTube', brand: 'youtube', href: siteSettings?.social?.youtube, hover: 'hover:bg-brand-youtube focus-visible:bg-brand-youtube' },
+    ].filter((social): social is { label: string; brand: Brand; href: string; hover: string } => Boolean(social.href));
 
     return (
         <footer className="relative isolate overflow-hidden text-white">
@@ -62,16 +63,19 @@ export function PublicFooter() {
                             <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
                                 {socials.length > 0 && (
                                     <ul className="flex items-center gap-3">
-                                        {socials.map(({ label, brand, href, color }) => (
+                                        {socials.map(({ label, brand, href, hover }) => (
                                             <li key={label}>
                                                 <a
                                                     href={href}
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     aria-label={label}
-                                                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-white ${color} transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950`}
+                                                    className={`group/social flex h-[3.25rem] w-[3.25rem] items-center justify-center overflow-hidden rounded-full bg-navy-800 text-white ring-1 ring-white/15 transition-[background-color,transform] duration-300 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${hover}`}
                                                 >
-                                                    <BrandIcon brand={brand} className="h-6 w-6" />
+                                                    <BrandIcon
+                                                        brand={brand}
+                                                        className="h-[1.125rem] w-[1.125rem] group-hover/social:animate-[social-slide-in_300ms_both] motion-reduce:!animate-none"
+                                                    />
                                                 </a>
                                             </li>
                                         ))}
