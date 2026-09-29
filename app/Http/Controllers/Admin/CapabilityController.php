@@ -63,7 +63,16 @@ class CapabilityController extends Controller
 
         return Inertia::render('admin/capabilities/Edit', [
             'capability' => $capability,
-            'availableMachines' => Machine::active()->orderBy('name')->get(['id', 'name']),
+            // Published machines, plus any unpublished one still attached, so it can be detached.
+            'availableMachines' => Machine::query()
+                ->where(fn ($q) => $q->active()->orWhereIn('id', $capability->machines->pluck('id')))
+                ->orderBy('name')
+                ->get(['id', 'name', 'status'])
+                ->map(fn (Machine $machine) => [
+                    'id' => $machine->id,
+                    'name' => $machine->name,
+                    'is_published' => $machine->status === ContentStatus::Published,
+                ]),
             'statusOptions' => array_map(fn ($c) => $c->value, ContentStatus::cases()),
         ]);
     }

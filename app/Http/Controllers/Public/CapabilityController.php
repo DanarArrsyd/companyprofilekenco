@@ -33,7 +33,11 @@ class CapabilityController extends Controller
     {
         $capability = Capability::query()
             ->published()
-            ->with(['steps' => fn ($q) => $q->orderBy('sort_order'), 'machines:id,name,brand,model,capacity,quantity'])
+            ->with([
+                'steps' => fn ($q) => $q->orderBy('sort_order'),
+                // Unpublished machines stay attached but never show publicly.
+                'machines' => fn ($q) => $q->active()->orderBy('sort_order'),
+            ])
             ->where('slug', $slug)
             ->firstOrFail();
 

@@ -14,7 +14,7 @@ export function AdminHeader({ onOpenMobileNav }: { onOpenMobileNav: () => void }
                 type="button"
                 onClick={onOpenMobileNav}
                 className="rounded p-2 text-slate-700 hover:bg-muted sm:hidden"
-                aria-label="Open navigation menu"
+                aria-label="Buka menu"
             >
                 <MenuIcon className="h-5 w-5" />
             </button>
@@ -41,7 +41,7 @@ export function AdminHeader({ onOpenMobileNav }: { onOpenMobileNav: () => void }
                                     focus && 'bg-muted',
                                 )}
                             >
-                                Profile
+                                Profil
                             </Link>
                         )}
                     </MenuItem>
@@ -57,7 +57,7 @@ export function AdminHeader({ onOpenMobileNav }: { onOpenMobileNav: () => void }
                                 )}
                             >
                                 <LogOut className="h-4 w-4" />
-                                Log Out
+                                Keluar
                             </Link>
                         )}
                     </MenuItem>

@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, Eye, Plus, Trash2 } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
@@ -20,6 +20,7 @@ import { countTranslated, initialTranslations, translatableBinder, translatableE
 import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
 import { FieldHint } from '@/components/admin/FieldHint';
 import { fieldHelp } from '@/lib/admin-field-help';
+import { cn } from '@/lib/utils';
 
 interface Step {
     id: number;
@@ -90,7 +91,7 @@ export default function Edit({
     statusOptions,
 }: {
     capability: Capability;
-    availableMachines: { id: number; name: string }[];
+    availableMachines: { id: number; name: string; is_published: boolean }[];
     statusOptions: string[];
 }) {
     const { can } = usePermissions();
@@ -279,15 +280,35 @@ export default function Edit({
                 </div>
 
                 <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
-                    <h2 className="text-sm font-semibold text-foreground">Assigned Machines</h2>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h2 className="text-sm font-semibold text-foreground">Mesin &amp; peralatan</h2>
+                            <p className="mt-1 text-sm text-slate-500">Mesin yang dicentang tampil di bagian “Peralatan” pada halaman kapabilitas ini.</p>
+                        </div>
+                        <Link href={route('admin.machines')} className="text-sm font-medium text-navy-700 hover:text-navy-900">
+                            Kelola mesin →
+                        </Link>
+                    </div>
                     {availableMachines.length === 0 ? (
-                        <p className="mt-2 text-sm text-slate-500">No published machines available yet.</p>
+                        <p className="mt-3 text-sm text-slate-500">Belum ada mesin yang tayang. Tambahkan di Data Master → Mesin &amp; Peralatan.</p>
                     ) : (
-                        <div className="mt-3 space-y-1">
+                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
                             {availableMachines.map((machine) => (
-                                <label key={machine.id} className="flex items-center gap-2 text-sm text-slate-700">
-                                    <input type="checkbox" checked={selectedMachines.includes(machine.id)} onChange={() => toggleMachine(machine.id)} className="rounded border-border" />
-                                    {machine.name}
+                                <label
+                                    key={machine.id}
+                                    className={cn(
+                                        'flex cursor-pointer items-start gap-3 rounded-lg border px-3.5 py-3 text-sm transition-colors',
+                                        selectedMachines.includes(machine.id) ? 'border-navy-700 bg-navy-700/5' : 'border-border hover:bg-muted',
+                                    )}
+                                >
+                                    <input type="checkbox" checked={selectedMachines.includes(machine.id)} onChange={() => toggleMachine(machine.id)} className="mt-0.5 rounded border-border" />
+                                    <span>
+                                        <span className={cn('flex items-center gap-2 font-medium', !machine.is_published && 'text-slate-500')}>
+                                            {machine.name}
+                                            {!machine.is_published && <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">Nonaktif</span>}
+                                        </span>
+                                        {!machine.is_published && <span className="mt-0.5 block text-xs text-slate-500">Tidak tampil di website · hilangkan centang untuk melepas</span>}
+                                    </span>
                                 </label>
                             ))}
                         </div>
@@ -298,7 +319,7 @@ export default function Edit({
                         className="mt-4"
                         onClick={() => router.post(route('admin.capabilities.machines', capability.id), { machine_ids: selectedMachines }, { preserveScroll: true })}
                     >
-                        Save Machine Assignments
+                        Simpan pilihan mesin
                     </Button>
                 </div>
             </div>

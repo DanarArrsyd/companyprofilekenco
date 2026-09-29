@@ -60,7 +60,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                                 type="button"
                                 onClick={onClose}
                                 className="rounded p-1.5 text-slate-500 hover:bg-muted"
-                                aria-label="Close navigation menu"
+                                aria-label="Tutup menu"
                             >
                                 <X className="h-4 w-4" />
                             </button>
