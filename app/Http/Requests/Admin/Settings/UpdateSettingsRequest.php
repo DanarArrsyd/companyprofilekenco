@@ -9,14 +9,19 @@ class UpdateSettingsRequest extends FormRequest
 {
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
+    /** Keep in sync with SOCIAL_PLATFORMS in resources/js/lib/social-links.ts (tests/js/social-links.test.ts). */
+    public const SOCIAL_PLATFORMS = ['linkedin', 'instagram', 'youtube', 'facebook', 'tiktok', 'x', 'whatsapp', 'threads', 'other'];
+
     /**
      * The settings page posts FormData, which cannot carry an empty list: with
-     * `operating_hours_sent`, a missing schedule means "no rows left".
+     * `<list>_sent`, a missing list means "no rows left".
      */
     protected function prepareForValidation(): void
     {
-        if ($this->boolean('operating_hours_sent')) {
-            $this->merge(['operating_hours' => $this->input('operating_hours', [])]);
+        foreach (['operating_hours', 'social_links'] as $list) {
+            if ($this->boolean("{$list}_sent")) {
+                $this->merge([$list => $this->input($list, [])]);
+            }
         }
     }
 
@@ -60,9 +65,11 @@ class UpdateSettingsRequest extends FormRequest
             }],
             'map_embed_url' => ['nullable', 'url', 'max:1000'],
 
-            'social_linkedin' => ['nullable', 'url', 'max:255'],
-            'social_youtube' => ['nullable', 'url', 'max:255'],
-            'social_instagram' => ['nullable', 'url', 'max:255'],
+            // Social links in footer order; `other` is any site, named by its label.
+            'social_links' => ['sometimes', 'array', 'max:12'],
+            'social_links.*.platform' => ['required', Rule::in(self::SOCIAL_PLATFORMS)],
+            'social_links.*.url' => ['required', 'url:http,https', 'max:255'],
+            'social_links.*.label' => ['nullable', 'required_if:social_links.*.platform,other', 'string', 'max:50'],
 
             'seo_default_meta_title' => ['nullable', 'string', 'max:70'],
             'seo_default_meta_description' => ['nullable', 'string', 'max:160'],

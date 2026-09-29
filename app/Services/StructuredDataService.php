@@ -36,11 +36,7 @@ class StructuredDataService
             $data['address'] = ['@type' => 'PostalAddress', 'streetAddress' => $address];
         }
 
-        $sameAs = array_values(array_filter([
-            $this->settings->get('social_linkedin'),
-            $this->settings->get('social_youtube'),
-            $this->settings->get('social_instagram'),
-        ]));
+        $sameAs = array_values(array_filter(array_column($this->settings->get('social_links') ?? [], 'url')));
 
         if ($sameAs !== []) {
             $data['sameAs'] = $sameAs;

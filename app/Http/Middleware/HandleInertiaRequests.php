@@ -98,11 +98,7 @@ class HandleInertiaRequests extends Middleware
             'email' => $settings['email'] ?: null,
             'operating_hours' => $settings['operating_hours'] ?: null, // schedule rows, see lib/opening-hours.ts
             'map_embed_url' => $settings['map_embed_url'] ?: null,
-            'social' => [
-                'linkedin' => $settings['social_linkedin'] ?: null,
-                'youtube' => $settings['social_youtube'] ?: null,
-                'instagram' => $settings['social_instagram'] ?: null,
-            ],
+            'social_links' => $settings['social_links'], // [{platform, url, label}], see lib/social-links.ts
         ];
     }
 

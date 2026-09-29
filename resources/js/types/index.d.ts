@@ -31,7 +31,7 @@ export interface SiteSettings {
     email: string | null;
     operating_hours: import('@/lib/opening-hours').OpeningHoursRow[] | null;
     map_embed_url: string | null;
-    social: { linkedin: string | null; youtube: string | null; instagram: string | null };
+    social_links: import('@/lib/social-links').SocialLink[];
 }
 
 export interface MenuNewsItem {

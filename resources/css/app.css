@@ -95,6 +95,10 @@
         --color-brand-linkedin: 10 102 194;
         --color-brand-instagram: 228 64 95;
         --color-brand-youtube: 255 0 0;
+        --color-brand-facebook: 8 102 255;
+        --color-brand-whatsapp: 37 211 102;
+        /* TikTok, X and Threads are black marks. */
+        --color-brand-mono: 0 0 0;
 
         --color-success: 22 132 71;
         --color-warning: 176 118 6;

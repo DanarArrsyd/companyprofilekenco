@@ -1,9 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Globe } from 'lucide-react';
 
-import { BrandIcon, type Brand } from '@/components/public/BrandIcon';
+import { BrandIcon } from '@/components/public/BrandIcon';
 import { Container } from '@/components/public/Section';
 import { useLocale } from '@/hooks/use-locale';
+import { SOCIAL_PLATFORM_INFO, socialLinkName } from '@/lib/social-links';
 
 import mascot from '../../../img/footer_maskot1.webp';
 import wave from '../../../img/element_footer.webp';
@@ -24,11 +25,12 @@ export function PublicFooter() {
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
     // White circles with a navy mark; hover fills the brand colour and drops the mark in from above.
-    const socials = [
-        { label: 'LinkedIn', brand: 'linkedin', href: siteSettings?.social?.linkedin, hover: 'hover:bg-brand-linkedin focus-visible:bg-brand-linkedin' },
-        { label: 'Instagram', brand: 'instagram', href: siteSettings?.social?.instagram, hover: 'hover:bg-brand-instagram focus-visible:bg-brand-instagram' },
-        { label: 'YouTube', brand: 'youtube', href: siteSettings?.social?.youtube, hover: 'hover:bg-brand-youtube focus-visible:bg-brand-youtube' },
-    ].filter((social): social is { label: string; brand: Brand; href: string; hover: string } => Boolean(social.href));
+    const socials = (siteSettings?.social_links ?? []).map((link) => ({
+        label: socialLinkName(link),
+        platform: link.platform,
+        href: link.url,
+        hover: SOCIAL_PLATFORM_INFO[link.platform]?.hover ?? SOCIAL_PLATFORM_INFO.other.hover,
+    }));
 
     return (
         <footer className="relative isolate overflow-hidden text-white">
@@ -62,9 +64,9 @@ export function PublicFooter() {
 
                             <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
                                 {socials.length > 0 && (
-                                    <ul className="flex items-center gap-3">
-                                        {socials.map(({ label, brand, href, hover }) => (
-                                            <li key={label}>
+                                    <ul className="flex flex-wrap items-center gap-3">
+                                        {socials.map(({ label, platform, href, hover }, index) => (
+                                            <li key={`${platform}-${index}`}>
                                                 <a
                                                     href={href}
                                                     target="_blank"
@@ -72,10 +74,14 @@ export function PublicFooter() {
                                                     aria-label={label}
                                                     className={`group/social flex h-[3.25rem] w-[3.25rem] items-center justify-center overflow-hidden rounded-full bg-white text-navy-950 transition-[background-color,color,transform] hover:text-white focus-visible:text-white duration-300 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-navy-950 ${hover}`}
                                                 >
-                                                    <BrandIcon
-                                                        brand={brand}
-                                                        className="h-[1.125rem] w-[1.125rem] group-hover/social:animate-[social-slide-in_300ms_both] motion-reduce:!animate-none"
-                                                    />
+                                                    {platform === 'other' ? (
+                                                        <Globe className="h-[1.125rem] w-[1.125rem] group-hover/social:animate-[social-slide-in_300ms_both] motion-reduce:!animate-none" aria-hidden="true" />
+                                                    ) : (
+                                                        <BrandIcon
+                                                            brand={platform}
+                                                            className="h-[1.125rem] w-[1.125rem] group-hover/social:animate-[social-slide-in_300ms_both] motion-reduce:!animate-none"
+                                                        />
+                                                    )}
                                                 </a>
                                             </li>
                                         ))}

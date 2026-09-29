@@ -69,6 +69,9 @@ export default {
                     linkedin: 'rgb(var(--color-brand-linkedin) / <alpha-value>)',
                     instagram: 'rgb(var(--color-brand-instagram) / <alpha-value>)',
                     youtube: 'rgb(var(--color-brand-youtube) / <alpha-value>)',
+                    facebook: 'rgb(var(--color-brand-facebook) / <alpha-value>)',
+                    whatsapp: 'rgb(var(--color-brand-whatsapp) / <alpha-value>)',
+                    mono: 'rgb(var(--color-brand-mono) / <alpha-value>)',
                 },
                 gray: {
                     200: 'rgb(var(--color-gray-200) / <alpha-value>)',

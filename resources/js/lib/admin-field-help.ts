@@ -97,9 +97,6 @@ const MODULES: Record<string, FieldHelp> = {
         hint: 'In Google Maps: Share → Embed a map → copy only the https://… link inside src="…". Other links are shown as a "view map" link instead of a map.',
         example: 'https://www.google.com/maps/embed?pb=…',
     },
-    'settings:social_linkedin': { example: 'https://www.linkedin.com/company/…' },
-    'settings:social_instagram': { example: 'https://www.instagram.com/…' },
-    'settings:social_youtube': { example: 'https://www.youtube.com/@…' },
     'settings:seo_twitter_username': { example: '@kenco' },
 
     'users:name': { example: 'Budi Santoso' },

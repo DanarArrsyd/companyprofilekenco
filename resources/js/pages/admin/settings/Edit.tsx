@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OperatingHoursField } from '@/components/admin/OperatingHoursField';
+import { SocialLinksField } from '@/components/admin/SocialLinksField';
 import AdminLayout from '@/layouts/AdminLayout';
 import type { OpeningHoursRow } from '@/lib/opening-hours';
+import type { SocialLink } from '@/lib/social-links';
 import { mediaUrl } from '@/lib/media';
 import { FieldHint } from '@/components/admin/FieldHint';
 import { fieldHelp } from '@/lib/admin-field-help';
@@ -20,7 +22,7 @@ interface Settings {
     company_name: string | null; legal_name: string | null; tagline: string | null; company_description: string | null;
     logo: string | null; favicon: string | null;
     address: string | null; phone: string | null; email: string | null; operating_hours: OpeningHoursRow[]; map_embed_url: string | null;
-    social_linkedin: string | null; social_youtube: string | null; social_instagram: string | null;
+    social_links: SocialLink[];
     seo_default_meta_title: string | null; seo_default_meta_description: string | null; seo_default_og_image: string | null;
     seo_title_separator: string | null; seo_default_robots: string | null;
     seo_twitter_card_type: string | null; seo_twitter_username: string | null;
@@ -47,7 +49,7 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
         company_name: string; legal_name: string; tagline: string; company_description: string;
         logo: File | null; logo_path: string; favicon: File | null;
         address: string; phone: string; email: string; operating_hours: OpeningHoursRow[]; operating_hours_sent: boolean; map_embed_url: string;
-        social_linkedin: string; social_youtube: string; social_instagram: string;
+        social_links: SocialLink[]; social_links_sent: boolean;
         seo_default_meta_title: string; seo_default_meta_description: string; seo_default_og_image: File | null; seo_default_og_image_path: string;
         seo_title_separator: string; seo_default_robots: string;
         seo_twitter_card_type: string; seo_twitter_username: string;
@@ -67,9 +69,8 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
         operating_hours: settings.operating_hours ?? [],
         operating_hours_sent: true,
         map_embed_url: settings.map_embed_url ?? '',
-        social_linkedin: settings.social_linkedin ?? '',
-        social_youtube: settings.social_youtube ?? '',
-        social_instagram: settings.social_instagram ?? '',
+        social_links: settings.social_links ?? [],
+        social_links_sent: true,
         seo_default_meta_title: settings.seo_default_meta_title ?? '',
         seo_default_meta_description: settings.seo_default_meta_description ?? '',
         seo_default_og_image: null,
@@ -185,21 +186,7 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
 
                 {tab === 'Social Media' && (
                     <FormSection title="Social Media">
-                        <div>
-                            <Label htmlFor="social_linkedin">LinkedIn</Label>
-                            <Input id="social_linkedin" placeholder={fieldHelp('settings', 'social_linkedin').example} value={data.social_linkedin} onChange={(e) => setData('social_linkedin', e.target.value)} className="mt-1.5" />
-                            {errors.social_linkedin && <p className="mt-1 text-sm text-danger">{errors.social_linkedin}</p>}
-                        </div>
-                        <div>
-                            <Label htmlFor="social_youtube">YouTube</Label>
-                            <Input id="social_youtube" placeholder={fieldHelp('settings', 'social_youtube').example} value={data.social_youtube} onChange={(e) => setData('social_youtube', e.target.value)} className="mt-1.5" />
-                            {errors.social_youtube && <p className="mt-1 text-sm text-danger">{errors.social_youtube}</p>}
-                        </div>
-                        <div>
-                            <Label htmlFor="social_instagram">Instagram</Label>
-                            <Input id="social_instagram" placeholder={fieldHelp('settings', 'social_instagram').example} value={data.social_instagram} onChange={(e) => setData('social_instagram', e.target.value)} className="mt-1.5" />
-                            {errors.social_instagram && <p className="mt-1 text-sm text-danger">{errors.social_instagram}</p>}
-                        </div>
+                        <SocialLinksField value={data.social_links} onChange={(links) => setData('social_links', links)} errors={errors} />
                     </FormSection>
                 )}
 
