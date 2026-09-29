@@ -29,7 +29,7 @@ export interface SiteSettings {
     address: string | null;
     phone: string | null;
     email: string | null;
-    operating_hours: string | null;
+    operating_hours: import('@/lib/opening-hours').OpeningHoursRow[] | null;
     map_embed_url: string | null;
     social: { linkedin: string | null; youtube: string | null; instagram: string | null };
 }

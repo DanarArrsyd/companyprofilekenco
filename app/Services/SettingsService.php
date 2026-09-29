@@ -16,7 +16,8 @@ class SettingsService
 
     /**
      * Known setting keys grouped for the admin Settings UI, with their
-     * value type ('string', 'text', 'bool', or 'image').
+     * value type ('string', 'text', 'bool', 'image', or 'schedule' — a JSON list
+     * of operating-hours rows).
      */
     public const GROUPS = [
         'general' => [
@@ -33,7 +34,7 @@ class SettingsService
             'address' => 'text',
             'phone' => 'string',
             'email' => 'string',
-            'operating_hours' => 'string',
+            'operating_hours' => 'schedule',
             'map_embed_url' => 'string',
         ],
         'social' => [
@@ -120,7 +121,11 @@ class SettingsService
 
             SiteSetting::updateOrCreate(
                 ['key' => $key],
-                ['value' => is_bool($value) ? ($value ? '1' : '0') : $value, 'type' => $types->get($key)],
+                ['value' => match (true) {
+                    is_bool($value) => $value ? '1' : '0',
+                    is_array($value) => json_encode(array_values($value)),
+                    default => $value,
+                }, 'type' => $types->get($key)],
             );
         }
 
@@ -131,6 +136,8 @@ class SettingsService
     {
         return match ($type) {
             'bool' => (bool) $value,
+            // Anything that is not a JSON list (e.g. the old free-text value) reads as no schedule.
+            'schedule' => is_array($decoded = json_decode((string) $value, true)) && array_is_list($decoded) ? $decoded : [],
             default => $value,
         };
     }

@@ -9,7 +9,9 @@ import { PageHeader } from '@/components/admin/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { OperatingHoursField } from '@/components/admin/OperatingHoursField';
 import AdminLayout from '@/layouts/AdminLayout';
+import type { OpeningHoursRow } from '@/lib/opening-hours';
 import { mediaUrl } from '@/lib/media';
 import { FieldHint } from '@/components/admin/FieldHint';
 import { fieldHelp } from '@/lib/admin-field-help';
@@ -17,7 +19,7 @@ import { fieldHelp } from '@/lib/admin-field-help';
 interface Settings {
     company_name: string | null; legal_name: string | null; tagline: string | null; company_description: string | null;
     logo: string | null; favicon: string | null;
-    address: string | null; phone: string | null; email: string | null; operating_hours: string | null; map_embed_url: string | null;
+    address: string | null; phone: string | null; email: string | null; operating_hours: OpeningHoursRow[]; map_embed_url: string | null;
     social_linkedin: string | null; social_youtube: string | null; social_instagram: string | null;
     seo_default_meta_title: string | null; seo_default_meta_description: string | null; seo_default_og_image: string | null;
     seo_title_separator: string | null; seo_default_robots: string | null;
@@ -44,7 +46,7 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
         _method: string;
         company_name: string; legal_name: string; tagline: string; company_description: string;
         logo: File | null; logo_path: string; favicon: File | null;
-        address: string; phone: string; email: string; operating_hours: string; map_embed_url: string;
+        address: string; phone: string; email: string; operating_hours: OpeningHoursRow[]; operating_hours_sent: boolean; map_embed_url: string;
         social_linkedin: string; social_youtube: string; social_instagram: string;
         seo_default_meta_title: string; seo_default_meta_description: string; seo_default_og_image: File | null; seo_default_og_image_path: string;
         seo_title_separator: string; seo_default_robots: string;
@@ -62,7 +64,8 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
         address: settings.address ?? '',
         phone: settings.phone ?? '',
         email: settings.email ?? '',
-        operating_hours: settings.operating_hours ?? '',
+        operating_hours: settings.operating_hours ?? [],
+        operating_hours_sent: true,
         map_embed_url: settings.map_embed_url ?? '',
         social_linkedin: settings.social_linkedin ?? '',
         social_youtube: settings.social_youtube ?? '',
@@ -170,10 +173,7 @@ export default function Edit({ settings, translator }: { settings: Settings; tra
                             <Input id="email" placeholder={fieldHelp('settings', 'email').example} type="email" value={data.email} onChange={(e) => setData('email', e.target.value)} className="mt-1.5" />
                             {errors.email && <p className="mt-1 text-sm text-danger">{errors.email}</p>}
                         </div>
-                        <div>
-                            <Label htmlFor="operating_hours">Operating Hours</Label>
-                            <Input id="operating_hours" value={data.operating_hours} onChange={(e) => setData('operating_hours', e.target.value)} className="mt-1.5" placeholder="Mon–Fri, 08:00–17:00" />
-                        </div>
+                        <OperatingHoursField value={data.operating_hours} onChange={(rows) => setData('operating_hours', rows)} errors={errors} />
                         <div>
                             <Label htmlFor="map_embed_url">Map Embed URL</Label>
                             <Input id="map_embed_url" aria-describedby="map_embed_url-help" placeholder={fieldHelp('settings', 'map_embed_url').example} value={data.map_embed_url} onChange={(e) => setData('map_embed_url', e.target.value)} className="mt-1.5" />

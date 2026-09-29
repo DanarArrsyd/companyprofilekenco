@@ -7,6 +7,19 @@ use Illuminate\Validation\Rule;
 
 class UpdateSettingsRequest extends FormRequest
 {
+    public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+    /**
+     * The settings page posts FormData, which cannot carry an empty list: with
+     * `operating_hours_sent`, a missing schedule means "no rows left".
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->boolean('operating_hours_sent')) {
+            $this->merge(['operating_hours' => $this->input('operating_hours', [])]);
+        }
+    }
+
     public function authorize(): bool
     {
         return true;
@@ -29,7 +42,22 @@ class UpdateSettingsRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:255'],
-            'operating_hours' => ['nullable', 'string', 'max:255'],
+            // A schedule of rows: day range + opening and closing time (24-hour HH:MM).
+            'operating_hours' => ['sometimes', 'array', 'max:7'],
+            'operating_hours.*.from' => ['required', Rule::in(self::DAYS)],
+            'operating_hours.*.to' => ['required', Rule::in(self::DAYS), function (string $attribute, mixed $value, \Closure $fail) {
+                $from = $this->input(str_replace('.to', '.from', $attribute));
+                if (in_array($from, self::DAYS, true) && array_search($value, self::DAYS, true) < array_search($from, self::DAYS, true)) {
+                    $fail('Hari selesai harus sama dengan atau sesudah hari mulai.');
+                }
+            }],
+            'operating_hours.*.open' => ['required', 'date_format:H:i'],
+            'operating_hours.*.close' => ['required', 'date_format:H:i', function (string $attribute, mixed $value, \Closure $fail) {
+                $open = $this->input(str_replace('.close', '.open', $attribute));
+                if (is_string($open) && is_string($value) && $value <= $open) {
+                    $fail('Jam tutup harus sesudah jam buka.');
+                }
+            }],
             'map_embed_url' => ['nullable', 'url', 'max:1000'],
 
             'social_linkedin' => ['nullable', 'url', 'max:255'],

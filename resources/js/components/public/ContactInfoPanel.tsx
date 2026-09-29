@@ -1,8 +1,9 @@
 import { usePage } from '@inertiajs/react';
-import { ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
+import { Clock, ExternalLink, Mail, MapPin, Phone } from 'lucide-react';
 import { ReactNode } from 'react';
 
 import { useLocale } from '@/hooks/use-locale';
+import { closedDays, dayName, formatDays, formatTimeRange } from '@/lib/opening-hours';
 
 /** A Google Maps "embed" URL is iframe-safe; a plain maps.google.com link is not — link out instead. */
 function isEmbeddableMapUrl(url: string): boolean {
@@ -29,7 +30,7 @@ function InfoRow({ icon: Icon, label, children }: { icon: typeof MapPin; label: 
  * rules or map, sized for sitting inside a colored CTA section.
  */
 export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const { siteSettings } = usePage().props;
     const hasAny = siteSettings.address || siteSettings.phone || siteSettings.email || siteSettings.operating_hours;
 
@@ -68,8 +69,21 @@ export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
                     </InfoRow>
                 )}
                 {siteSettings.operating_hours && (
-                    <InfoRow icon={Phone} label={t('Operating Hours')}>
-                        <span className="whitespace-pre-line">{siteSettings.operating_hours}</span>
+                    <InfoRow icon={Clock} label={t('Operating Hours')}>
+                        <dl className="grid grid-cols-[auto_auto] gap-x-6 gap-y-1">
+                            {siteSettings.operating_hours.map((row, index) => (
+                                <div key={index} className="contents">
+                                    <dt>{formatDays(row, locale)}</dt>
+                                    <dd className="tabular-nums">{formatTimeRange(row, locale)}</dd>
+                                </div>
+                            ))}
+                            {closedDays(siteSettings.operating_hours).length > 0 && (
+                                <div className="contents text-muted-foreground">
+                                    <dt>{closedDays(siteSettings.operating_hours).map((day) => dayName(day, locale)).join(', ')}</dt>
+                                    <dd>{t('Closed')}</dd>
+                                </div>
+                            )}
+                        </dl>
                     </InfoRow>
                 )}
             </dl>
