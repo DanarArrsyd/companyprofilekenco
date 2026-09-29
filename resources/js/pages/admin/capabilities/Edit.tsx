@@ -1,25 +1,22 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, Eye, Plus, Trash2 } from 'lucide-react';
-import { FormEventHandler, useState } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
-import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { ContentLocaleTabs, LocaleBadge } from '@/components/admin/ContentLocaleTabs';
-import { FormActions } from '@/components/admin/FormActions';
-import { FormSection } from '@/components/admin/FormSection';
+import { EditCard } from '@/components/admin/edit/EditCard';
+import { EditPageLayout } from '@/components/admin/edit/EditPageLayout';
+import { PublishPanel } from '@/components/admin/edit/PublishPanel';
+import { WebsitePanel } from '@/components/admin/edit/WebsitePanel';
+import { FieldHint } from '@/components/admin/FieldHint';
 import { MediaPickerField } from '@/components/admin/MediaPicker';
-import { PageHeader } from '@/components/admin/PageHeader';
 import { SEO_FIELDS_DEFAULT, SeoFields, SeoFieldsData, seoTranslations } from '@/components/admin/SeoFields';
-import { StatusBadge } from '@/components/admin/StatusBadge';
-import { Button } from '@/components/ui/button';
+import { SlugField } from '@/components/admin/SlugField';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SlugField } from '@/components/admin/SlugField';
-import { usePermissions } from '@/hooks/use-permissions';
+import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning';
 import AdminLayout from '@/layouts/AdminLayout';
-import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
-import { fromDateTimeInput, toDateTimeInput } from '@/lib/datetime-input';
-import { FieldHint } from '@/components/admin/FieldHint';
 import { fieldHelp } from '@/lib/admin-field-help';
+import { countTranslated, initialTranslations, translatableBinder, translatableError, type ContentLocale, type TranslationValues } from '@/lib/translatable-form';
 import { cn } from '@/lib/utils';
 
 interface Step {
@@ -27,6 +24,7 @@ interface Step {
     title: string;
     description: string | null;
     sort_order: number;
+    translations?: { id?: Record<string, string | null> } | null;
 }
 
 interface Capability {
@@ -42,48 +40,28 @@ interface Capability {
     } | null;
 }
 
-const STEP_TRANSLATABLE_FIELDS = ['title', 'description'];
-
-function StepRow({ capabilityId, step, isFirst, isLast, onMove, locale }: { capabilityId: number; step: Step; isFirst: boolean; isLast: boolean; onMove: (dir: 'up' | 'down') => void; locale: ContentLocale }) {
-    const [confirmingDelete, setConfirmingDelete] = useState(false);
-    const { data, setData, put, processing } = useForm({
-        title: step.title,
-        description: step.description ?? '',
-        translations: initialTranslations(step, STEP_TRANSLATABLE_FIELDS),
-    });
-    const bind = translatableBinder(data, setData, locale);
-
-    return (
-        <div className="rounded-lg border border-border bg-surface p-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_auto]">
-                <div className="space-y-3">
-                    <Input {...bind('title')} placeholder={bind('title').placeholder ?? 'Step title'} aria-label={locale === 'en' ? 'Step title' : 'Step title (Indonesian)'} />
-                    <textarea {...bind('description')} placeholder={bind('description').placeholder ?? 'Step description'} aria-label={locale === 'en' ? 'Step description' : 'Step description (Indonesian)'} rows={2} className="w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
-                </div>
-                <div className="flex items-start gap-2">
-                    <Button type="button" variant="secondary" size="sm" disabled={isFirst} onClick={() => onMove('up')} aria-label="Move up"><ChevronUp className="h-4 w-4" /></Button>
-                    <Button type="button" variant="secondary" size="sm" disabled={isLast} onClick={() => onMove('down')} aria-label="Move down"><ChevronDown className="h-4 w-4" /></Button>
-                    <Button type="button" size="sm" onClick={() => put(route('admin.capabilities.steps.update', [capabilityId, step.id]), { preserveScroll: true })} disabled={processing}>Save</Button>
-                    <Button type="button" variant="danger" size="sm" onClick={() => setConfirmingDelete(true)} aria-label="Delete step"><Trash2 className="h-4 w-4" /></Button>
-                </div>
-            </div>
-
-            <ConfirmDialog
-                open={confirmingDelete}
-                title="Remove this step?"
-                confirmLabel="Remove"
-                destructive
-                onCancel={() => setConfirmingDelete(false)}
-                onConfirm={() => {
-                    router.delete(route('admin.capabilities.steps.destroy', [capabilityId, step.id]), { preserveScroll: true });
-                    setConfirmingDelete(false);
-                }}
-            />
-        </div>
-    );
+/** A process step as the form holds it; `key` only identifies the row on screen. */
+interface StepRow {
+    key: string;
+    id: number | null;
+    title: string;
+    description: string;
+    translations: { id: { title: string; description: string } };
 }
 
 const TRANSLATABLE_FIELDS = ['name', 'summary', 'description'];
+
+let newStepCounter = 0;
+
+function stepRow(step: Step): StepRow {
+    return {
+        key: `step-${step.id}`,
+        id: step.id,
+        title: step.title,
+        description: step.description ?? '',
+        translations: { id: { title: step.translations?.id?.title ?? '', description: step.translations?.id?.description ?? '' } },
+    };
+}
 
 export default function Edit({
     capability,
@@ -94,17 +72,15 @@ export default function Edit({
     availableMachines: { id: number; name: string; is_published: boolean }[];
     statusOptions: string[];
 }) {
-    const { can } = usePermissions();
-    const steps = capability.steps ?? [];
-    const [newStepTitle, setNewStepTitle] = useState('');
-    const [selectedMachines, setSelectedMachines] = useState<number[]>(capability.machines.map((m) => m.id));
-
-    const { data, setData, post, processing, errors } = useForm<{
+    const { data, setData, post, processing, errors, isDirty, setDefaults } = useForm<{
         _method: string; slug: string; name: string; summary: string; description: string; icon: string;
         featured_image: File | null; featured_image_path: string; is_featured: boolean; sort_order: number;
         status: string; published_at: string;
         seo: SeoFieldsData;
         translations: { id: TranslationValues };
+        steps: StepRow[];
+        machine_ids: number[];
+        sync_relations: boolean;
     }>({
         translations: initialTranslations(capability, TRANSLATABLE_FIELDS),
         _method: 'put',
@@ -131,198 +107,257 @@ export default function Edit({
             robots_index: capability.seo_metadata?.robots_index ?? true,
             robots_follow: capability.seo_metadata?.robots_follow ?? true,
         },
+        steps: (capability.steps ?? []).map(stepRow),
+        machine_ids: capability.machines.map((machine) => machine.id),
+        sync_relations: true,
     });
 
     const [contentLocale, setContentLocale] = useState<ContentLocale>('en');
     const bind = translatableBinder(data, setData, contentLocale);
+    const publicUrl = `/capabilities/${capability.slug}`;
+
+    useUnsavedChangesWarning(isDirty && !processing);
+
+    // After a save, take the server's rows (new steps now have ids, an uploaded image
+    // is now a stored path) and make that the "unchanged" baseline. setDefaults() runs
+    // in an effect so it sees the updated data, not the pre-save closure.
+    const [savedAt, setSavedAt] = useState(0);
+    useEffect(() => {
+        if (savedAt) setDefaults();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [savedAt]);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('admin.capabilities.update', capability.id), { forceFormData: true });
-    };
-
-    const addStep = () => {
-        if (!newStepTitle.trim()) return;
-        router.post(route('admin.capabilities.steps.store', capability.id), { title: newStepTitle }, {
+        post(route('admin.capabilities.update', capability.id), {
+            forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => setNewStepTitle(''),
+            onSuccess: (page) => {
+                const fresh = (page.props as unknown as { capability: Capability }).capability;
+                setData((current) => ({
+                    ...current,
+                    steps: (fresh.steps ?? []).map(stepRow),
+                    featured_image: null,
+                    featured_image_path: fresh.featured_image ?? '',
+                }));
+                setSavedAt(Date.now());
+            },
         });
     };
 
-    const moveStep = (index: number, direction: 'up' | 'down') => {
-        const target = direction === 'up' ? index - 1 : index + 1;
-        if (target < 0 || target >= steps.length) return;
-        const reordered = [...steps];
-        [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
-        router.post(route('admin.capabilities.steps.reorder', capability.id), { ordered_ids: reordered.map((s) => s.id) }, { preserveScroll: true });
+    // --- Steps: edited here, saved with the form. -------------------------------------------
+    const updateStep = (index: number, field: 'title' | 'description', value: string) =>
+        setData('steps', data.steps.map((step, i) => {
+            if (i !== index) return step;
+            return contentLocale === 'en'
+                ? { ...step, [field]: value }
+                : { ...step, translations: { id: { ...step.translations.id, [field]: value } } };
+        }));
+    const stepValue = (step: StepRow, field: 'title' | 'description') => (contentLocale === 'en' ? step[field] : step.translations.id[field]);
+    const moveStep = (index: number, offset: -1 | 1) => {
+        const target = index + offset;
+        if (target < 0 || target >= data.steps.length) return;
+        const next = [...data.steps];
+        [next[index], next[target]] = [next[target], next[index]];
+        setData('steps', next);
     };
+    const addStep = () =>
+        setData('steps', [...data.steps, { key: `new-${++newStepCounter}`, id: null, title: '', description: '', translations: { id: { title: '', description: '' } } }]);
+    const removeStep = (index: number) => setData('steps', data.steps.filter((_, i) => i !== index));
 
-    const toggleMachine = (id: number) => {
-        setSelectedMachines((current) => current.includes(id) ? current.filter((v) => v !== id) : [...current, id]);
-    };
+    const toggleMachine = (id: number) =>
+        setData('machine_ids', data.machine_ids.includes(id) ? data.machine_ids.filter((value) => value !== id) : [...data.machine_ids, id]);
 
     return (
         <AdminLayout>
             <Head title={`Edit ${capability.name}`} />
 
-            <PageHeader
+            <EditPageLayout
+                eyebrow="Edit kapabilitas"
                 title={capability.name}
-                breadcrumbs={[{ label: 'Capabilities', href: route('admin.capabilities') }, { label: 'Edit' }]}
-                actions={
-                    <div className="flex items-center gap-2">
-                        <StatusBadge status={capability.status} />
-                        <a href={route('admin.capabilities.preview', capability.id)} target="_blank" rel="noreferrer">
-                            <Button variant="secondary" size="sm"><Eye className="mr-2 h-4 w-4" />Preview</Button>
-                        </a>
-                        {can('capabilities.update') && capability.status !== 'published' && (
-                            <Button size="sm" onClick={() => router.post(route('admin.capabilities.publish', capability.id))}>Publish</Button>
-                        )}
-                        {can('capabilities.update') && capability.status !== 'archived' && (
-                            <Button variant="secondary" size="sm" onClick={() => router.post(route('admin.capabilities.archive', capability.id))}>Archive</Button>
-                        )}
-                    </div>
-                }
-            />
-
-            <div className="space-y-6">
-                <form onSubmit={submit} className="rounded-lg border border-border bg-surface px-6 sm:px-8">
-                    <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
-                    <FormSection title="General">
-                        <div>
-                            <Label htmlFor="name">Name<LocaleBadge locale={contentLocale} /></Label>
-                            <Input id="name" {...bind('name', fieldHelp('capabilities', 'name').example)} className="mt-1.5" />
-                            {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
-                        </div>
-                        <SlugField value={data.slug} onChange={(slug) => setData('slug', slug)} source={data.name} prefix="/capabilities/" hint="Lowercase letters, numbers and hyphens. The page address is the same in both languages; if you change it, links to the old address redirect here automatically." error={errors.slug} />
-                        <div>
-                            <Label htmlFor="summary">Summary<LocaleBadge locale={contentLocale} /></Label>
-                            <Input id="summary" aria-describedby="summary-help" {...bind('summary', fieldHelp('capabilities', 'summary').example)} className="mt-1.5" />
-                            <FieldHint id="summary-help">{fieldHelp('capabilities', 'summary').hint}</FieldHint>
-                        </div>
-                        <div>
-                            <Label htmlFor="description">Description<LocaleBadge locale={contentLocale} /></Label>
-                            <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
-                        </div>
-                        <div>
-                            <Label htmlFor="icon">Icon</Label>
-                            <Input id="icon" aria-describedby="icon-help" placeholder={fieldHelp('capabilities', 'icon').example} value={data.icon} onChange={(e) => setData('icon', e.target.value)} className="mt-1.5" />
-                            <FieldHint id="icon-help">{fieldHelp('capabilities', 'icon').hint}</FieldHint>
-                        </div>
-                    </FormSection>
-
-                    <FormSection title="Media">
-                        <MediaPickerField
-                            label="Featured Image"
-                            currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : null)}
-                            onUploadFile={(file) => { setData('featured_image', file); setData('featured_image_path', ''); }}
-                            onSelectPath={(path) => { setData('featured_image_path', path); setData('featured_image', null); }}
-                            onClear={() => { setData('featured_image', null); setData('featured_image_path', ''); }}
-                        />
-                    </FormSection>
-
-                    <FormSection title="Publishing">
-                        <div>
-                            <label className="flex items-center gap-2 text-sm text-slate-700">
-                                <input type="checkbox" checked={data.is_featured} onChange={(e) => setData('is_featured', e.target.checked)} className="rounded border-border" />
-                                Featured capability
+                breadcrumbs={[{ label: 'Kapabilitas', href: route('admin.capabilities') }, { label: capability.name }]}
+                viewUrl={capability.status === 'published' ? publicUrl : null}
+                onSubmit={submit}
+                aside={
+                    <>
+                        <PublishPanel
+                            status={data.status}
+                            statusOptions={statusOptions}
+                            onStatusChange={(status) => setData('status', status)}
+                            publishedAt={data.published_at}
+                            onPublishedAtChange={(value) => setData('published_at', value)}
+                            isDirty={isDirty}
+                            processing={processing}
+                            previewUrl={route('admin.capabilities.preview', capability.id)}
+                        >
+                            <label className="flex items-start gap-3 text-sm">
+                                <input type="checkbox" checked={data.is_featured} onChange={(e) => setData('is_featured', e.target.checked)} className="mt-0.5 rounded border-border" />
+                                <span>
+                                    <span className="block font-medium text-foreground">Tampilkan di Beranda</span>
+                                    <span className="mt-0.5 block text-xs text-slate-500">Masuk bagian “Kapabilitas” di halaman utama.</span>
+                                </span>
                             </label>
-                            <FieldHint>{fieldHelp('capabilities', 'is_featured').hint}</FieldHint>
-                        </div>
-                        <div>
-                            <Label htmlFor="sort_order">Sort order</Label>
-                            <Input id="sort_order" aria-describedby="sort_order-help" type="number" value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
-                            <FieldHint id="sort_order-help">{fieldHelp('capabilities', 'sort_order').hint}</FieldHint>
-                        </div>
-                        <div>
-                            <Label htmlFor="status">Status</Label>
-                            <select id="status" aria-describedby="status-help" value={data.status} onChange={(e) => setData('status', e.target.value)} className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm">
-                                {statusOptions.map((s) => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                            <FieldHint id="status-help">{fieldHelp('capabilities', 'status').hint}</FieldHint>
-                        </div>
-                        <div>
-                            <Label htmlFor="published_at">Published at</Label>
-                            <Input id="published_at" aria-describedby="published_at-help" type="datetime-local" value={toDateTimeInput(data.published_at)} onChange={(e) => setData('published_at', fromDateTimeInput(e.target.value))} className="mt-1.5" />
-                            <FieldHint id="published_at-help">{fieldHelp('capabilities', 'published_at').hint}</FieldHint>
-                        </div>
-                    </FormSection>
-
-                    <FormSection title="SEO">
-                        <SeoFields
-                            locale={contentLocale}
-                            data={data.seo}
-                            onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
-                            errors={errors}
-                            titleFallback={capability.name}
-                            pageUrl={`/capabilities/${capability.slug}`}
-                        />
-                    </FormSection>
-
-                    <FormActions>
-                        <Button type="submit" disabled={processing}>Save Changes</Button>
-                    </FormActions>
-                </form>
-
-                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
-                    <h2 className="text-sm font-semibold text-foreground">Process Steps</h2>
-                    <div className="mb-5 mt-4">
-                        <ContentLocaleTabs inline value={contentLocale} onChange={setContentLocale} />
-                    </div>
-                    <div className="mt-5 space-y-4">
-                        {steps.map((step, index) => (
-                            <StepRow key={step.id} capabilityId={capability.id} step={step} isFirst={index === 0} isLast={index === steps.length - 1} onMove={(dir) => moveStep(index, dir)} locale={contentLocale} />
-                        ))}
-                    </div>
-                    <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
-                        <Input value={newStepTitle} onChange={(e) => setNewStepTitle(e.target.value)} placeholder="New step title" className="max-w-sm" />
-                        <Button type="button" size="sm" onClick={addStep}><Plus className="mr-2 h-4 w-4" />Add Step</Button>
-                    </div>
+                            <div>
+                                <Label htmlFor="sort_order">Urutan</Label>
+                                <Input id="sort_order" aria-describedby="sort_order-help" type="number" min={0} value={data.sort_order} onChange={(e) => setData('sort_order', Number(e.target.value))} className="mt-1.5" />
+                                <FieldHint id="sort_order-help">Angka kecil tampil lebih dulu.</FieldHint>
+                            </div>
+                        </PublishPanel>
+                        <WebsitePanel url={publicUrl} places={['Daftar di halaman Kapabilitas', ...(data.is_featured ? ['Beranda, bagian Kapabilitas'] : [])]} />
+                    </>
+                }
+            >
+                <div className="rounded-lg border border-border bg-surface px-5 sm:px-6">
+                    <ContentLocaleTabs value={contentLocale} onChange={setContentLocale} translated={countTranslated(data.translations.id)} total={TRANSLATABLE_FIELDS.length} />
                 </div>
 
-                <div className="rounded-lg border border-border bg-surface p-6 sm:p-8">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                            <h2 className="text-sm font-semibold text-foreground">Mesin &amp; peralatan</h2>
-                            <p className="mt-1 text-sm text-slate-500">Mesin yang dicentang tampil di bagian “Peralatan” pada halaman kapabilitas ini.</p>
-                        </div>
+                <EditCard title="Informasi utama" description="Nama dan teks yang tampil di daftar kapabilitas dan halaman detailnya.">
+                    <div>
+                        <Label htmlFor="name">Nama kapabilitas<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="name" aria-describedby="name-help" {...bind('name', fieldHelp('capabilities', 'name').example)} className="mt-1.5" />
+                        <FieldHint id="name-help">Judul di kartu daftar dan di halaman detail.</FieldHint>
+                        {translatableError(errors, 'name', contentLocale) && <p className="mt-1 text-sm text-danger">{translatableError(errors, 'name', contentLocale)}</p>}
+                    </div>
+                    <SlugField
+                        value={data.slug}
+                        onChange={(slug) => setData('slug', slug)}
+                        source={data.name}
+                        prefix="/capabilities/"
+                        hint="Huruf kecil, angka dan tanda hubung. Alamat sama untuk kedua bahasa; kalau diganti, alamat lama otomatis dialihkan ke sini."
+                        error={errors.slug}
+                    />
+                    <div>
+                        <Label htmlFor="summary">Ringkasan<LocaleBadge locale={contentLocale} /></Label>
+                        <Input id="summary" aria-describedby="summary-help" {...bind('summary', fieldHelp('capabilities', 'summary').example)} className="mt-1.5" />
+                        <FieldHint id="summary-help">1–2 kalimat. Tampil di kartu daftar kapabilitas dan di Beranda.</FieldHint>
+                    </div>
+                    <div>
+                        <Label htmlFor="description">Deskripsi lengkap<LocaleBadge locale={contentLocale} /></Label>
+                        <textarea id="description" {...bind('description')} rows={5} className="mt-1.5 w-full rounded border border-border bg-surface px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                        <Label htmlFor="icon">Ikon</Label>
+                        <Input id="icon" aria-describedby="icon-help" placeholder={fieldHelp('capabilities', 'icon').example} value={data.icon} onChange={(e) => setData('icon', e.target.value)} className="mt-1.5" />
+                        <FieldHint id="icon-help">{fieldHelp('capabilities', 'icon').hint}</FieldHint>
+                    </div>
+                </EditCard>
+
+                <EditCard title="Gambar utama" description="Tampil di kartu daftar dan di atas halaman detail. Rasio 4:3, minimal 1200 px.">
+                    <MediaPickerField
+                        label="Gambar"
+                        currentUrl={data.featured_image ? URL.createObjectURL(data.featured_image) : (data.featured_image_path ? `/storage/${data.featured_image_path}` : null)}
+                        onUploadFile={(file) => { setData('featured_image', file); setData('featured_image_path', ''); }}
+                        onSelectPath={(path) => { setData('featured_image_path', path); setData('featured_image', null); }}
+                        onClear={() => { setData('featured_image', null); setData('featured_image_path', ''); }}
+                    />
+                </EditCard>
+
+                <EditCard
+                    title="Langkah proses"
+                    description="Tampil berurutan di halaman detail. Tersimpan bersama tombol Simpan."
+                    actions={<span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-slate-700">{data.steps.length} langkah</span>}
+                >
+                    {data.steps.length === 0 && <p className="text-sm text-slate-500">Belum ada langkah. Tambahkan urutan proses produksinya.</p>}
+                    <ol className="space-y-3">
+                        {data.steps.map((step, index) => (
+                            <li key={step.key} className="grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-border p-3.5">
+                                <span className="mt-2 flex h-7 w-7 items-center justify-center rounded-full bg-navy-950 text-xs font-semibold text-white">{index + 1}</span>
+                                <div className="space-y-2">
+                                    <Input
+                                        value={stepValue(step, 'title')}
+                                        placeholder={contentLocale === 'id' ? step.title || 'Judul langkah' : 'Judul langkah, mis. Desain & simulasi die'}
+                                        onChange={(e) => updateStep(index, 'title', e.target.value)}
+                                        aria-label={`Judul langkah ${index + 1}`}
+                                        className={cn(errors[`steps.${index}.title` as keyof typeof errors] && 'border-danger')}
+                                    />
+                                    <textarea
+                                        value={stepValue(step, 'description')}
+                                        placeholder={contentLocale === 'id' ? step.description || 'Deskripsi singkat (opsional)' : 'Deskripsi singkat (opsional)'}
+                                        onChange={(e) => updateStep(index, 'description', e.target.value)}
+                                        aria-label={`Deskripsi langkah ${index + 1}`}
+                                        rows={2}
+                                        className="w-full rounded border border-border bg-surface px-3 py-2 text-sm"
+                                    />
+                                    {errors[`steps.${index}.title` as keyof typeof errors] && (
+                                        <p className="text-sm text-danger">Judul langkah {index + 1} wajib diisi (bahasa Inggris).</p>
+                                    )}
+                                </div>
+                                <div className="flex gap-1.5">
+                                    <button type="button" onClick={() => moveStep(index, -1)} disabled={index === 0} aria-label={`Naikkan langkah ${index + 1}`} className="flex h-9 w-9 items-center justify-center rounded border border-border text-slate-700 hover:bg-muted disabled:opacity-40">
+                                        <ArrowUp className="h-4 w-4" />
+                                    </button>
+                                    <button type="button" onClick={() => moveStep(index, 1)} disabled={index === data.steps.length - 1} aria-label={`Turunkan langkah ${index + 1}`} className="flex h-9 w-9 items-center justify-center rounded border border-border text-slate-700 hover:bg-muted disabled:opacity-40">
+                                        <ArrowDown className="h-4 w-4" />
+                                    </button>
+                                    <button type="button" onClick={() => removeStep(index)} aria-label={`Hapus langkah ${index + 1}`} className="flex h-9 w-9 items-center justify-center rounded border border-border text-danger hover:bg-danger/10">
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ol>
+                    <button
+                        type="button"
+                        onClick={addStep}
+                        disabled={contentLocale !== 'en'}
+                        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 text-sm font-medium text-navy-700 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Tambah langkah
+                    </button>
+                    {contentLocale !== 'en' && <p className="text-xs text-slate-500">Tambah langkah dari tab English; di tab ini isi terjemahannya.</p>}
+                </EditCard>
+
+                <EditCard
+                    title="Mesin & peralatan"
+                    description="Mesin yang dicentang tampil di bagian “Peralatan” pada halaman kapabilitas ini."
+                    actions={
                         <Link href={route('admin.machines')} className="text-sm font-medium text-navy-700 hover:text-navy-900">
                             Kelola mesin →
                         </Link>
-                    </div>
+                    }
+                >
                     {availableMachines.length === 0 ? (
-                        <p className="mt-3 text-sm text-slate-500">Belum ada mesin yang tayang. Tambahkan di Data Master → Mesin &amp; Peralatan.</p>
+                        <p className="text-sm text-slate-500">Belum ada mesin yang tayang. Tambahkan di Data Master → Mesin &amp; Peralatan.</p>
                     ) : (
-                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                            {availableMachines.map((machine) => (
-                                <label
-                                    key={machine.id}
-                                    className={cn(
-                                        'flex cursor-pointer items-start gap-3 rounded-lg border px-3.5 py-3 text-sm transition-colors',
-                                        selectedMachines.includes(machine.id) ? 'border-navy-700 bg-navy-700/5' : 'border-border hover:bg-muted',
-                                    )}
-                                >
-                                    <input type="checkbox" checked={selectedMachines.includes(machine.id)} onChange={() => toggleMachine(machine.id)} className="mt-0.5 rounded border-border" />
-                                    <span>
-                                        <span className={cn('flex items-center gap-2 font-medium', !machine.is_published && 'text-slate-500')}>
-                                            {machine.name}
-                                            {!machine.is_published && <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">Nonaktif</span>}
+                        <div className="grid gap-2 sm:grid-cols-2">
+                            {availableMachines.map((machine) => {
+                                const checked = data.machine_ids.includes(machine.id);
+
+                                return (
+                                    <label
+                                        key={machine.id}
+                                        className={cn(
+                                            'flex cursor-pointer items-start gap-3 rounded-lg border px-3.5 py-3 text-sm transition-colors',
+                                            checked ? 'border-navy-700 bg-navy-700/5' : 'border-border hover:bg-muted',
+                                        )}
+                                    >
+                                        <input type="checkbox" checked={checked} onChange={() => toggleMachine(machine.id)} className="mt-0.5 rounded border-border" />
+                                        <span>
+                                            <span className={cn('flex items-center gap-2 font-medium', !machine.is_published && 'text-slate-500')}>
+                                                {machine.name}
+                                                {!machine.is_published && <span className="rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">Nonaktif</span>}
+                                            </span>
+                                            {!machine.is_published && <span className="mt-0.5 block text-xs text-slate-500">Tidak tampil di website · hilangkan centang untuk melepas</span>}
                                         </span>
-                                        {!machine.is_published && <span className="mt-0.5 block text-xs text-slate-500">Tidak tampil di website · hilangkan centang untuk melepas</span>}
-                                    </span>
-                                </label>
-                            ))}
+                                    </label>
+                                );
+                            })}
                         </div>
                     )}
-                    <Button
-                        type="button"
-                        size="sm"
-                        className="mt-4"
-                        onClick={() => router.post(route('admin.capabilities.machines', capability.id), { machine_ids: selectedMachines }, { preserveScroll: true })}
-                    >
-                        Simpan pilihan mesin
-                    </Button>
-                </div>
-            </div>
+                </EditCard>
+
+                <EditCard title="SEO (opsional)" description="Judul & deskripsi untuk Google. Kosongkan untuk memakai nama & ringkasan.">
+                    <SeoFields
+                        locale={contentLocale}
+                        data={data.seo}
+                        onChange={(patch) => setData('seo', { ...data.seo, ...patch })}
+                        errors={errors}
+                        titleFallback={capability.name}
+                        pageUrl={publicUrl}
+                    />
+                </EditCard>
+            </EditPageLayout>
         </AdminLayout>
     );
 }

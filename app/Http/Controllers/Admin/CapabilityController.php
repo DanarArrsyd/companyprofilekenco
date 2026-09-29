@@ -81,7 +81,7 @@ class CapabilityController extends Controller
     {
         $action->handle($capability, $request->validated());
 
-        return back()->with('success', 'Capability updated.');
+        return back()->with('success', 'Perubahan kapabilitas disimpan.');
     }
 
     public function publish(Capability $capability, PublishCapability $action): RedirectResponse

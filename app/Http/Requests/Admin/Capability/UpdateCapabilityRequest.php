@@ -17,6 +17,20 @@ class UpdateCapabilityRequest extends FormRequest
         return true;
     }
 
+    /**
+     * The edit page posts FormData (image uploads), which cannot carry an empty
+     * array: with `sync_relations` set, a missing list means "none left".
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->boolean('sync_relations')) {
+            $this->merge([
+                'steps' => $this->input('steps', []),
+                'machine_ids' => $this->input('machine_ids', []),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $rules = [
@@ -41,6 +55,16 @@ class UpdateCapabilityRequest extends FormRequest
             'seo.og_image_path' => ['nullable', 'string', 'max:255'],
             'seo.robots_index' => ['boolean'],
             'seo.robots_follow' => ['boolean'],
+
+            // Steps and machines save with the capability when sent; absent keys leave them as they are.
+            'steps' => ['sometimes', 'array'],
+            'steps.*.id' => ['nullable', 'integer', Rule::exists('capability_steps', 'id')->where('capability_id', $this->route('capability')->id)],
+            'steps.*.title' => ['required', 'string', 'max:255'],
+            'steps.*.description' => ['nullable', 'string'],
+            'steps.*.translations.id.title' => ['nullable', 'string', 'max:255'],
+            'steps.*.translations.id.description' => ['nullable', 'string'],
+            'machine_ids' => ['sometimes', 'array'],
+            'machine_ids.*' => ['integer', 'exists:machines,id'],
         ];
 
         $rules = $this->withTranslations($rules, ['name', 'summary', 'description']);

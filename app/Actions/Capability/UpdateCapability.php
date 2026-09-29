@@ -53,9 +53,45 @@ class UpdateCapability
 
             $this->seo->saveMetadata($capability, $data['seo'] ?? [], $this->media, 'seo/capabilities');
 
+            if (array_key_exists('steps', $data)) {
+                $this->syncSteps($capability, $data['steps']);
+            }
+
+            if (array_key_exists('machine_ids', $data)) {
+                $capability->machines()->sync($data['machine_ids']);
+            }
+
             $this->activityLog->record('capability.updated', $capability, ['name' => $capability->name]);
 
             return $capability->fresh();
         });
+    }
+
+    /**
+     * Makes the capability's steps exactly the submitted list, in its order:
+     * listed ids are updated, rows without an id are created, the rest removed.
+     *
+     * @param  list<array{id?: int|null, title: string, description?: string|null, translations?: array}>  $steps
+     */
+    private function syncSteps(Capability $capability, array $steps): void
+    {
+        $kept = [];
+
+        foreach (array_values($steps) as $position => $step) {
+            $attributes = [
+                'title' => $step['title'],
+                'description' => $step['description'] ?? null,
+                'sort_order' => $position,
+                'translations' => $step['translations'] ?? [],
+            ];
+
+            $model = isset($step['id'])
+                ? tap($capability->steps()->findOrFail($step['id']))->update($attributes)
+                : $capability->steps()->create($attributes);
+
+            $kept[] = $model->id;
+        }
+
+        $capability->steps()->whereNotIn('id', $kept)->delete();
     }
 }

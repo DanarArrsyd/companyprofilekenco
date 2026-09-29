@@ -41,7 +41,7 @@ export function ContentLocaleTabs({
     return (
         <div className={inline ? '' : 'sticky top-0 z-20 -mx-6 border-b border-border bg-surface/95 px-6 py-4 backdrop-blur-sm sm:-mx-8 sm:px-8'}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div role="tablist" aria-label="Content language" className="inline-flex rounded-lg bg-muted p-1">
+                <div role="tablist" aria-label="Bahasa konten" className="inline-flex rounded-lg bg-muted p-1">
                     {TABS.map((tab) => {
                         const active = tab.locale === value;
 
@@ -72,13 +72,13 @@ export function ContentLocaleTabs({
                     <p className="flex items-center gap-2 text-xs text-slate-500">
                         <Languages className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         {value === 'en'
-                            ? 'English is required. Images, status and other shared fields apply to both languages.'
-                            : 'Fields marked ID are translated. Leave one blank to show the English text instead.'}
+                            ? 'Bahasa Inggris wajib diisi. Gambar, status dan isian umum berlaku untuk kedua bahasa.'
+                            : 'Isian bertanda ID adalah terjemahan. Kosongkan untuk memakai teks bahasa Inggris.'}
                     </p>
                     {autoTranslate && !inline && (
                         <label
                             className="flex items-center gap-2 text-xs font-medium text-slate-700"
-                            title="Saving regenerates the other language from the tab you are on, except fields you also edited there. Turn off to keep both languages exactly as typed."
+                            title="Saat disimpan, bahasa lainnya dibuat ulang dari tab yang sedang aktif, kecuali isian yang juga kamu ubah di sana. Matikan agar kedua bahasa tersimpan persis seperti diketik."
                         >
                             <input
                                 type="checkbox"
@@ -89,12 +89,12 @@ export function ContentLocaleTabs({
                                 }}
                                 className="rounded border-border text-primary focus:ring-primary"
                             />
-                            {value === 'en' ? 'Translate to Bahasa Indonesia on save' : 'Translate to English on save'}
+                            {value === 'en' ? 'Terjemahkan otomatis ke Bahasa Indonesia saat disimpan' : 'Terjemahkan otomatis ke English saat disimpan'}
                         </label>
                     )}
                     {autoTranslate && !inline && translateOnSave && <AutoTranslateStatus />}
                     {autoTranslate && !inline && !translateOnSave && (
-                        <p className="text-xs text-slate-500">Both languages are saved exactly as typed.</p>
+                        <p className="text-xs text-slate-500">Kedua bahasa disimpan persis seperti diketik.</p>
                     )}
                 </div>
             </div>
