@@ -12,16 +12,35 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { PageSection, ResolvedSeo } from '@/types/cms';
 import { Container, Section } from '@/components/public/Section';
 
-/** Customer logos; homepage only, no "view all" link (user decision 2026-09-29). */
-function CustomersSection({ customers }: { customers: CustomerLogo[] }) {
+type CustomerSegments = { stamping: CustomerLogo[]; engineering: CustomerLogo[] };
+
+const CUSTOMER_ROWS: { key: keyof CustomerSegments; label: string }[] = [
+    { key: 'stamping', label: 'Stamping Production' },
+    { key: 'engineering', label: 'Engineering Production' },
+];
+
+/**
+ * Customer logos, one drifting row per production line (Stamping on top);
+ * homepage only, no links (user decisions 2026-09-29). Segment names stay
+ * English in both languages, like the division names.
+ */
+function CustomersSection({ customers }: { customers: CustomerSegments }) {
     const { t } = useLocale();
-    if (customers.length === 0) return null;
+    const rows = CUSTOMER_ROWS.filter((row) => customers[row.key].length > 0);
+    if (rows.length === 0) return null;
 
     return (
         <Section className="border-t border-border">
             <SectionHeader eyebrow={t('Who We Serve')} heading={t('Customers Served')} />
-            <div className="mt-10">
-                <CustomerLogos customers={customers} />
+            <div className="mt-10 space-y-10 lg:space-y-12">
+                {rows.map((row) => (
+                    <div key={row.key}>
+                        <h3 className="text-small font-semibold uppercase tracking-wider text-slate-500">{row.label}</h3>
+                        <div className="mt-4">
+                            <CustomerLogos customers={customers[row.key]} />
+                        </div>
+                    </div>
+                ))}
             </div>
         </Section>
     );
@@ -55,7 +74,7 @@ export default function Home({
     schema?: Record<string, unknown>[];
     latestArticles: ArticlePreviewItem[];
     certifications: CertificationItemData[];
-    customers: CustomerLogo[];
+    customers: CustomerSegments;
     openJobCount: number;
 }) {
     const { t } = useLocale();

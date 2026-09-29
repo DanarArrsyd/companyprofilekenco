@@ -24,6 +24,7 @@ class SaveCustomer
     {
         $attributes = [
             'name' => $data['name'],
+            'segment' => $data['segment'],
             'is_featured' => (bool) ($data['is_featured'] ?? $customer?->is_featured ?? true),
         ];
 
@@ -36,7 +37,7 @@ class SaveCustomer
         }
 
         if ($customer === null) {
-            $attributes['order'] = (int) Customer::max('order') + 1;
+            $attributes['order'] = (int) Customer::where('segment', $data['segment'])->max('order') + 1;
             $customer = Customer::create($attributes);
             $this->activityLog->record('customer.created', $customer, ['name' => $customer->name]);
 

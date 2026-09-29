@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
+use App\Enums\CustomerSegment;
 use App\Models\Customer;
 use App\Models\Facility;
 use App\Models\JobVacancy;
@@ -62,19 +63,37 @@ class HomeController extends Controller
                     'image' => $cert->media?->path,
                 ]),
             // "Customers Served": logos only, no links (user decision 2026-09-29).
-            'customers' => Customer::query()
-                ->where('is_featured', true)
-                ->with('logo:id,path')
-                ->orderBy('order')
-                ->orderBy('id')
-                ->limit(24)
-                ->get()
-                ->map(fn (Customer $customer) => ['id' => $customer->id, 'name' => $customer->name, 'logo' => $customer->logo?->path]),
+            'customers' => $this->customersBySegment(),
             'openJobCount' => JobVacancy::query()
                 ->published()
                 ->where(fn ($q) => $q->whereNull('closes_at')->orWhere('closes_at', '>', now()))
                 ->count(),
         ]);
+    }
+
+    /**
+     * Shown customers per segment, in their admin order: one scrolling logo row
+     * each on the homepage (Stamping on top). Every segment key is present.
+     *
+     * @return array<string, list<array{id: int, name: string, logo: string|null}>>
+     */
+    private function customersBySegment(): array
+    {
+        $customers = Customer::query()
+            ->where('is_featured', true)
+            ->with('logo:id,path')
+            ->orderBy('order')
+            ->orderBy('id')
+            ->get();
+
+        return collect(CustomerSegment::cases())->mapWithKeys(fn (CustomerSegment $segment) => [
+            $segment->value => $customers
+                ->filter(fn (Customer $customer) => $customer->segment === $segment)
+                ->take(30)
+                ->map(fn (Customer $customer) => ['id' => $customer->id, 'name' => $customer->name, 'logo' => $customer->logo?->path])
+                ->values()
+                ->all(),
+        ])->all();
     }
 
     /**

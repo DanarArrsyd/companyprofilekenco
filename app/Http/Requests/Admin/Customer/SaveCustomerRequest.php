@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Admin\Customer;
 
+use App\Enums\CustomerSegment;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 /** A customer shown in "Customers Served" on the homepage: a name and a logo. */
 class SaveCustomerRequest extends FormRequest
@@ -16,6 +18,7 @@ class SaveCustomerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:150'],
+            'segment' => ['required', new Enum(CustomerSegment::class)],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'logo_path' => ['nullable', 'string', 'max:255'],
             'is_featured' => ['boolean'],

@@ -673,3 +673,107 @@ html.page-loading {
         transform: translate3d(calc(50cqw - 50%), 0, 0);
     }
 }
+
+/*
+ * "Customers Served" logo rows (CustomerLogos.tsx, user reference 2026-09-29):
+ * transparent logos drifting right to left, grey until hovered or tapped.
+ * The track holds the loop twice; -50% brings it back to its start.
+ */
+.logo-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.logo-marquee__track {
+    display: flex;
+    width: max-content;
+    animation: logo-marquee var(--marquee-duration, 30s) linear infinite;
+}
+
+.logo-marquee:hover .logo-marquee__track {
+    animation-play-state: paused;
+}
+
+.logo-marquee__group {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.logo-marquee__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 4.5rem;
+    padding: 0 2.25rem;
+    filter: grayscale(1);
+    opacity: 0.55;
+    transition:
+        filter 300ms ease,
+        opacity 300ms ease;
+}
+
+.logo-marquee__item:hover,
+.logo-marquee__item:active {
+    filter: none;
+    opacity: 1;
+}
+
+.logo-marquee__logo {
+    display: block;
+    max-width: 9rem;
+    max-height: 3.75rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    user-select: none;
+}
+
+.logo-marquee__name {
+    white-space: nowrap;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: rgb(var(--color-navy-900));
+}
+
+@media (min-width: 1024px) {
+    .logo-marquee__item {
+        height: 5.5rem;
+        padding: 0 3rem;
+    }
+
+    .logo-marquee__logo {
+        max-width: 11rem;
+        max-height: 4.5rem;
+    }
+}
+
+@keyframes logo-marquee {
+    to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Reduced motion: one still, centred, wrapping row. */
+@media (prefers-reduced-motion: reduce) {
+    .logo-marquee {
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    .logo-marquee__track {
+        width: auto;
+        animation: none;
+    }
+
+    .logo-marquee__group {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .logo-marquee__group[aria-hidden='true'],
+    .logo-marquee__item[aria-hidden='true'] {
+        display: none;
+    }
+}

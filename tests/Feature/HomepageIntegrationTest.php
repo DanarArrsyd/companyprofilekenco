@@ -172,7 +172,7 @@ test('homepage only exposes published certifications and shown customers', funct
         ->component('public/Home')
         ->where('certifications', fn ($certs) => collect($certs)->pluck('name')->contains('ISO 9001')
             && ! collect($certs)->pluck('name')->contains('Draft Cert'))
-        ->where('customers', fn ($customers) => collect($customers)->pluck('name')->contains('Astra Daihatsu')
+        ->where('customers.stamping', fn ($customers) => collect($customers)->pluck('name')->contains('Astra Daihatsu')
             && ! collect($customers)->pluck('name')->contains('Hidden Customer'))
         ->missing('industries')
     );
@@ -187,7 +187,7 @@ test('homepage stays safe with no certifications or customers configured', funct
     $response->assertInertia(fn ($assert) => $assert
         ->component('public/Home')
         ->where('certifications', [])
-        ->where('customers', [])
+        ->where('customers', ['stamping' => [], 'engineering' => []])
     );
 });
 

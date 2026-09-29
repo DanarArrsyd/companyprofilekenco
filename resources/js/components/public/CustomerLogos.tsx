@@ -6,29 +6,53 @@ export interface CustomerLogo {
     logo: string | null;
 }
 
+/** Enough logos per loop that a short list still fills a wide screen. */
+const MIN_PER_LOOP = 8;
+/** Seconds each logo takes to pass: a steady pace whatever the count. */
+const SECONDS_PER_LOGO = 3.2;
+
 /**
- * "Customers Served" logo wall (homepage only, no links — user decision
- * 2026-09-29). Every logo sits in the same white tile so wide and square
- * marks weigh the same; a customer without a logo shows its name.
+ * One "Customers Served" row (user reference 2026-09-29): logos on the page
+ * background, grey until the pointer (or a tap) is on one, drifting right to
+ * left without end. The list is repeated to fill a loop and the loop is
+ * rendered twice, so translating the track by -50% lands exactly where it
+ * started. Hovering the row pauses it; reduced motion shows one still row.
+ * No links (homepage only). CSS lives in app.css (.logo-marquee).
  */
 export function CustomerLogos({ customers }: { customers: CustomerLogo[] }) {
+    const repeats = Math.max(1, Math.ceil(MIN_PER_LOOP / customers.length));
+    const loop = Array.from({ length: repeats }, () => customers).flat();
+    const duration = `${loop.length * SECONDS_PER_LOGO}s`;
+
     return (
-        <ul data-reveal-group className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
-            {customers.map((customer) => (
-                <li key={customer.id} className="flex aspect-[3/2] items-center justify-center rounded-lg border border-border bg-white p-5">
-                    {customer.logo ? (
-                        <img
-                            src={mediaUrl(customer.logo) ?? undefined}
-                            alt={customer.name}
-                            loading="lazy"
-                            decoding="async"
-                            className="max-h-full max-w-full object-contain"
-                        />
-                    ) : (
-                        <span className="text-center text-small font-semibold text-navy-900">{customer.name}</span>
-                    )}
-                </li>
-            ))}
-        </ul>
+        <div className="logo-marquee" style={{ ['--marquee-duration' as string]: duration }}>
+            <div className="logo-marquee__track">
+                {[0, 1].map((copy) => (
+                    <ul key={copy} className="logo-marquee__group" aria-hidden={copy === 1 ? true : undefined}>
+                        {loop.map((customer, index) => {
+                            // Screen readers get each customer once: the first pass of the first copy.
+                            const hidden = copy === 1 || index >= customers.length;
+
+                            return (
+                                <li key={`${customer.id}-${index}`} className="logo-marquee__item" aria-hidden={hidden && copy === 0 ? true : undefined}>
+                                    {customer.logo ? (
+                                        <img
+                                            src={mediaUrl(customer.logo) ?? undefined}
+                                            alt={hidden ? '' : customer.name}
+                                            loading="lazy"
+                                            decoding="async"
+                                            draggable={false}
+                                            className="logo-marquee__logo"
+                                        />
+                                    ) : (
+                                        <span className="logo-marquee__name">{customer.name}</span>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ))}
+            </div>
+        </div>
     );
 }

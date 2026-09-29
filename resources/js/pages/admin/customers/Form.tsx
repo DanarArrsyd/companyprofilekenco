@@ -14,16 +14,18 @@ import AdminLayout from '@/layouts/AdminLayout';
 interface Customer {
     id: number;
     name: string;
+    segment: string;
     logo: string | null;
     is_featured: boolean;
 }
 
-export default function Form({ customer }: { customer: Customer | null }) {
+export default function Form({ customer, segments }: { customer: Customer | null; segments: { value: string; label: string }[] }) {
     const { data, setData, post, processing, errors, isDirty } = useForm<{
-        _method: string; name: string; logo: File | null; logo_path: string; is_featured: boolean;
+        _method: string; name: string; segment: string; logo: File | null; logo_path: string; is_featured: boolean;
     }>({
         _method: customer ? 'put' : 'post',
         name: customer?.name ?? '',
+        segment: customer?.segment ?? segments[0]?.value ?? 'stamping',
         logo: null,
         logo_path: customer?.logo ?? '',
         is_featured: customer?.is_featured ?? true,
@@ -71,9 +73,25 @@ export default function Form({ customer }: { customer: Customer | null }) {
                         <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} placeholder="mis. PT Astra Daihatsu Motor" className="mt-1.5" />
                         {errors.name && <p className="mt-1 text-sm text-danger">{errors.name}</p>}
                     </div>
+                    <fieldset>
+                        <legend className="text-sm font-medium text-foreground">Kategori</legend>
+                        <p className="mt-1 text-sm text-slate-500">Menentukan di baris mana logo berjalan di Beranda: Stamping di atas, Engineering di bawah.</p>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                            {segments.map((segment) => (
+                                <label
+                                    key={segment.value}
+                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium ${data.segment === segment.value ? 'border-navy-700 bg-navy-700/5 text-foreground' : 'border-border text-slate-700 hover:bg-muted'}`}
+                                >
+                                    <input type="radio" name="segment" value={segment.value} checked={data.segment === segment.value} onChange={() => setData('segment', segment.value)} />
+                                    {segment.label}
+                                </label>
+                            ))}
+                        </div>
+                        {errors.segment && <p className="mt-1 text-sm text-danger">{errors.segment}</p>}
+                    </fieldset>
                 </EditCard>
 
-                <EditCard title="Logo" description="PNG atau WebP dengan latar transparan paling rapi. Tampil dalam kotak putih yang sama besar, jadi logo lebar dan logo kotak tetap seimbang.">
+                <EditCard title="Logo" description="PNG atau WebP dengan latar transparan. Di Beranda logo tampil tanpa kotak, abu-abu, dan berwarna saat disorot kursor; tinggi logo disamakan otomatis.">
                     <MediaPickerField
                         label="Logo pelanggan"
                         currentUrl={data.logo ? URL.createObjectURL(data.logo) : data.logo_path ? `/storage/${data.logo_path}` : null}

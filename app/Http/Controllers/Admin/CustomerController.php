@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Actions\Customer\SaveCustomer;
+use App\Enums\CustomerSegment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Customer\SaveCustomerRequest;
 use App\Models\Customer;
@@ -23,12 +24,13 @@ class CustomerController extends Controller
         return Inertia::render('admin/customers/Index', [
             'customers' => Customer::query()->with('logo:id,path')->orderBy('order')->orderBy('id')->get()
                 ->map(fn (Customer $customer) => $this->row($customer)),
+            'segments' => $this->segments(),
         ]);
     }
 
     public function create(): Response
     {
-        return Inertia::render('admin/customers/Form', ['customer' => null]);
+        return Inertia::render('admin/customers/Form', ['customer' => null, 'segments' => $this->segments()]);
     }
 
     public function store(SaveCustomerRequest $request, SaveCustomer $save): RedirectResponse
@@ -40,7 +42,7 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer): Response
     {
-        return Inertia::render('admin/customers/Form', ['customer' => $this->row($customer->load('logo:id,path'))]);
+        return Inertia::render('admin/customers/Form', ['customer' => $this->row($customer->load('logo:id,path')), 'segments' => $this->segments()]);
     }
 
     public function update(SaveCustomerRequest $request, Customer $customer, SaveCustomer $save): RedirectResponse
@@ -74,12 +76,19 @@ class CustomerController extends Controller
         return redirect()->route('admin.customers')->with('success', 'Pelanggan dihapus.');
     }
 
-    /** @return array{id: int, name: string, logo: string|null, is_featured: bool} */
+    /** @return list<array{value: string, label: string}> */
+    private function segments(): array
+    {
+        return array_map(fn (CustomerSegment $segment) => ['value' => $segment->value, 'label' => $segment->label()], CustomerSegment::cases());
+    }
+
+    /** @return array{id: int, name: string, segment: string, logo: string|null, is_featured: bool} */
     private function row(Customer $customer): array
     {
         return [
             'id' => $customer->id,
             'name' => $customer->name,
+            'segment' => $customer->segment->value,
             'logo' => $customer->logo?->path,
             'is_featured' => $customer->is_featured,
         ];
