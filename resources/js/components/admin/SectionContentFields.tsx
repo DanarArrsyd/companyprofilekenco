@@ -239,11 +239,12 @@ export function SectionContentFields({
 
         case 'operating_values': {
             const items = Array.isArray(content.items)
-                ? (content.items as { letter?: string; title?: string; description?: unknown; icon?: string | null }[])
+                ? (content.items as { letter?: string; title?: string; description?: unknown; icon?: string | null; color?: string | null }[])
                 : [];
+            const colorOptions: [string, string][] = [['green', 'Hijau'], ['yellow', 'Kuning'], ['red', 'Merah'], ['blue', 'Biru'], ['grey', 'Abu-abu']];
 
             // Letter, title and icon are shared by both languages (the titles spell the acronym); the description is translated.
-            const updateItem = (index: number, key: 'letter' | 'title' | 'description' | 'icon', value: string | null) => {
+            const updateItem = (index: number, key: 'letter' | 'title' | 'description' | 'icon' | 'color', value: string | null) => {
                 const next = [...items];
                 next[index] = { ...next[index], [key]: key === 'description' ? writeText(next[index].description, locale, value ?? '') : value };
                 set('items', next);
@@ -268,7 +269,7 @@ export function SectionContentFields({
                         <Label>Values</Label>
                         <p className="text-xs leading-relaxed text-slate-500">
                             The letters, in order, form the acronym (K.E.N.C.O). Titles stay as typed in both languages; only the description is translated.
-                            Icons are optional: until one is set, the wheel shows the letter.
+                            Each value is a slice of the wheel in its colour. Icons are optional: until one is set, the wheel shows a built-in icon.
                         </p>
                         {items.map((item, index) => (
                             <div key={index} className="space-y-4 rounded-lg border border-border p-4">
@@ -292,6 +293,21 @@ export function SectionContentFields({
                                             onChange={(e) => updateItem(index, 'title', e.target.value)}
                                             className="mt-1.5"
                                         />
+                                    </div>
+                                    <div className="w-32">
+                                        <Label htmlFor={`value_color_${index}`}>Colour</Label>
+                                        <select
+                                            id={`value_color_${index}`}
+                                            value={item.color ?? colorOptions[index % colorOptions.length][0]}
+                                            onChange={(e) => updateItem(index, 'color', e.target.value)}
+                                            className="mt-1.5 h-11 w-full rounded border border-border bg-surface px-3 text-sm"
+                                        >
+                                            {colorOptions.map(([key, label]) => (
+                                                <option key={key} value={key}>
+                                                    {label}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                     <Button
                                         type="button"

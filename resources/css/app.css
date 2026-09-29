@@ -100,6 +100,18 @@
         /* TikTok, X and Threads are black marks. */
         --color-brand-mono: 0 0 0;
 
+        /* Operating Values wheel (user artwork resources/img/wheelie_value.png): band colour + pastel slice. */
+        --color-value-green: 103 186 106;
+        --color-value-green-soft: 199 229 201;
+        --color-value-yellow: 255 213 79;
+        --color-value-yellow-soft: 255 241 180;
+        --color-value-red: 238 110 97;
+        --color-value-red-soft: 249 196 190;
+        --color-value-blue: 101 180 246;
+        --color-value-blue-soft: 202 229 250;
+        --color-value-grey: 206 206 206;
+        --color-value-grey-soft: 243 243 243;
+
         --color-success: 22 132 71;
         --color-warning: 176 118 6;
         --color-danger: 178 34 34;
@@ -233,18 +245,6 @@
 
     .submenu-item-enter {
         animation: submenu-item-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    /* Operating Values: the active value's letter/icon settles into the wheel centre. */
-    @keyframes value-pop {
-        from {
-            opacity: 0;
-            transform: scale(0.6) rotate(-24deg);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) rotate(0);
-        }
     }
 
     /* Footer social links: the brand mark drops in from above on hover. */

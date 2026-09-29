@@ -1,18 +1,22 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { KeyboardEvent, TouchEvent, useId, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, ClipboardCheck, Handshake, LucideIcon, Recycle, RotateCw, ShieldCheck } from 'lucide-react';
+import { CSSProperties, KeyboardEvent, TouchEvent, useId, useRef, useState } from 'react';
 
 import { Container } from '@/components/public/Section';
 import { useLocale } from '@/hooks/use-locale';
 import { mediaUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
+import { labelArc, labelFlipped, sectorPath, shortestSteps, valueColor, WHEEL, wheelPoint } from '@/lib/value-wheel';
 
 import arc from '../../../img/elemen_values.webp';
+import people from '../../../img/people_wheel.png';
 
 export interface OperatingValue {
     letter?: string;
     title?: string;
     description?: string | null;
     icon?: string | null;
+    /** Wheel colour preset (green, yellow, red, blue, grey); defaults to the design order. */
+    color?: string | null;
 }
 
 export interface OperatingValuesContent {
@@ -22,37 +26,36 @@ export interface OperatingValuesContent {
     items?: OperatingValue[];
 }
 
-const WHEEL_STEP = 360;
-
 /**
- * "Operating Values" (user reference, 2026-09-28): the heading on the left,
- * a wheel of the value icons that turns to bring the active value to the
- * top, and on the right the acronym (K.E.N.C.O) lighting up letter by letter
+ * "Operating Values" (user reference 2026-09-28, wheel redesigned
+ * 2026-09-29): the heading on the left, a coloured wheel of the values that
+ * turns to bring the active value to the right, facing the text, and on the right the acronym (K.E.N.C.O) lighting up letter by letter
  * with the active value's title and description. Every value stays in the
  * HTML so crawlers read all of them; inactive ones are only hidden visually.
- * The letters are the tabs; arrows, the ‹ › buttons and swipes move between
- * them, wrapping around. No autoplay.
+ * The letters are the tabs; clicking a slice or a letter, arrows, the ‹ ›
+ * buttons and swipes move between them, wrapping around. No autoplay.
  */
 export function OperatingValues({ content }: { content: OperatingValuesContent }) {
     const { t } = useLocale();
     const baseId = useId();
     const values = (content.items ?? []).filter((item) => item.title || item.letter);
-    const [active, setActive] = useState(0);
+    // Steps the wheel has turned, unbounded, so it always spins the short way and never unwinds.
+    const [turn, setTurn] = useState(0);
     const touchStart = useRef<number | null>(null);
     const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
     if (values.length === 0) return null;
 
     const count = values.length;
-    const step = WHEEL_STEP / count;
+    const active = ((turn % count) + count) % count;
     const current = values[active];
     const go = (index: number, focus = false) => {
-        const next = (index + count) % count;
-        setActive(next);
+        const next = ((index % count) + count) % count;
+        setTurn((previous) => previous + shortestSteps(((previous % count) + count) % count, next, count));
         if (focus) tabs.current[next]?.focus();
     };
-    // Relative moves read the latest index, so quick repeated clicks never skip or stall.
-    const move = (delta: number) => setActive((previous) => (previous + delta + count) % count);
+    // Relative moves read the latest turn, so quick repeated clicks never skip or stall.
+    const move = (delta: number) => setTurn((previous) => previous + delta);
 
     const onTabKey = (event: KeyboardEvent) => {
         const moves: Record<string, number> = { ArrowRight: active + 1, ArrowDown: active + 1, ArrowLeft: active - 1, ArrowUp: active - 1, Home: 0, End: count - 1 };
@@ -90,57 +93,15 @@ export function OperatingValues({ content }: { content: OperatingValuesContent }
 
                 <div className="mt-12 grid grid-cols-1 items-center gap-14 lg:mt-8 lg:grid-cols-2 lg:gap-12">
                     {/* The wheel. The arc image is anchored to it (sizes in % of the wheel), matching the reference. */}
-                    <div data-reveal="auto" className="relative mx-auto aspect-square w-[18rem] sm:w-[22rem] lg:w-[27rem]">
+                    <div data-reveal="auto" className="relative mx-auto aspect-square w-[19rem] sm:w-[25rem] lg:w-[30rem]">
                         <img
                             src={arc}
                             alt=""
                             aria-hidden="true"
                             draggable={false}
-                            className="pointer-events-none absolute left-[85%] top-[-64%] -z-10 w-[269%] max-w-none select-none"
+                            className="pointer-events-none absolute left-[76%] top-[-58%] -z-10 w-[242%] max-w-none select-none"
                         />
-
-                        <div className="absolute inset-0 rounded-full bg-slate-500/30" aria-hidden="true" />
-
-                        <div
-                            aria-hidden="true"
-                            className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)] motion-reduce:transition-none"
-                            style={{ transform: `rotate(${-active * step}deg)` }}
-                        >
-                            {values.map((value, index) => {
-                                const angle = ((index * step - 90) * Math.PI) / 180;
-                                const isActive = index === active;
-
-                                return (
-                                    <div
-                                        key={index}
-                                        className="absolute"
-                                        style={{
-                                            left: `${50 + 37 * Math.cos(angle)}%`,
-                                            top: `${50 + 37 * Math.sin(angle)}%`,
-                                            // Counter-rotate so every icon stays upright while the wheel turns.
-                                            transform: `translate(-50%, -50%) rotate(${active * step}deg)`,
-                                            transition: 'transform 700ms cubic-bezier(0.65, 0, 0.35, 1)',
-                                        }}
-                                    >
-                                        <span
-                                            className={cn(
-                                                'flex h-[3.25rem] w-[3.25rem] items-center justify-center overflow-hidden rounded-full text-[1.375rem] font-bold transition-all duration-500 motion-reduce:transition-none sm:h-[4rem] sm:w-[4rem] lg:h-[4.5rem] lg:w-[4.5rem] lg:text-[1.75rem]',
-                                                isActive ? 'scale-110 bg-navy-900 text-white' : 'bg-white/80 text-navy-900/50',
-                                            )}
-                                        >
-                                            {value.icon ? <img src={mediaUrl(value.icon) ?? undefined} alt="" className="h-3/5 w-3/5 object-contain" /> : value.letter}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* The active value, large, in the centre. */}
-                        <div aria-hidden="true" className="absolute left-1/2 top-1/2 flex h-[40%] w-[40%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white">
-                            <span key={active} className="animate-[value-pop_500ms_cubic-bezier(0.16,1,0.3,1)] text-[3.5rem] font-bold leading-none text-navy-900 motion-reduce:animate-none lg:text-[5rem]">
-                                {current.icon ? <img src={mediaUrl(current.icon) ?? undefined} alt="" className="h-[5rem] w-[5rem] object-contain lg:h-[6.5rem] lg:w-[6.5rem]" /> : current.letter}
-                            </span>
-                        </div>
+                        <ValueWheel values={values} turn={turn} onPick={go} />
                     </div>
 
                     <div data-reveal="auto" className="relative">
@@ -226,5 +187,91 @@ export function OperatingValues({ content }: { content: OperatingValuesContent }
                 </div>
             </Container>
         </section>
+    );
+}
+
+// Stand-ins in the artwork's style until the admin uploads the value icons.
+const FALLBACK_ICONS: LucideIcon[] = [ShieldCheck, Recycle, ClipboardCheck, RotateCw, Handshake];
+const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
+
+/**
+ * The wheel drawn in SVG from the user's artwork (resources/img/wheelie_value.png):
+ * each value is a coloured band with its name on an arc and a pastel slice
+ * with its icon. The whole wheel turns; labels on the lower half switch to
+ * an anticlockwise arc (crossfaded) so they always read upright. Mouse and
+ * touch can pick a slice; keyboard and screen readers use the letter tabs,
+ * so the drawing itself is hidden from assistive tech.
+ */
+function ValueWheel({ values, turn, onPick }: { values: OperatingValue[]; turn: number; onPick: (index: number) => void }) {
+    const pathId = useId();
+    const count = values.length;
+    const step = 360 / count;
+    const rotation = -turn * step;
+    const iconSize = 68;
+
+    return (
+        <svg viewBox={`0 0 ${WHEEL.size} ${WHEEL.size}`} aria-hidden="true" className="relative block h-full w-full overflow-visible font-montserrat">
+            <g
+                className="transition-transform duration-[900ms] motion-reduce:transition-none"
+                style={{ transform: `rotate(${rotation}deg)`, transformOrigin: `${WHEEL.centre}px ${WHEEL.centre}px`, transitionTimingFunction: EASE }}
+            >
+                {values.map((value, index) => {
+                    const centre = index * step;
+                    const color = valueColor(value.color, index);
+                    const flipped = labelFlipped(centre, rotation);
+                    const [ix, iy] = wheelPoint(WHEEL.iconRadius, centre);
+                    const Icon = FALLBACK_ICONS[index % FALLBACK_ICONS.length];
+                    const [nx, ny] = [Math.cos((centre * Math.PI) / 180), Math.sin((centre * Math.PI) / 180)];
+
+                    return (
+                        <g
+                            key={index}
+                            onClick={() => onPick(index)}
+                            className="group/slice cursor-pointer"
+                            style={{ '--nudge': `translate(${nx * 8}px, ${ny * 8}px)` } as CSSProperties}
+                        >
+                            <title>{value.title}</title>
+                            <g className="transition-transform duration-300 ease-out group-hover/slice:[transform:var(--nudge)] motion-reduce:transition-none">
+                                <path
+                                    d={sectorPath(centre, step, WHEEL.bandInner, WHEEL.bandOuter)}
+                                    className="stroke-navy-950"
+                                    strokeWidth={3}
+                                    strokeLinejoin="round"
+                                    style={{ fill: `rgb(var(--color-value-${color}))` }}
+                                />
+                                <path
+                                    d={sectorPath(centre, step, WHEEL.sliceInner, WHEEL.sliceOuter)}
+                                    className="stroke-navy-950"
+                                    strokeWidth={3}
+                                    strokeLinejoin="round"
+                                    style={{ fill: `rgb(var(--color-value-${color}-soft))` }}
+                                />
+
+                                {[false, true].map((reverse) => (
+                                    <g key={String(reverse)} className="transition-opacity duration-500 motion-reduce:transition-none" style={{ opacity: reverse === flipped ? 1 : 0 }}>
+                                        <path id={`${pathId}-${index}-${reverse ? 'r' : 'f'}`} d={labelArc(centre, step - 4, reverse)} fill="none" />
+                                        <text className="fill-navy-900 font-bold" fontSize={24} dominantBaseline="central" textAnchor="middle">
+                                            <textPath href={`#${pathId}-${index}-${reverse ? 'r' : 'f'}`} startOffset="50%">
+                                                {value.title}
+                                            </textPath>
+                                        </text>
+                                    </g>
+                                ))}
+
+                                {value.icon ? (
+                                    <image href={mediaUrl(value.icon) ?? undefined} x={ix - iconSize / 2} y={iy - iconSize / 2} width={iconSize} height={iconSize} preserveAspectRatio="xMidYMid meet" />
+                                ) : (
+                                    <Icon x={ix - iconSize / 2} y={iy - iconSize / 2} width={iconSize} height={iconSize} className="text-navy-900" strokeWidth={2} />
+                                )}
+                            </g>
+                        </g>
+                    );
+                })}
+            </g>
+
+            {/* The hub stays still. */}
+            <circle cx={WHEEL.centre} cy={WHEEL.centre} r={WHEEL.hub} className="fill-white stroke-navy-950" strokeWidth={3} />
+            <image href={people} x={WHEEL.centre - 58} y={WHEEL.centre - 48} width={116} height={97} />
+        </svg>
     );
 }
