@@ -688,6 +688,9 @@ html.page-loading {
 .logo-marquee__track {
     display: flex;
     width: max-content;
+    /* The moving track is its own compositing group, so give it the page colour
+       for the logos' multiply blend below to have something to blend with. */
+    background-color: rgb(var(--background));
     animation: logo-marquee var(--marquee-duration, 30s) linear infinite;
 }
 
@@ -711,6 +714,9 @@ html.page-loading {
     padding: 0 2.25rem;
     filter: grayscale(1);
     opacity: 0.55;
+    /* Uploaded logos often come on a white box: multiply turns white into the
+       page colour, so every logo reads as transparent without editing files. */
+    mix-blend-mode: multiply;
     transition:
         filter 300ms ease,
         opacity 300ms ease;
