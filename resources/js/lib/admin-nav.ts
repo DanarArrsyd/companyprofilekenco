@@ -7,6 +7,7 @@ import {
     Factory,
     FileText,
     FolderTree,
+    Handshake,
     History,
     Home,
     Image,
@@ -56,6 +57,7 @@ export const adminNavSections: AdminNavSection[] = [
         heading: 'Halaman Website',
         entries: [
             { label: 'Beranda', icon: Home, href: 'admin.homepage', permission: 'pages.view' },
+            { label: 'Pelanggan', icon: Handshake, href: 'admin.customers', permission: 'customers.view' },
             { label: 'Halaman', icon: FileText, href: 'admin.pages', permission: 'pages.view' },
             { label: 'Industri', icon: Building2, href: 'admin.industries', permission: 'industries.view' },
             { label: 'Tonggak Sejarah', icon: History, href: 'admin.milestones', permission: 'milestones.view' },

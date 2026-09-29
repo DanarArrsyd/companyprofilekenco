@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FacilityCategoryController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\HomepageController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobVacancyController;
@@ -187,6 +188,14 @@ Route::prefix('admin')->group(function () {
         Route::delete('quality-content/{qualityContent}', [QualityContentController::class, 'destroy'])->name('admin.quality-content.destroy')->middleware('permission:certifications.delete');
 
         // Industries
+        Route::get('customers', [CustomerController::class, 'index'])->name('admin.customers')->middleware('permission:customers.view');
+        Route::get('customers/create', [CustomerController::class, 'create'])->name('admin.customers.create')->middleware('permission:customers.create');
+        Route::post('customers', [CustomerController::class, 'store'])->name('admin.customers.store')->middleware('permission:customers.create');
+        Route::post('customers/reorder', [CustomerController::class, 'reorder'])->name('admin.customers.reorder')->middleware('permission:customers.update');
+        Route::get('customers/{customer}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit')->middleware('permission:customers.update');
+        Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('admin.customers.update')->middleware('permission:customers.update');
+        Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy')->middleware('permission:customers.delete');
+
         Route::get('industries', [IndustryController::class, 'index'])->name('admin.industries')->middleware('permission:industries.view');
         Route::get('industries/create', [IndustryController::class, 'create'])->name('admin.industries.create')->middleware('permission:industries.create');
         Route::post('industries', [IndustryController::class, 'store'])->name('admin.industries.store')->middleware('permission:industries.create');

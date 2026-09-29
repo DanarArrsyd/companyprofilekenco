@@ -5,8 +5,8 @@ use App\Enums\PageType;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
+use App\Models\Customer;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\Machine;
 use App\Models\Page;
 use App\Models\Product;
@@ -159,12 +159,12 @@ test('homepage contact CTA uses live Settings data, not invented values', functi
     );
 });
 
-test('homepage only exposes published certifications and industries', function () {
+test('homepage only exposes published certifications and shown customers', function () {
     publishedHomepage($this);
     Certification::factory()->published()->create(['name' => 'ISO 9001']);
     Certification::factory()->create(['name' => 'Draft Cert', 'status' => ContentStatus::Draft]);
-    Industry::factory()->published()->create(['name' => 'Automotive']);
-    Industry::factory()->create(['name' => 'Draft Industry', 'status' => ContentStatus::Draft]);
+    Customer::create(['name' => 'Astra Daihatsu', 'is_featured' => true]);
+    Customer::create(['name' => 'Hidden Customer', 'is_featured' => false]);
 
     $response = $this->get('/');
 
@@ -172,12 +172,13 @@ test('homepage only exposes published certifications and industries', function (
         ->component('public/Home')
         ->where('certifications', fn ($certs) => collect($certs)->pluck('name')->contains('ISO 9001')
             && ! collect($certs)->pluck('name')->contains('Draft Cert'))
-        ->where('industries', fn ($industries) => collect($industries)->pluck('name')->contains('Automotive')
-            && ! collect($industries)->pluck('name')->contains('Draft Industry'))
+        ->where('customers', fn ($customers) => collect($customers)->pluck('name')->contains('Astra Daihatsu')
+            && ! collect($customers)->pluck('name')->contains('Hidden Customer'))
+        ->missing('industries')
     );
 });
 
-test('homepage stays safe with no certifications or industries configured', function () {
+test('homepage stays safe with no certifications or customers configured', function () {
     publishedHomepage($this);
 
     $response = $this->get('/');
@@ -186,7 +187,7 @@ test('homepage stays safe with no certifications or industries configured', func
     $response->assertInertia(fn ($assert) => $assert
         ->component('public/Home')
         ->where('certifications', [])
-        ->where('industries', [])
+        ->where('customers', [])
     );
 });
 

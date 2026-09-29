@@ -3,7 +3,7 @@ import { Fragment } from 'react';
 
 import { ArticlePreview, ArticlePreviewItem } from '@/components/public/ArticlePreview';
 import { CertificationItemData } from '@/components/public/CertificationItem';
-import { IndustryGrid, IndustryGridItem } from '@/components/public/IndustryGrid';
+import { CustomerLogo, CustomerLogos } from '@/components/public/CustomerLogos';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
@@ -12,15 +12,16 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { PageSection, ResolvedSeo } from '@/types/cms';
 import { Container, Section } from '@/components/public/Section';
 
-function IndustriesSection({ items }: { items: IndustryGridItem[] }) {
+/** Customer logos; homepage only, no "view all" link (user decision 2026-09-29). */
+function CustomersSection({ customers }: { customers: CustomerLogo[] }) {
     const { t } = useLocale();
-    if (items.length === 0) return null;
+    if (customers.length === 0) return null;
 
     return (
         <Section className="border-t border-border">
-            <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries Served')} cta={{ label: t('View All Industries'), href: '/company#industries' }} />
+            <SectionHeader eyebrow={t('Who We Serve')} heading={t('Customers Served')} />
             <div className="mt-10">
-                <IndustryGrid items={items} />
+                <CustomerLogos customers={customers} />
             </div>
         </Section>
     );
@@ -46,7 +47,7 @@ export default function Home({
     schema,
     latestArticles,
     certifications,
-    industries,
+    customers,
     openJobCount,
 }: {
     sections: PageSection[];
@@ -54,7 +55,7 @@ export default function Home({
     schema?: Record<string, unknown>[];
     latestArticles: ArticlePreviewItem[];
     certifications: CertificationItemData[];
-    industries: IndustryGridItem[];
+    customers: CustomerLogo[];
     openJobCount: number;
 }) {
     const { t } = useLocale();
@@ -88,7 +89,7 @@ export default function Home({
                         <SectionRenderer section={section} certifications={certifications} openJobCount={openJobCount} />
                     )}
 
-                    {section.section_type === 'quality' && <IndustriesSection items={industries} />}
+                    {section.section_type === 'quality' && <CustomersSection customers={customers} />}
                 </Fragment>
             ))}
         </PublicLayout>

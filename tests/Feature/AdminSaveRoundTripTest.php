@@ -3,6 +3,7 @@
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
+use App\Models\Customer;
 use App\Models\Facility;
 use App\Models\Industry;
 use App\Models\JobVacancy;
@@ -106,6 +107,8 @@ dataset('edit forms', [
         fn (array $r) => ['name' => $r['name'], 'brand' => $r['brand'] ?? '', 'model' => $r['model'] ?? '', 'capacity' => $r['capacity'] ?? '', 'quantity' => $r['quantity'] ?? '', 'description' => $r['description'] ?? '', 'specification' => $r['specification'] ?? '', 'facility_id' => $r['facility_id'] ?? '', 'capability_ids' => array_column($r['capabilities'] ?? [], 'id'), 'image_path' => $r['image'] ?? '', 'sort_order' => $r['sort_order'], 'status' => $r['status']]],
     'milestone' => [fn () => Milestone::factory()->create(['image' => 'library/milestone.webp']), 'milestones', 'milestone',
         fn (array $r) => ['year' => $r['year'], 'title' => $r['title'], 'description' => $r['description'] ?? '', 'order' => $r['order'], 'image_path' => '', 'remove_image' => false, 'translations' => ['id' => $r['translations']['id'] ?? []]]],
+    'customer' => [fn () => Customer::create(['name' => 'PT Astra Daihatsu Motor', 'logo_media_id' => Media::factory()->create(['path' => 'library/adm.webp'])->id, 'is_featured' => true, 'order' => 3]), 'customers', 'customer',
+        fn (array $r) => ['name' => $r['name'], 'logo_path' => $r['logo'] ?? '', 'is_featured' => $r['is_featured']]],
 ]);
 
 test('saving an edit form without changes keeps the stored record', function (Closure $make, string $route, string $prop, Closure $form) {

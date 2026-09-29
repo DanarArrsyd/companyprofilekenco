@@ -34,7 +34,6 @@ const NAV: NavItem[] = [
         { label: 'Vision & Mission', href: '/company#vision-mission' },
         { label: 'Operating Values', href: '/company#values' },
         { label: 'Facilities', href: '/company#facilities' },
-        { label: 'Industries', href: '/company#industries' },
     ] },
     { label: 'Capabilities', href: '/capabilities' },
     { label: 'Products', href: '/products' },

@@ -7,8 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
+use App\Models\Customer;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\JobVacancy;
 use App\Models\Page;
 use App\Models\Product;
@@ -61,11 +61,15 @@ class HomeController extends Controller
                     'expires_at' => $cert->expires_at,
                     'image' => $cert->media?->path,
                 ]),
-            'industries' => Industry::query()
-                ->published()
-                ->orderBy('sort_order')
-                ->limit(6)
-                ->get(['id', 'name', 'slug', 'image']),
+            // "Customers Served": logos only, no links (user decision 2026-09-29).
+            'customers' => Customer::query()
+                ->where('is_featured', true)
+                ->with('logo:id,path')
+                ->orderBy('order')
+                ->orderBy('id')
+                ->limit(24)
+                ->get()
+                ->map(fn (Customer $customer) => ['id' => $customer->id, 'name' => $customer->name, 'logo' => $customer->logo?->path]),
             'openJobCount' => JobVacancy::query()
                 ->published()
                 ->where(fn ($q) => $q->whereNull('closes_at')->orWhere('closes_at', '>', now()))
