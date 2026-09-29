@@ -214,6 +214,12 @@ MAINTENANCE_ENABLED=0
 # while an external runner exercises the same public route successfully.
 # ---------------------------------------------------------------------------
 if [[ "${DEFER_PUBLIC_HEALTH_CHECK:-0}" == "1" ]]; then
+    # The public URL is checked by the runner; here, prove the app itself
+    # renders its key pages (in-process, no network, no CDN).
+    log "Smoke-checking key pages in-process..."
+    if ! "$PHP_BIN" "${APP_DIR}/artisan" app:smoke; then
+        fail "Smoke check failed: a key page did not render (see the list above)."
+    fi
     log "Public health check deferred to the external deployment runner."
 else
     log "Health-checking ${HEALTH_URL}..."
