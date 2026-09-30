@@ -12,13 +12,13 @@ import { SectionHeader } from '@/components/public/SectionHeader';
 import { getSectionHeadingClass } from '@/components/public/section-heading';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/use-locale';
-import { mediaUrl } from '@/lib/media';
 import { PageSection } from '@/types/cms';
 import paperTape1 from '../../../img/paper_tape1.png';
 import paperTape2 from '../../../img/paper_tape2.png';
 import { getTextSectionPresentation } from './text-section-presentation';
 import { Container, Section } from '@/components/public/Section';
 import { OperatingValues, type OperatingValuesContent } from '@/components/public/OperatingValues';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface CtaContent {
     heading?: string;
@@ -44,6 +44,12 @@ interface PickerContent {
  * SectionType::forGenericPage()) keep their existing, page-agnostic markup
  * unchanged so Company/Vision pages are unaffected this phase.
  */
+/** Torn-paper edges of Vision & Mission: full artwork for wide screens, a 1200 px copy for phones. */
+const PAPER_SRCSET = {
+    top: '/images/vision-mission-paper-top-1200.webp 1200w, /images/vision-mission-paper-top.webp 2331w',
+    bottom: '/images/vision-mission-paper-bottom-1200.webp 1200w, /images/vision-mission-paper-bottom.webp 2331w',
+};
+
 export function SectionRenderer({
     section,
     certifications,
@@ -75,7 +81,7 @@ export function SectionRenderer({
                         </div>
                         <div data-reveal="image" className="order-1 aspect-[4/3] w-full bg-muted lg:order-2">
                             {c.image ? (
-                                <img src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
+                                <img {...responsiveImage(c.image, IMAGE_SIZES.half)} alt={section.title ?? ''} loading="lazy" className="h-full w-full object-cover" />
                             ) : (
                                 <ImagePlaceholder />
                             )}
@@ -109,7 +115,7 @@ export function SectionRenderer({
                                 <div className="relative -rotate-[5deg] transform-gpu">
                                     <div className="relative aspect-[4/3] overflow-hidden border border-navy-900/70 bg-muted shadow-sm">
                                         <img
-                                            src={mediaUrl(presentation.image) ?? undefined}
+                                            {...responsiveImage(presentation.image, IMAGE_SIZES.half)}
                                             alt={section.title ?? t('Company manufacturing')}
                                             loading="lazy"
                                             className="h-full w-full object-cover"
@@ -156,7 +162,7 @@ export function SectionRenderer({
                             )}
                         </div>
                         {c.image ? (
-                            <img data-reveal="image" src={mediaUrl(c.image) ?? undefined} alt={section.title ?? ''} className="w-full rounded" />
+                            <img data-reveal="image" {...responsiveImage(c.image, IMAGE_SIZES.half)} alt={section.title ?? ''} className="w-full rounded" />
                         ) : (
                             <div className="flex h-64 items-center justify-center rounded border border-dashed border-border text-small text-muted-foreground">
                                 {t('No image set')}
@@ -183,14 +189,14 @@ export function SectionRenderer({
                     <div className="absolute inset-0 z-0 flex" aria-hidden="true">
                         <div className="h-full w-1/2">
                             {c.left_image ? (
-                                <img src={mediaUrl(c.left_image) ?? undefined} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
+                                <img {...responsiveImage(c.left_image, '50vw')} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
                         </div>
                         <div className="h-full w-1/2">
                             {c.right_image ? (
-                                <img src={mediaUrl(c.right_image) ?? undefined} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
+                                <img {...responsiveImage(c.right_image, '50vw')} alt="" className="h-full w-full object-cover contrast-[1.08] brightness-105 grayscale" />
                             ) : (
                                 <ImagePlaceholder className="h-full" />
                             )}
@@ -236,14 +242,22 @@ export function SectionRenderer({
                     {/* Torn paper — foreground layer, above the panels, masking their
                         top/bottom edges (z-20 > panels' z-10) instead of framing behind them. */}
                     <img
-                        src="/images/vision-mission-paper-top.png"
+                        src="/images/vision-mission-paper-top.webp"
+                        srcSet={PAPER_SRCSET.top}
+                        sizes="110vw"
+                        loading="lazy"
+                        decoding="async"
                         alt=""
                         aria-hidden="true"
                         className="absolute z-20 hidden max-w-none object-cover object-bottom lg:block"
                         style={{ height: '25%', left: '-5%', width: '110%', top: 0 }}
                     />
                     <img
-                        src="/images/vision-mission-paper-bottom.png"
+                        src="/images/vision-mission-paper-bottom.webp"
+                        srcSet={PAPER_SRCSET.bottom}
+                        sizes="110vw"
+                        loading="lazy"
+                        decoding="async"
                         alt=""
                         aria-hidden="true"
                         className="absolute z-20 hidden max-w-none object-cover object-top lg:block"
@@ -270,13 +284,21 @@ export function SectionRenderer({
                         </div>
                     </div>
                     <img
-                        src="/images/vision-mission-paper-top.png"
+                        src="/images/vision-mission-paper-top.webp"
+                        srcSet={PAPER_SRCSET.top}
+                        sizes="110vw"
+                        loading="lazy"
+                        decoding="async"
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-x-0 top-0 z-20 h-16 w-full object-cover object-bottom sm:h-24 lg:hidden"
                     />
                     <img
-                        src="/images/vision-mission-paper-bottom.png"
+                        src="/images/vision-mission-paper-bottom.webp"
+                        srcSet={PAPER_SRCSET.bottom}
+                        sizes="110vw"
+                        loading="lazy"
+                        decoding="async"
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-x-0 bottom-0 z-20 h-16 w-full object-cover object-top sm:h-24 lg:hidden"
@@ -303,7 +325,7 @@ export function SectionRenderer({
                     ) : (
                         <div data-reveal-group className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
                             {images.map((src, index) => (
-                                <img key={index} src={mediaUrl(src) ?? undefined} alt="" loading="lazy" className="aspect-square w-full rounded object-cover" />
+                                <img key={index} {...responsiveImage(src, IMAGE_SIZES.third)} alt="" loading="lazy" className="aspect-square w-full rounded object-cover" />
                             ))}
                         </div>
                     )}

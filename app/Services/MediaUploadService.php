@@ -78,6 +78,9 @@ class MediaUploadService
         if (str_starts_with($file->getMimeType() ?: '', 'image/')) {
             $this->resizeInPlace($existingPath);
         }
+
+        // Same path, new pixels: stale responsive copies must be rebuilt.
+        app(ImageVariantService::class)->forget($existingPath);
     }
 
     /**
@@ -102,6 +105,7 @@ class MediaUploadService
     {
         if ($path) {
             Storage::disk('public')->delete($path);
+            app(ImageVariantService::class)->forget($path);
         }
     }
 

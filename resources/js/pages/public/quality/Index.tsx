@@ -6,6 +6,7 @@ import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 import { Container, Section } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface QualityRow {
     id: number; title: string; summary: string | null; content: string | null; image: string | null;
@@ -21,7 +22,7 @@ function QualityBlock({ item, reverse }: { item: QualityRow; reverse: boolean })
         >
             <div className={`aspect-[4/3] w-full bg-muted ${reverse ? 'lg:order-last' : ''}`}>
                 {item.image ? (
-                    <img src={`/storage/${item.image}`} alt={item.title} loading="lazy" className="h-full w-full object-cover" />
+                    <img {...responsiveImage(item.image, IMAGE_SIZES.half)} alt={item.title} loading="lazy" className="h-full w-full object-cover" />
                 ) : (
                     <ImagePlaceholder />
                 )}

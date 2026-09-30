@@ -33,7 +33,9 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Off: private files (CVs, certificate PDFs) are only downloaded through
+            // authorized admin controllers, never a public /storage route.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

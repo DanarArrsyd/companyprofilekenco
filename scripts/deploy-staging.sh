@@ -207,6 +207,12 @@ log "Restoring from maintenance mode..."
 "$PHP_BIN" "${APP_DIR}/artisan" up
 MAINTENANCE_ENABLED=0
 
+# Responsive WebP copies of stored images, built while the site is already
+# live; only missing ones are made, and a page still builds any copy on
+# demand, so a failure here must not fail the deploy.
+log "Building missing responsive image copies..."
+"$PHP_BIN" "${APP_DIR}/artisan" media:variants || true
+
 # ---------------------------------------------------------------------------
 # 9. Health check — fail visibly (non-zero exit) if this doesn't succeed.
 # GitHub Actions defers this public request to its following smoke-test step.

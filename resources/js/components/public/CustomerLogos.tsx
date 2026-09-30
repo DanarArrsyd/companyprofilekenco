@@ -1,4 +1,4 @@
-import { mediaUrl } from '@/lib/media';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface CustomerLogo {
     id: number;
@@ -37,7 +37,7 @@ export function CustomerLogos({ customers }: { customers: CustomerLogo[] }) {
                                 <li key={`${customer.id}-${index}`} className="logo-marquee__item" aria-hidden={hidden && copy === 0 ? true : undefined}>
                                     {customer.logo ? (
                                         <img
-                                            src={mediaUrl(customer.logo) ?? undefined}
+                                            {...responsiveImage(customer.logo, IMAGE_SIZES.thumb)}
                                             alt={hidden ? '' : customer.name}
                                             loading="lazy"
                                             decoding="async"

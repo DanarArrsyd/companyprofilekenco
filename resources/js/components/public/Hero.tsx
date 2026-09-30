@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/use-locale';
-import { mediaUrl } from '@/lib/media';
 import { Container } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface HeroContent {
     eyebrow?: string;
@@ -45,7 +45,7 @@ export function Hero({ content, fallbackTitle }: { content: HeroContent; fallbac
             <div className="absolute inset-0">
                 {content.image ? (
                     <img
-                        src={mediaUrl(content.image) ?? undefined}
+                        {...responsiveImage(content.image, IMAGE_SIZES.full)}
                         alt=""
                         className="h-full w-full object-cover"
                         loading="eager"

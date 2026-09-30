@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { RevealGroup } from '@/components/public/ScrollReveal';
 import { useLocale } from '@/hooks/use-locale';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface ProductShowcaseItem {
     id: number;
@@ -21,7 +22,7 @@ function Unit({ item, large = false }: { item: ProductShowcaseItem; large?: bool
             <div className={`relative w-full bg-muted ${large ? 'aspect-[4/3]' : 'aspect-square'}`}>
                 {item.featured_image ? (
                     <img
-                        src={`/storage/${item.featured_image}`}
+                        {...responsiveImage(item.featured_image, '(min-width: 640px) 33vw, 78vw')}
                         alt={item.name}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"

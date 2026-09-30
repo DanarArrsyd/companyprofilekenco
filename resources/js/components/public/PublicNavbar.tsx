@@ -13,9 +13,9 @@ import {
 } from '@/components/public/navbar-scroll';
 import { useLocale } from '@/hooks/use-locale';
 import { stripLocale } from '@/lib/locale';
-import { mediaUrl } from '@/lib/media';
 import { pauseSmoothScroll, resumeSmoothScroll, scrollToElement } from '@/lib/smooth-scroll';
 import type { PageProps } from '@/types';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface NavLink {
     label: string;
@@ -467,7 +467,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                             {t('Latest news')}
                                         </h2>
                                         {menuNews.map((article, index) => {
-                                            const image = mediaUrl(article.featured_image);
+                                            const image = responsiveImage(article.featured_image, '(min-width: 1024px) 30vw, 100vw');
 
                                             return (
                                                 <Link
@@ -477,9 +477,9 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                                                         index > 0 ? '[@media(max-height:500px)]:hidden' : ''
                                                     }`}
                                                 >
-                                                    {image && (
+                                                    {image.src && (
                                                         <img
-                                                            src={image}
+                                                            {...image}
                                                             alt=""
                                                             loading="lazy"
                                                             className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"

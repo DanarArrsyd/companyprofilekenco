@@ -6,6 +6,7 @@ import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 import { Container } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface Article {
     id: number; title: string; excerpt: string | null; content: string | null;
@@ -49,7 +50,7 @@ export default function Show({
                     <div className="mt-8 aspect-[16/9] w-full bg-muted">
                         {article.featured_image ? (
                             <img
-                                src={`/storage/${article.featured_image}`}
+                                {...responsiveImage(article.featured_image, IMAGE_SIZES.content)}
                                 alt={article.title}
                                 loading="eager"
                                 className="h-full w-full object-cover"

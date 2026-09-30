@@ -5,6 +5,7 @@ import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 import { Container } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface Step {
     id: number; title: string; description: string | null;
@@ -51,7 +52,7 @@ export default function Show({
                     </div>
                     <div data-reveal="image" className="aspect-[4/3] w-full bg-muted">
                         {capability.featured_image ? (
-                            <img src={`/storage/${capability.featured_image}`} alt={capability.name} className="h-full w-full object-cover" loading="eager" />
+                            <img {...responsiveImage(capability.featured_image, IMAGE_SIZES.half)} alt={capability.name} className="h-full w-full object-cover" loading="eager" />
                         ) : (
                             <ImagePlaceholder />
                         )}

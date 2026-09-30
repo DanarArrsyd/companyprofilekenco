@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react';
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { revealClass, useInView } from '@/hooks/use-in-view';
 import { useLocale } from '@/hooks/use-locale';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface CapabilityFeatureItem {
     id: number;
@@ -24,7 +25,7 @@ function Row({ item, reverse }: { item: CapabilityFeatureItem; reverse: boolean 
             <div className={`aspect-[4/3] w-full bg-muted ${reverse ? 'lg:order-last' : ''}`}>
                 {item.featured_image ? (
                     <img
-                        src={`/storage/${item.featured_image}`}
+                        {...responsiveImage(item.featured_image, IMAGE_SIZES.half)}
                         alt={item.name}
                         loading="lazy"
                         className="h-full w-full object-cover"

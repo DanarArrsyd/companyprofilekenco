@@ -25,6 +25,9 @@
         @if ($pageLoader)
             <link rel="preload" as="image" href="{{ asset('images/loader/logo-white.webp') }}" fetchpriority="high">
             <link rel="preload" as="image" href="{{ asset('images/loader/brush.webp') }}">
+            @if ($heroImage = \App\Support\HeroImage::preload($page))
+                <link rel="preload" as="image" imagesrcset="{{ $heroImage['srcset'] }}" imagesizes="{{ $heroImage['sizes'] }}" fetchpriority="high">
+            @endif
         @endif
 
         <!-- Fonts -->

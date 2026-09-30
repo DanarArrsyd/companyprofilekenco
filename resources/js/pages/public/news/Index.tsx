@@ -10,6 +10,7 @@ import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 import { Container, Section } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
     const { localizedRoute, t, formatDate } = useLocale();
@@ -24,7 +25,7 @@ function FeaturedArticle({ article }: { article: ArticlePreviewItem }) {
             <div className="aspect-[16/10] w-full bg-muted">
                 {article.featured_image ? (
                     <img
-                        src={`/storage/${article.featured_image}`}
+                        {...responsiveImage(article.featured_image, IMAGE_SIZES.half)}
                         alt={article.title}
                         loading="eager"
                         className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"

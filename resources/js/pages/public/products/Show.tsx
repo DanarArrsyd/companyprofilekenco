@@ -7,6 +7,7 @@ import { useLocale } from '@/hooks/use-locale';
 import PublicLayout from '@/layouts/PublicLayout';
 import { ResolvedSeo } from '@/types/cms';
 import { Container } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 interface ProductImage {
     id: number;
@@ -63,7 +64,7 @@ export default function Show({
                         <div data-reveal="image" className="aspect-square w-full bg-muted">
                             {activeImage ? (
                                 <img
-                                    src={`/storage/${activeImage.path}`}
+                                    {...responsiveImage(activeImage.path, IMAGE_SIZES.half)}
                                     alt={activeImage.alt_text ?? product.name}
                                     className="h-full w-full object-cover"
                                     loading="eager"
@@ -84,7 +85,7 @@ export default function Show({
                                         aria-current={index === active}
                                         className={`aspect-square w-full overflow-hidden bg-muted ${index === active ? 'ring-2 ring-navy-900' : 'opacity-70 hover:opacity-100'}`}
                                     >
-                                        <img src={`/storage/${image.path}`} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                        <img {...responsiveImage(image.path, '6rem')} alt="" loading="lazy" className="h-full w-full object-cover" />
                                     </button>
                                 ))}
                             </div>

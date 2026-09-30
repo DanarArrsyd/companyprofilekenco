@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { useLocale } from '@/hooks/use-locale';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface ArticlePreviewItem {
     id: number;
@@ -20,7 +21,7 @@ export function ArticlePreview({ article }: { article: ArticlePreviewItem }) {
             <div className="aspect-[16/9] w-full bg-muted">
                 {article.featured_image ? (
                     <img
-                        src={`/storage/${article.featured_image}`}
+                        {...responsiveImage(article.featured_image, IMAGE_SIZES.third)}
                         alt={article.title}
                         loading="lazy"
                         className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"

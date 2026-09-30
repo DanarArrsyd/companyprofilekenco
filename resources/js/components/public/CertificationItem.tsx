@@ -1,4 +1,5 @@
 import { useLocale } from '@/hooks/use-locale';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface CertificationItemData {
     id: number;
@@ -22,7 +23,7 @@ function Plate({ cert }: { cert: CertificationItemData }) {
     return (
         <div className="w-40 shrink-0 border-t-2 border-navy-900 pt-4 text-center sm:w-44">
             {cert.image ? (
-                <img src={`/storage/${cert.image}`} alt={cert.name} loading="lazy" className="mx-auto h-16 w-16 object-contain" />
+                <img {...responsiveImage(cert.image, '4rem')} alt={cert.name} loading="lazy" className="mx-auto h-16 w-16 object-contain" />
             ) : (
                 <div className="mx-auto flex h-16 w-16 items-center justify-center text-caption uppercase text-muted-foreground">
                     {t('Mark')}
@@ -49,7 +50,7 @@ function Row({ cert }: { cert: CertificationItemData }) {
             <div className="flex items-start gap-4 sm:contents">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-border">
                     {cert.image ? (
-                        <img src={`/storage/${cert.image}`} alt={cert.name} loading="lazy" className="h-10 w-10 object-contain" />
+                        <img {...responsiveImage(cert.image, '4rem')} alt={cert.name} loading="lazy" className="h-10 w-10 object-contain" />
                     ) : (
                         <span className="text-caption uppercase text-muted-foreground">{t('Mark')}</span>
                     )}

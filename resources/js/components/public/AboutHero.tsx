@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { Container } from '@/components/public/Section';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface AboutHeroContent {
     heading: string;
@@ -50,7 +51,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
         <section className="relative isolate min-h-[35rem] w-full overflow-hidden bg-secondary sm:min-h-[40rem] lg:min-h-[45rem]">
             <div className="absolute inset-0">
                 {content.image ? (
-                    <img src={`/storage/${content.image}`} alt="" className="h-full w-full object-cover" loading="eager" />
+                    <img {...responsiveImage(content.image, IMAGE_SIZES.full)} alt="" className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
                 ) : (
                     <ImagePlaceholder className="h-full min-h-[35rem]" />
                 )}
@@ -66,7 +67,7 @@ export function AboutHero({ content }: { content: AboutHeroContent }) {
             {/* Brand arc, anchored to the bottom-right corner and sized to
                 enclose the highlight statement that sits inside it. */}
             <img
-                src="/images/about-accent.png"
+                src="/images/about-accent.webp"
                 alt=""
                 className="pointer-events-none absolute -bottom-10 -right-10 w-[62%] max-w-none sm:-bottom-8 sm:right-0 sm:w-[54%] lg:-bottom-[30%] lg:-right-[10%] lg:w-[58%]"
                 aria-hidden="true"

@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 
 import { ImagePlaceholder } from '@/components/public/ImagePlaceholder';
 import { useLocale } from '@/hooks/use-locale';
+import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
 export interface FacilityFeatureMachine {
     id: number;
@@ -48,7 +49,7 @@ export function FacilityFeature({
             <div data-reveal="image" className="aspect-[16/9] w-full bg-muted lg:aspect-[21/9]">
                 {facility.image ? (
                     <img
-                        src={`/storage/${facility.image}`}
+                        {...responsiveImage(facility.image, IMAGE_SIZES.content)}
                         alt={facility.name}
                         loading="lazy"
                         className="h-full w-full object-cover"
