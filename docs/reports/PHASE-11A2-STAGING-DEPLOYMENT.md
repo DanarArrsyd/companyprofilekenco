@@ -204,7 +204,7 @@ Not automated, not guessed. In hPanel:
 
 ## 11. `.env` setup
 
-See `docs/STAGING-ENV.md` for the full recommended template (no secrets).
+See `docs/deployment/STAGING-ENV.md` for the full recommended template (no secrets).
 Created once, by hand, directly on the server at
 `application/.env` — never generated or overwritten by any script in this
 repo. `scripts/deploy-staging.sh` explicitly refuses to run at all if
@@ -472,7 +472,7 @@ credentials, and the phase brief explicitly requires stopping here):
 1. **Staging database created** in hPanel (Part 10) — name, user, password
    noted somewhere safe (a password manager, not a chat log).
 2. **`application/.env` created manually** on the server (Part 11 /
-   `docs/STAGING-ENV.md`), with the real staging DB credentials from step 1.
+   `docs/deployment/STAGING-ENV.md`), with the real staging DB credentials from step 1.
 3. **`APP_KEY` generated** on the server, once, after `.env` exists.
 4. **`application/` and `incoming/` directories exist** on the server (can
    be empty/`mkdir -p`'d ahead of the first deploy — the deploy script

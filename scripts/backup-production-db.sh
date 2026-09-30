@@ -18,7 +18,7 @@
 # Output: a timestamped, gzip-compressed .sql file under
 # $DOMAIN_ROOT/backups/db/ (created if missing). Existing backups are never
 # deleted or overwritten by this script — retention/cleanup is a separate,
-# manual decision (see docs/PRODUCTION-CUTOVER.md's backup section).
+# manual decision (see docs/deployment/PRODUCTION-CUTOVER.md's backup section).
 #
 set -euo pipefail
 

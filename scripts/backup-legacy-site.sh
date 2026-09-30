@@ -75,7 +75,7 @@ if [[ -n "${LEGACY_DB_NAME:-}" ]]; then
     [[ -s "$DB_OUT" ]] || fail "Legacy database backup ${DB_OUT} is empty after mysqldump — something went wrong."
     log "Legacy database backup complete: ${DB_OUT} ($(du -h "$DB_OUT" | cut -f1))"
 else
-    warn "LEGACY_DB_NAME not set — skipping legacy database backup (files-only backup taken). If the legacy site has a database, back it up manually before cutover — see docs/PRODUCTION-CUTOVER.md."
+    warn "LEGACY_DB_NAME not set — skipping legacy database backup (files-only backup taken). If the legacy site has a database, back it up manually before cutover — see docs/deployment/PRODUCTION-CUTOVER.md."
 fi
 
 log "Legacy site backup complete."

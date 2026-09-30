@@ -591,7 +591,7 @@ occurrences remaining.**
 
 ### Intentionally retained — reviewed individually
 
-- `docs/PHASE-9A-UI-AUDIT.md` — contains the bare word "Kenco" (not the full
+- `docs/reports/PHASE-9A-UI-AUDIT.md` — contains the bare word "Kenco" (not the full
   "Kenco Manufacturing" phrase) three times, in narrative sentences from an
   earlier design-review audit ("what Kenco makes", "establish who Kenco
   is..."). **Retained**: this is a historical record of a past analysis

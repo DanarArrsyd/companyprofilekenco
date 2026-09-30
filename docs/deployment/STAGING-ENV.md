@@ -45,7 +45,7 @@ MAIL_FROM_NAME="${APP_NAME}"
 ## Why `MAIL_MAILER=log` on staging
 
 Real production SMTP is not configured yet (see
-`docs/PHASE-11A1-HOSTING-AUDIT.md`'s mail recommendation — this app doesn't
+`docs/reports/PHASE-11A1-HOSTING-AUDIT.md`'s mail recommendation — this app doesn't
 even send any email today, there's nothing implemented that would trigger a
 send). Setting `MAIL_MAILER=log` means anything that *does* eventually call
 `Mail::` writes to `storage/logs/laravel.log` instead of actually
@@ -72,7 +72,7 @@ the old key).
 
 The split `application/` + `public_html/` layout does **not** require a
 `PUBLIC_PATH` override or any other `bootstrap/app.php` change. See
-`docs/PHASE-11A2-STAGING-DEPLOYMENT.md`'s "Public path audit" section for
+`docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md`'s "Public path audit" section for
 why — in short: the one thing that reads `public_path()` at runtime is
 Vite's manifest lookup, and it resolves correctly against
 `application/public/` (where the build output originally lands before being

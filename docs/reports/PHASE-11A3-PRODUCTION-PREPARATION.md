@@ -26,10 +26,10 @@ phase's documentation:
   set — backs up the production database, migrates, optimizes, and
   atomically swaps `public_html_new/` into `public_html/` (the previous
   `public_html/` is renamed, never deleted, into `backups/legacy/`). Full
-  human checklist: `docs/PRODUCTION-CUTOVER.md`.
+  human checklist: `docs/deployment/PRODUCTION-CUTOVER.md`.
 - **ROLLBACK**: reversing a cutover, either automatically (the script
   itself, if the post-swap health check fails) or manually (a human,
-  following `docs/PRODUCTION-ROLLBACK.md`, for a problem the health check
+  following `docs/deployment/PRODUCTION-ROLLBACK.md`, for a problem the health check
   didn't catch).
 
 ## What this phase built, based on the proven staging pattern
@@ -37,7 +37,7 @@ phase's documentation:
 Phase 11A.2 proved the split-layout deployment pattern on staging
 (`application/` outside the docroot, `public_html/` holding only the
 front controller, `.htaccess`, and built static assets — see
-`docs/PHASE-11A2-STAGING-DEPLOYMENT.md`). That pattern is reused as-is for
+`docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md`). That pattern is reused as-is for
 production. The one structural difference: on staging, `public_html/` was
 empty/available from the start; on production, `public_html/` is
 currently the **live legacy PHP Native site** and cannot simply be
@@ -72,7 +72,7 @@ window to seconds.
 `public_html/` is switched only during the explicit, confirmed cutover
 step — never during ordinary preparation/deployment runs. See
 `scripts/deploy-production.sh`'s own header comment for the exact
-mechanics, and `docs/PRODUCTION-CUTOVER.md` for the full human procedure.
+mechanics, and `docs/deployment/PRODUCTION-CUTOVER.md` for the full human procedure.
 
 ## Backup strategy
 
@@ -104,7 +104,7 @@ Three distinct backups, each covering something different:
 Retention/cleanup is a manual, separate decision — not automated here, to
 avoid ever automatically deleting the one thing a rollback depends on.
 
-**Restore procedure**: documented in full in `docs/PRODUCTION-ROLLBACK.md`.
+**Restore procedure**: documented in full in `docs/deployment/PRODUCTION-ROLLBACK.md`.
 
 No backup was taken during this phase — Step 3 of the phase brief was
 preparation of the *strategy and scripts* only, explicitly not execution.
@@ -131,7 +131,7 @@ preparation of the *strategy and scripts* only, explicitly not execution.
 
 ## Cutover strategy
 
-Full checklist: `docs/PRODUCTION-CUTOVER.md`. Summary: legacy backup →
+Full checklist: `docs/deployment/PRODUCTION-CUTOVER.md`. Summary: legacy backup →
 verify Laravel app ready (PREPARE run) → verify DB connection → confirmed
 CUTOVER run (DB backup → migrate → optimize → atomic swap → health check,
 with automatic rollback built in) → manual verification (admin login,
@@ -139,7 +139,7 @@ robots/sitemap, error log monitoring) → done, or roll back.
 
 ## Rollback strategy
 
-Full procedure: `docs/PRODUCTION-ROLLBACK.md`. Two cases: automatic
+Full procedure: `docs/deployment/PRODUCTION-ROLLBACK.md`. Two cases: automatic
 (the deploy script's own health-check-triggered rollback — the common
 case, requires no manual action) and manual (a human restores the
 timestamped legacy backup from `backups/legacy/` for a problem the health
@@ -180,7 +180,7 @@ afterward regardless).
 `.github/workflows/deploy-production.yml` — `workflow_dispatch` only,
 never on push, uses the `production` GitHub Environment (configure
 required-reviewer protection on this environment in repo settings before
-ever confirming a real cutover — see `docs/PRODUCTION-CUTOVER.md`'s
+ever confirming a real cutover — see `docs/deployment/PRODUCTION-CUTOVER.md`'s
 prerequisites), and reads only `PRODUCTION_*`-named secrets — never
 `STAGING_*` — so a naming mistake can't silently point production
 deployment at staging credentials or vice versa. Runs the full test/build
@@ -201,19 +201,19 @@ exactly as `SWITCH-PRODUCTION-NOW`. **Not triggered during this phase.**
   names the secrets `deploy-production.yml` expects
   (`PRODUCTION_HOST`, `PRODUCTION_PORT`, `PRODUCTION_USER`,
   `PRODUCTION_SSH_PRIVATE_KEY`, `PRODUCTION_PATH`), consistent with how
-  `docs/PHASE-11A2-STAGING-DEPLOYMENT.md` named staging's without ever
+  `docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md` named staging's without ever
   creating them.
 
 ## Prerequisites still required before any real cutover
 
 Same shape as staging's equivalent list in
-`docs/PHASE-11A2-STAGING-DEPLOYMENT.md`, plus the production-specific
+`docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md`, plus the production-specific
 items:
 
 - [ ] Production MySQL database created (dedicated, not shared with
       legacy or staging).
 - [ ] `application/.env` created manually on the production server per
-      `docs/PRODUCTION-ENV.md`.
+      `docs/deployment/PRODUCTION-ENV.md`.
 - [ ] Production `APP_KEY` generated (unique from staging's).
 - [ ] Dedicated production SSH deploy keypair generated (not staging's).
 - [ ] Five `PRODUCTION_*` GitHub Secrets configured.

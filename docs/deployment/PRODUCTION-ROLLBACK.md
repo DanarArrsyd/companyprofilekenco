@@ -1,6 +1,6 @@
 # Production Rollback — Kenco Manufacturing
 
-What to do if the production cutover (`docs/PRODUCTION-CUTOVER.md`) needs
+What to do if the production cutover (`docs/deployment/PRODUCTION-CUTOVER.md`) needs
 to be reversed — either automatically (the deploy script already did it)
 or manually (you're doing it by hand because something the script
 couldn't detect went wrong).
@@ -68,7 +68,7 @@ Should return the legacy site's normal response.
 
 Only needed if migrations already ran against a shared/legacy database
 (they should not have — the Laravel app is expected to use its own
-dedicated database, per `docs/PRODUCTION-ENV.md` — but if that assumption
+dedicated database, per `docs/deployment/PRODUCTION-ENV.md` — but if that assumption
 turns out to be wrong, or the legacy site's own database was affected for
 any reason):
 
@@ -126,5 +126,5 @@ was never part of this cutover in the first place; only what
 - [ ] Communicate the rollback and revised timeline to whoever was told
       about the maintenance window.
 - [ ] Fix the root cause, re-verify on staging first, then restart
-      `docs/PRODUCTION-CUTOVER.md` from the top — do not resume partway
+      `docs/deployment/PRODUCTION-CUTOVER.md` from the top — do not resume partway
       through.

@@ -33,7 +33,7 @@
 #      and no default that performs a cutover. This is deliberate: it must
 #      be impossible to switch production by accident.
 #
-# See docs/PRODUCTION-CUTOVER.md for the full, human-run cutover checklist
+# See docs/deployment/PRODUCTION-CUTOVER.md for the full, human-run cutover checklist
 # this script is one part of — do not run this script as the only step of
 # a real cutover; read that document first.
 #
@@ -75,7 +75,7 @@ fail() { echo "[deploy-production] FAILED: $*" >&2; exit 1; }
     || fail "DOMAIN_ROOT contains 'staging' — this script must never run against staging. Use scripts/deploy-staging.sh."
 [[ -x "$PHP_BIN" ]] || fail "PHP 8.3 binary not found at $PHP_BIN"
 [[ -d "$INCOMING_DIR" ]] || fail "Nothing to deploy: $INCOMING_DIR does not exist. Upload a release there first."
-[[ -f "${APP_DIR}/.env" ]] || fail ".env missing at ${APP_DIR}/.env — create it manually first (docs/PRODUCTION-ENV.md), this script will not create one."
+[[ -f "${APP_DIR}/.env" ]] || fail ".env missing at ${APP_DIR}/.env — create it manually first (docs/deployment/PRODUCTION-ENV.md), this script will not create one."
 
 COMPOSER_BIN="$(command -v composer || true)"
 [[ -n "$COMPOSER_BIN" ]] || fail "composer not found on PATH"
@@ -87,7 +87,7 @@ env_get() { grep -E "^${1}=" "${APP_DIR}/.env" | tail -n1 | cut -d '=' -f2- | se
 
 [[ "$(env_get APP_ENV)" == "production" ]] || fail ".env APP_ENV is not 'production' — refusing to deploy."
 [[ "$(env_get APP_URL)" == "$EXPECTED_APP_URL" ]] || fail ".env APP_URL is not '${EXPECTED_APP_URL}' — refusing to deploy."
-[[ -n "$(env_get APP_KEY)" ]] || fail ".env APP_KEY is empty — run 'artisan key:generate' on the server first (docs/PRODUCTION-ENV.md). Never copy APP_KEY from staging or local."
+[[ -n "$(env_get APP_KEY)" ]] || fail ".env APP_KEY is empty — run 'artisan key:generate' on the server first (docs/deployment/PRODUCTION-ENV.md). Never copy APP_KEY from staging or local."
 [[ -n "$(env_get DB_DATABASE)" ]] || fail ".env DB_DATABASE is empty — refusing to deploy."
 [[ -n "$(env_get DB_USERNAME)" ]] || fail ".env DB_USERNAME is empty — refusing to deploy."
 
@@ -167,7 +167,7 @@ if [[ "$CUTOVER" != "$CUTOVER_TOKEN" ]]; then
     log "PREPARE complete. public_html/ was NOT touched — the live legacy site is still serving all traffic."
     log "To perform the real cutover, re-run this script as:"
     log "  CUTOVER_CONFIRM=${CUTOVER_TOKEN} bash scripts/deploy-production.sh"
-    log "Read docs/PRODUCTION-CUTOVER.md fully before doing that."
+    log "Read docs/deployment/PRODUCTION-CUTOVER.md fully before doing that."
     exit 0
 fi
 
@@ -224,7 +224,7 @@ log "Optimizing (config/route/view cache)..."
 # ---------------------------------------------------------------------------
 # 8. Atomic-as-possible public_html switch. The previous public_html/ (the
 #    legacy site) is RENAMED, never deleted, into backups/legacy/ with a
-#    timestamp — it can be renamed straight back by docs/PRODUCTION-ROLLBACK.md
+#    timestamp — it can be renamed straight back by docs/deployment/PRODUCTION-ROLLBACK.md
 #    at any time. No wildcard delete of public_html/ ever happens here.
 # ---------------------------------------------------------------------------
 mkdir -p "$LEGACY_BACKUP_DIR"
@@ -245,7 +245,7 @@ rollback_swap() {
     rm -rf "$PUBLIC_DIR"
     mv "$LEGACY_MOVE_TARGET" "$PUBLIC_DIR"
     ROLLBACK_DONE=1
-    fail "Cutover rolled back — legacy site restored. See docs/PRODUCTION-ROLLBACK.md and investigate before retrying."
+    fail "Cutover rolled back — legacy site restored. See docs/deployment/PRODUCTION-ROLLBACK.md and investigate before retrying."
 }
 
 # ---------------------------------------------------------------------------

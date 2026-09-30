@@ -6,7 +6,7 @@ name: Deploy to Production
 # scripts/deploy-production.sh, which itself defaults to PREPARE mode
 # (application/ only, public_html/ never touched) unless explicitly told
 # to cut over — see the "Confirm cutover" input below and
-# docs/PRODUCTION-CUTOVER.md for the full human checklist this is one part
+# docs/deployment/PRODUCTION-CUTOVER.md for the full human checklist this is one part
 # of. Do not run this workflow casually; running it with cutover confirmed
 # switches live production traffic.
 #

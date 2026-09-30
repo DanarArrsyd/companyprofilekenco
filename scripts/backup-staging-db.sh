@@ -13,7 +13,7 @@
 # Output: a timestamped, gzip-compressed .sql file under
 # $DOMAIN_ROOT/backups/db/ (created if missing). Old backups are not
 # auto-deleted by this script — retention/cleanup is a separate decision
-# (see docs/PHASE-11A2-STAGING-DEPLOYMENT.md's backup section).
+# (see docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md's backup section).
 #
 set -euo pipefail
 

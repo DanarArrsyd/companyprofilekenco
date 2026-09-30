@@ -18,7 +18,7 @@ do not proceed with a partial prerequisite.
 
 - [ ] Staging has been running the same release with no open issues for a
       reasonable soak period.
-- [ ] `docs/PRODUCTION-ENV.md` has been followed: `application/.env` exists
+- [ ] `docs/deployment/PRODUCTION-ENV.md` has been followed: `application/.env` exists
       on the production server, `APP_KEY` has been generated (and is
       **different** from staging's), `DB_DATABASE`/`DB_USERNAME`/
       `DB_PASSWORD` point at a real, dedicated production database that
@@ -35,7 +35,7 @@ do not proceed with a partial prerequisite.
       (internal stakeholders, anyone who might notice a brief outage).
 - [ ] You have read `scripts/deploy-production.sh` in full and understand
       its PREPARE vs CUTOVER modes (see the comment block at its top).
-- [ ] You have read `docs/PRODUCTION-ROLLBACK.md` and know exactly what
+- [ ] You have read `docs/deployment/PRODUCTION-ROLLBACK.md` and know exactly what
       you'll do if a step below fails.
 
 ## The sequence
@@ -196,7 +196,7 @@ the goal, not just a 200 on the homepage.
 If steps 10–13 reveal a critical problem that the script's own automatic
 rollback didn't already catch (e.g., homepage 200s but admin login is
 broken, or content is visibly wrong), follow
-`docs/PRODUCTION-ROLLBACK.md` immediately. Don't try to "fix forward" under
+`docs/deployment/PRODUCTION-ROLLBACK.md` immediately. Don't try to "fix forward" under
 pressure during the maintenance window — roll back, investigate calmly,
 retry later.
 

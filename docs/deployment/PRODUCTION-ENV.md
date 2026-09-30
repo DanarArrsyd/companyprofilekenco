@@ -90,8 +90,8 @@ one.
 
 ## `PUBLIC_PATH` — not needed
 
-Same conclusion as staging (see `docs/PHASE-11A2-STAGING-DEPLOYMENT.md`'s
-"Public path audit" and `docs/STAGING-ENV.md`): the split
+Same conclusion as staging (see `docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md`'s
+"Public path audit" and `docs/deployment/STAGING-ENV.md`): the split
 `application/` + `public_html/` layout does not require a `PUBLIC_PATH`
 override or any other `bootstrap/app.php` change. Vite's manifest lookup
 resolves correctly against `application/public/build/manifest.json`
@@ -101,5 +101,5 @@ exists there before ever touching `public_html/`.
 ## `QUEUE_CONNECTION=sync`
 
 No background job workload exists in this application yet (see
-`docs/PHASE-11A1-HOSTING-AUDIT.md`). `sync` runs jobs inline on the request
+`docs/reports/PHASE-11A1-HOSTING-AUDIT.md`). `sync` runs jobs inline on the request
 thread — correct for now. Revisit only if a real queued job is introduced.

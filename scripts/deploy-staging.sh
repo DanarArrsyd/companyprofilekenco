@@ -10,9 +10,9 @@
 #   - $DOMAIN_ROOT/incoming/ contains a fresh copy of the application source
 #     (repo checkout + built public/build/**), placed there by rsync/scp from
 #     CI (or manually, for the first rehearsal) — see
-#     docs/PHASE-11A2-STAGING-DEPLOYMENT.md for exactly how to populate it.
+#     docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md for exactly how to populate it.
 #   - $DOMAIN_ROOT/application/.env already exists (created once, by hand,
-#     per docs/STAGING-ENV.md) — this script NEVER creates, overwrites, or
+#     per docs/deployment/STAGING-ENV.md) — this script NEVER creates, overwrites, or
 #     deletes it.
 #   - The staging MySQL database already exists and its credentials are in
 #     that .env — this script does not create databases or users.
@@ -48,7 +48,7 @@ fail() { echo "[deploy-staging] FAILED: $*" >&2; exit 1; }
 # ---------------------------------------------------------------------------
 [[ -x "$PHP_BIN" ]] || fail "PHP 8.3 binary not found at $PHP_BIN"
 [[ -d "$INCOMING_DIR" ]] || fail "Nothing to deploy: $INCOMING_DIR does not exist. Upload a release there first."
-[[ -f "${APP_DIR}/.env" ]] || fail ".env missing at ${APP_DIR}/.env — create it manually first (docs/STAGING-ENV.md), this script will not create one."
+[[ -f "${APP_DIR}/.env" ]] || fail ".env missing at ${APP_DIR}/.env — create it manually first (docs/deployment/STAGING-ENV.md), this script will not create one."
 
 COMPOSER_BIN="$(command -v composer || true)"
 [[ -n "$COMPOSER_BIN" ]] || fail "composer not found on PATH"
@@ -161,7 +161,7 @@ fi
 
 # ---------------------------------------------------------------------------
 # 5. Storage symlink — deliberate, not artisan storage:link (see
-#    docs/PHASE-11A2-STAGING-DEPLOYMENT.md part F for why: public_path()
+#    docs/reports/PHASE-11A2-STAGING-DEPLOYMENT.md part F for why: public_path()
 #    resolves to application/public here, not the real public_html, so the
 #    framework's own storage:link command would create the symlink in the
 #    wrong, unserved location).
