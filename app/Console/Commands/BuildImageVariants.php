@@ -22,6 +22,14 @@ class BuildImageVariants extends Command
     {
         $built = 0;
         $failed = 0;
+        $disk = Storage::disk('public');
+        $marker = ImageVariantService::DIRECTORY.'/VERSION';
+
+        // Copies made with older encoder settings are dropped and rebuilt once.
+        if (trim((string) $disk->get($marker)) !== (string) ImageVariantService::VERSION) {
+            $disk->deleteDirectory(ImageVariantService::DIRECTORY);
+            $this->info('Encoder settings changed: rebuilding every copy.');
+        }
 
         $sources = collect(Storage::disk('public')->allFiles())
             ->filter(fn (string $path) => $variants->isEligible($path));
@@ -40,6 +48,8 @@ class BuildImageVariants extends Command
                 $built += $existed ? 0 : 1;
             }
         }
+
+        $disk->put($marker, (string) ImageVariantService::VERSION);
 
         $this->info("{$sources->count()} images checked, {$built} copies built".($failed ? ", {$failed} unreadable" : '').'.');
 

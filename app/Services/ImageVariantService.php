@@ -24,7 +24,18 @@ class ImageVariantService
 
     private const SOURCE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
 
-    private const QUALITY = 80;
+    /**
+     * WebP quality per width. Hostinger's libwebp at 80 made a 1600 px photo
+     * larger than its q85 JPEG, so the big copies (retina desktops) trade a
+     * barely visible amount of detail for size; small copies keep more.
+     */
+    private const QUALITY = [480 => 78, 960 => 78, 1440 => 70, 2000 => 70];
+
+    /**
+     * Bump when the encoding changes: `media:variants` sees a different
+     * number in _variants/VERSION and rebuilds every copy once.
+     */
+    public const VERSION = 2;
 
     public function variantPath(string $source, int $width): string
     {
@@ -83,7 +94,7 @@ class ImageVariantService
             // Write beside the target, then move, so a concurrent request never reads half a file.
             $temporary = $disk->path($target).'.'.bin2hex(random_bytes(4)).'.tmp';
 
-            if (! imagewebp($image, $temporary, self::QUALITY)) {
+            if (! imagewebp($image, $temporary, self::QUALITY[$width])) {
                 @unlink($temporary);
 
                 return null;

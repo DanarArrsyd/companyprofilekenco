@@ -94,3 +94,15 @@ test('media:variants builds every missing copy once', function () {
 
     Storage::disk('public')->assertExists('_variants/w2000/library/photo.png.webp');
 });
+
+test('media:variants rebuilds every copy once when the encoder version changes', function () {
+    storeTestImage('library/photo.png', 1200, 600);
+    Storage::disk('public')->put('_variants/w480/library/photo.png.webp', 'stale');
+    Storage::disk('public')->put('_variants/VERSION', '1');
+
+    $this->artisan('media:variants')->expectsOutputToContain('rebuilding every copy')->assertSuccessful();
+
+    expect(Storage::disk('public')->get('_variants/w480/library/photo.png.webp'))->not->toBe('stale')
+        ->and(Storage::disk('public')->get('_variants/VERSION'))->toBe((string) App\Services\ImageVariantService::VERSION);
+    $this->artisan('media:variants')->doesntExpectOutputToContain('rebuilding')->assertSuccessful();
+});
