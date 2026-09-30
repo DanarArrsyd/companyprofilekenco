@@ -11,7 +11,6 @@ use App\Http\Controllers\Admin\FacilityCategoryController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\HomepageController;
 use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\IndustryController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobVacancyController;
 use App\Http\Controllers\Admin\MachineController;
@@ -187,7 +186,7 @@ Route::prefix('admin')->group(function () {
         Route::put('quality-content/{qualityContent}', [QualityContentController::class, 'update'])->name('admin.quality-content.update')->middleware('permission:certifications.update');
         Route::delete('quality-content/{qualityContent}', [QualityContentController::class, 'destroy'])->name('admin.quality-content.destroy')->middleware('permission:certifications.delete');
 
-        // Industries
+        // Customers
         Route::get('customers', [CustomerController::class, 'index'])->name('admin.customers')->middleware('permission:customers.view');
         Route::get('customers/create', [CustomerController::class, 'create'])->name('admin.customers.create')->middleware('permission:customers.create');
         Route::post('customers', [CustomerController::class, 'store'])->name('admin.customers.store')->middleware('permission:customers.create');
@@ -196,12 +195,6 @@ Route::prefix('admin')->group(function () {
         Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('admin.customers.update')->middleware('permission:customers.update');
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy')->middleware('permission:customers.delete');
 
-        Route::get('industries', [IndustryController::class, 'index'])->name('admin.industries')->middleware('permission:industries.view');
-        Route::get('industries/create', [IndustryController::class, 'create'])->name('admin.industries.create')->middleware('permission:industries.create');
-        Route::post('industries', [IndustryController::class, 'store'])->name('admin.industries.store')->middleware('permission:industries.create');
-        Route::get('industries/{industry}/edit', [IndustryController::class, 'edit'])->name('admin.industries.edit')->middleware('permission:industries.update');
-        Route::put('industries/{industry}', [IndustryController::class, 'update'])->name('admin.industries.update')->middleware('permission:industries.update');
-        Route::delete('industries/{industry}', [IndustryController::class, 'destroy'])->name('admin.industries.destroy')->middleware('permission:industries.delete');
 
         // Milestones
         Route::get('milestones', [MilestoneController::class, 'index'])->name('admin.milestones')->middleware('permission:milestones.view');

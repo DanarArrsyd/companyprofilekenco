@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\Page;
 use App\Services\SeoService;
 use Inertia\Inertia;
@@ -38,11 +37,11 @@ class PageController extends Controller
     }
 
     /**
-     * /company — one long page merging About, Vision & Mission, Facilities,
-     * and Industries into #about/#vision-mission/#facilities/#industries
-     * sections (the nav's "Company" submenu jumps between them instead of
-     * navigating to four separate pages). /company/vision-mission,
-     * /facilities, and /industries redirect here — see routes/web.php.
+     * /company — one long page merging About, Vision & Mission and
+     * Facilities into #about/#vision-mission/#facilities sections (the nav's
+     * "Company" submenu jumps between them instead of navigating to separate
+     * pages). /company/vision-mission, /facilities and the retired
+     * /industries redirect here — see routes/web.php.
      *
      * Any other slug under company/* (an admin-created custom Page) still
      * falls through to the generic show() renderer.
@@ -68,16 +67,10 @@ class PageController extends Controller
             ->orderBy('sort_order')
             ->get(['id', 'facility_category_id', 'name', 'slug', 'location', 'description', 'image']);
 
-        $industries = Industry::query()
-            ->published()
-            ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'description', 'image']);
-
         return Inertia::render('public/company/Index', [
             'aboutPage' => $aboutPage,
             'visionPage' => $visionPage,
             'facilities' => $facilities,
-            'industries' => $industries,
             'seo' => $aboutPage
                 ? $this->seo->resolve($aboutPage, $aboutPage->title)
                 : $this->seo->resolveStatic(__('Company')),

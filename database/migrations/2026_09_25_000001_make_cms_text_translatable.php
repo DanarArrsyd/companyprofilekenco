@@ -89,6 +89,11 @@ return new class extends Migration
      */
     private function rewrite(string $table, array $columns, callable $transform): void
     {
+        // Tables retired later (industries, 2026-09-30) are skipped on a re-run.
+        if (! Schema::hasTable($table)) {
+            return;
+        }
+
         DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table, $columns, $transform) {
             foreach ($rows as $row) {
                 $changes = [];

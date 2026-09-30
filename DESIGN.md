@@ -240,7 +240,7 @@ Core Capabilities
 Featured Products
 Facilities
 Quality & Certifications
-Industries Served
+Customers Served
 Milestones
 Latest News
 Career CTA

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Review pass over the Indonesian drafts from
@@ -123,6 +124,11 @@ return new class extends Migration
         };
 
         foreach (self::COLUMNS as $table => $columns) {
+            // Tables retired later (industries, 2026-09-30) are skipped on a re-run.
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+
             DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table, $columns, $reviseMap) {
                 foreach ($rows as $row) {
                     $changes = [];

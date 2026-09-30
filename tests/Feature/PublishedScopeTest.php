@@ -3,7 +3,6 @@
 use App\Enums\ContentStatus;
 use App\Models\Article;
 use App\Models\Capability;
-use App\Models\Industry;
 use App\Models\JobVacancy;
 use App\Models\Page;
 use App\Models\Product;
@@ -14,7 +13,6 @@ dataset('publishable_models', [
     'Capability' => [Capability::class],
     'Article' => [Article::class],
     'JobVacancy' => [JobVacancy::class],
-    'Industry' => [Industry::class],
 ]);
 
 test('published scope only returns published content in the past', function (string $model) {

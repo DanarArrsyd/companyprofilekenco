@@ -34,13 +34,14 @@ $registerPublicRoutes = function (string $locale): void {
 
     Route::get('/', [HomeController::class, 'index'])->name('home');
 
-    // /company is one long page merging About, Vision & Mission, Facilities,
-    // and Industries into #about/#vision-mission/#facilities/#industries
-    // sections — these three old standalone URLs redirect there permanently.
+    // /company is one long page merging About, Vision & Mission and Facilities
+    // into #about/#vision-mission/#facilities sections — these old standalone
+    // URLs redirect there permanently (Industries was retired on 2026-09-30;
+    // its old URL keeps pointing at /company so existing links do not 404).
     // Registered before the company/{path?} wildcard so the literal match wins.
     Route::redirect('company/vision-mission', $path('/company#vision-mission'), 301);
     Route::redirect('facilities', $path('/company#facilities'), 301);
-    Route::redirect('industries', $path('/company#industries'), 301);
+    Route::redirect('industries', $path('/company'), 301);
 
     Route::get('company/{path?}', [PageController::class, 'company'])
         ->where('path', '.*')

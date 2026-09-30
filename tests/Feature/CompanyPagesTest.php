@@ -80,10 +80,14 @@ test('facilities redirects to the merged company page anchor', function () {
     $response->assertRedirect('/company#facilities');
 });
 
-test('industries redirects to the merged company page anchor', function () {
+test('the retired industries page redirects to the company page', function () {
     $response = $this->get('/industries');
 
-    $response->assertRedirect('/company#industries');
+    $response->assertRedirect('/company');
+});
+
+test('the company page no longer carries industries', function () {
+    $this->get('/company')->assertOk()->assertInertia(fn ($page) => $page->missing('industries'));
 });
 
 test('company/milestones page has been removed and returns 404', function () {
@@ -101,4 +105,19 @@ test('company page renders its header shell with no 404 when no Page records exi
         ->where('aboutPage', null)
         ->where('visionPage', null)
     );
+});
+
+test('industries are dropped from the database and permissions', function () {
+    expect(Illuminate\Support\Facades\Schema::hasTable('industries'))->toBeFalse()
+        ->and(Spatie\Permission\Models\Permission::where('name', 'like', 'industries.%')->exists())->toBeFalse();
+});
+
+test('dropping industries detaches their activity log entries', function () {
+    $migration = require database_path('migrations/2026_09_30_000001_drop_industries.php');
+    $migration->down();
+    $log = App\Models\ActivityLog::create(['action' => 'industry.created', 'subject_type' => 'App\\Models\\Industry', 'subject_id' => 1]);
+
+    $migration->up();
+
+    expect($log->fresh())->subject_type->toBeNull()->subject_id->toBeNull()->action->toBe('industry.created');
 });

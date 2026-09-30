@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Indonesian drafts for the CMS content that existed when the site became
@@ -300,6 +301,11 @@ return new class extends Migration
     private function rewriteColumns(callable $transform): void
     {
         foreach (self::COLUMNS as $table => $columns) {
+            // Tables retired later (industries, 2026-09-30) are skipped on a re-run.
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+
             DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table, $columns, $transform) {
                 foreach ($rows as $row) {
                     $changes = [];

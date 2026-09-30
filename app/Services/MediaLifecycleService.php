@@ -7,7 +7,6 @@ use App\Models\Capability;
 use App\Models\Certification;
 use App\Models\Customer;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\Machine;
 use App\Models\Media;
 use App\Models\Milestone;
@@ -38,7 +37,6 @@ class MediaLifecycleService
             [Capability::class, 'featured_image', 'capability', 'name'],
             [Facility::class, 'image', 'facility', 'name'],
             [Machine::class, 'image', 'machine', 'name'],
-            [Industry::class, 'image', 'industry', 'name'],
             [Milestone::class, 'image', 'milestone', 'title'],
             [QualityContent::class, 'image', 'quality_content', 'title'],
             [SeoMetadata::class, 'og_image', 'seo_metadata', 'meta_title'],

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /*
  * Content saved as "published" from an admin form without a publish date was
@@ -19,6 +20,11 @@ return new class extends Migration
     public function up(): void
     {
         foreach (self::TABLES as $table) {
+            // Tables retired later (industries, 2026-09-30) are skipped on a re-run.
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+
             DB::table($table)
                 ->where('status', 'published')
                 ->whereNull('published_at')

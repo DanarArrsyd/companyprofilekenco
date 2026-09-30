@@ -2,7 +2,6 @@
 
 use App\Models\Certification;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\Machine;
 use App\Models\Media;
 use App\Models\Product;
@@ -17,7 +16,6 @@ beforeEach(function () {
 
     foreach ([
         'facilities.create',
-        'industries.create',
         'certifications.create',
         'products.update',
         'settings.manage',
@@ -59,19 +57,6 @@ test('machine accepts a media library path', function () {
     ])->assertRedirect();
 
     expect(Machine::where('name', 'Path Machine')->value('image'))->toBe($media->path);
-});
-
-test('industry accepts a media library path', function () {
-    $user = createMediaPathAdmin('industries.create');
-    $media = Media::factory()->create(['path' => 'library/industry.jpg']);
-
-    $this->actingAs($user)->post(route('admin.industries.store'), [
-        'name' => 'Path Industry',
-        'status' => 'draft',
-        'image_path' => $media->path,
-    ])->assertRedirect();
-
-    expect(Industry::where('name->en', 'Path Industry')->value('image'))->toBe($media->path);
 });
 
 test('quality content accepts a media library path', function () {

@@ -165,7 +165,7 @@ none of them hand-build a metadata array:
   Page). `$model` must use the `HasSeoMetadata` trait.
 - `resolveStatic($title, $description = null, $image = null)` — for
   listing/static pages with no SEO-metadata record of their own (Products
-  index, Facilities, Quality, Certifications, Industries, News index,
+  index, Facilities, Quality, Certifications, News index,
   Careers index, Contact).
 - `homepage($page = null)` — homepage title is the company name alone (or
   the Homepage `Page`'s own SEO override), never duplicated with a separator.
@@ -244,7 +244,7 @@ cached for 30 minutes (`Cache::remember('sitemap.xml', ...)`). Includes:
   whatever the admin actually publishes there, not a hardcoded list)
 - `/products` + every published product detail URL
 - `/capabilities` + every published capability detail URL
-- `/facilities`, `/quality`, `/certifications`, `/industries` (index-only —
+- `/facilities`, `/quality`, `/certifications` (index-only —
   no detail routes exist for these)
 - `/news` + every published article detail URL
 - `/careers` + every published **and currently open** (`closes_at` null or
@@ -300,8 +300,8 @@ actually exists.
   Description (160 chars), Canonical URL override, Robots (select), OG
   Title, OG Description, OG Image (via the existing `MediaPickerField` —
   choose from the Media Library or upload new), and a lightweight SERP
-  preview (URL / title / description) above the fields. Facility and
-  Industry do not have this panel — neither has a public detail page, so a
+  preview (URL / title / description) above the fields. Facility does
+  not have this panel — it has no public detail page, so a
   per-entity SEO override would have nothing to attach to.
 - Every Create/Update Action for these five entities funnels its `seo.*`
   input through `SeoService::saveMetadata()` — the one place that resolves

@@ -9,7 +9,6 @@ use App\Models\Capability;
 use App\Models\Certification;
 use App\Models\Customer;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\Machine;
 use App\Models\Media;
 use App\Models\Milestone;
@@ -68,7 +67,6 @@ test('direct public image references prevent media deletion', function (string $
     'capability' => [Capability::class, 'featured_image'],
     'facility' => [Facility::class, 'image'],
     'machine' => [Machine::class, 'image'],
-    'industry' => [Industry::class, 'image'],
     'milestone' => [Milestone::class, 'image'],
     'quality content' => [QualityContent::class, 'image'],
 ]);

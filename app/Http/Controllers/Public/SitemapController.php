@@ -38,7 +38,7 @@ class SitemapController extends Controller
         $urls->push($this->entry(url('/'), $homepage?->updated_at));
 
         // /company is now the single merged page (About, Vision & Mission,
-        // Facilities, Industries all live there as sections) — the old
+        // Facilities all live there as sections) — the old
         // company/vision-mission slug 301-redirects and is never its own
         // sitemap entry.
         Page::query()

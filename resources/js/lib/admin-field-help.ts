@@ -67,7 +67,6 @@ const MODULES: Record<string, FieldHelp> = {
     'product-categories:name': { example: 'Brackets' },
     'news-categories:name': { example: 'Company News' },
 
-    'industries:name': { example: 'Automotive' },
 
     'machines:name': { example: 'Progressive Press' },
     'machines:brand': { example: 'Amada' },

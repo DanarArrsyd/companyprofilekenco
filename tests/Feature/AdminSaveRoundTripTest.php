@@ -5,7 +5,6 @@ use App\Models\Capability;
 use App\Models\Certification;
 use App\Models\Customer;
 use App\Models\Facility;
-use App\Models\Industry;
 use App\Models\JobVacancy;
 use App\Models\Machine;
 use App\Models\Media;
@@ -97,8 +96,6 @@ dataset('edit forms', [
         fn (array $r) => ['title' => $r['title'], 'status' => $r['status'], 'published_at' => formDate($r['published_at']), 'seo' => formSeo($r['seo_metadata']), 'translations' => ['id' => $r['translations']['id'] ?? []]]],
     'facility' => [fn () => Facility::factory()->published()->create(['image' => 'library/facility.webp']), 'facilities', 'facility',
         fn (array $r) => ['slug' => $r['slug'], 'name' => $r['name'], 'location' => $r['location'] ?? '', 'description' => $r['description'] ?? '', 'facility_category_id' => $r['facility_category_id'] ?? '', 'image_path' => $r['image'] ?? '', 'sort_order' => $r['sort_order'], 'status' => $r['status'], 'published_at' => formDate($r['published_at']), 'translations' => ['id' => $r['translations']['id'] ?? []]]],
-    'industry' => [fn () => Industry::factory()->published()->create(['image' => 'library/industry.webp']), 'industries', 'industry',
-        fn (array $r) => ['slug' => $r['slug'], 'name' => $r['name'], 'description' => $r['description'] ?? '', 'image_path' => $r['image'] ?? '', 'sort_order' => $r['sort_order'], 'status' => $r['status'], 'published_at' => formDate($r['published_at']), 'translations' => ['id' => $r['translations']['id'] ?? []]]],
     'quality content' => [fn () => QualityContent::factory()->published()->create(['image' => 'library/quality.webp']), 'quality-content', 'item',
         fn (array $r) => ['slug' => $r['slug'], 'title' => $r['title'], 'summary' => $r['summary'] ?? '', 'content' => $r['content'] ?? '', 'image_path' => $r['image'] ?? '', 'sort_order' => $r['sort_order'], 'status' => $r['status'], 'published_at' => formDate($r['published_at']), 'translations' => ['id' => $r['translations']['id'] ?? []]]],
     'certification' => [fn () => Certification::factory()->published()->create(['media_id' => Media::factory()->create(['path' => 'library/cert.webp'])->id]), 'certifications', 'certification',

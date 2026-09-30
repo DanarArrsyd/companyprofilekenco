@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 
 import { AboutHero, AboutHeroContent } from '@/components/public/AboutHero';
 import { FacilityFeature, FacilityFeatureItem } from '@/components/public/FacilityFeature';
-import { IndustryGrid, IndustryGridItem } from '@/components/public/IndustryGrid';
 import { SectionHeader } from '@/components/public/SectionHeader';
 import { SectionRenderer } from '@/components/public/SectionRenderer';
 import { SeoHead } from '@/components/public/SeoHead';
@@ -31,23 +30,21 @@ function FacilityRow({ facility }: { facility: FacilityFeatureItem }) {
 }
 
 /**
- * /company — About, Vision & Mission, Facilities, and Industries as one
- * continuous scrollable page instead of four separate ones. The navbar's
- * "Company" submenu links here as #about / #vision-mission / #facilities /
- * #industries; each section carries a matching id + scroll-mt (offsetting
+ * /company — About, Vision & Mission (with Operating Values) and Facilities
+ * as one continuous scrollable page instead of separate ones. The navbar's
+ * "Company" submenu links here as #about / #vision-mission / #values /
+ * #facilities; each section carries a matching id + scroll-mt (offsetting
  * the fixed header) as the jump target.
  */
 export default function CompanyIndex({
     aboutPage,
     visionPage,
     facilities,
-    industries,
     seo,
 }: {
     aboutPage: CmsPage | null;
     visionPage: CmsPage | null;
     facilities: FacilityFeatureItem[];
-    industries: IndustryGridItem[];
     seo: ResolvedSeo;
 }) {
     const { t } = useLocale();
@@ -114,18 +111,6 @@ export default function CompanyIndex({
                         {facilities.map((facility) => <FacilityRow key={facility.id} facility={facility} />)}
                     </div>
                 )}
-            </Section>
-
-            <Section id="industries" className="scroll-mt-20 border-t border-border">
-                <SectionHeader eyebrow={t('Who We Serve')} heading={t('Industries')} description={t('Sectors we manufacture for.')} />
-
-                <div className="mt-12 md:mt-16">
-                    {industries.length === 0 ? (
-                        <p className="text-small text-muted-foreground">{t('No industries published yet.')}</p>
-                    ) : (
-                        <IndustryGrid items={industries} showDescription />
-                    )}
-                </div>
             </Section>
         </PublicLayout>
     );

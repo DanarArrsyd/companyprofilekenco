@@ -11,7 +11,6 @@ use App\Models\CapabilityStep;
 use App\Models\Certification;
 use App\Models\Facility;
 use App\Models\FacilityCategory;
-use App\Models\Industry;
 use App\Models\JobVacancy;
 use App\Models\Machine;
 use App\Models\Milestone;
@@ -49,7 +48,6 @@ class DemoContentSeeder extends Seeder
     {
         $admin = User::where('email', 'admin@kenco.test')->first();
 
-        $industries = $this->seedIndustries();
         $certifications = $this->seedCertifications();
         $qualityContents = $this->seedQualityContent();
         $capabilities = $this->seedCapabilities();
@@ -62,33 +60,11 @@ class DemoContentSeeder extends Seeder
         $this->seedHomepage($capabilities, $products, $facilities);
 
         $this->command?->info('Demo content seeded: '
-            .$industries->count().' industries, '
             .$certifications->count().' certifications, '
             .$qualityContents->count().' quality items, '
             .$capabilities->count().' capabilities, '
             .$products->count().' products, '
             .$facilities->count().' facilities.');
-    }
-
-    private function seedIndustries()
-    {
-        $names = [
-            ['name' => 'Automotive', 'description' => 'Precision components for tier-1 and tier-2 automotive suppliers.'],
-            ['name' => 'Electronics', 'description' => 'Enclosures and structural parts for consumer and industrial electronics.'],
-            ['name' => 'Aerospace', 'description' => 'Tight-tolerance machined parts for aerospace subassemblies.'],
-            ['name' => 'Industrial Equipment', 'description' => 'Structural and mechanical components for heavy machinery OEMs.'],
-            ['name' => 'Consumer Goods', 'description' => 'High-volume plastic and metal parts for consumer product brands.'],
-        ];
-
-        return collect($names)->map(fn (array $i) => Industry::query()->firstOrCreate(
-            ['slug' => Str::slug($i['name'])],
-            [
-                'name' => $i['name'],
-                'description' => $i['description'],
-                'status' => ContentStatus::Published,
-                'published_at' => now()->subDay(),
-            ],
-        ));
     }
 
     private function seedCertifications()
