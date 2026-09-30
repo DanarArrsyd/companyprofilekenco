@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 | cookies or CSRF, so the one PHP-built response is as cacheable as the
 | static file that replaces it. See ImageVariantService.
 */
-Route::get('storage/'.ImageVariantService::DIRECTORY.'/w{width}/{path}', ImageVariantController::class)
+Route::get('storage/'.ImageVariantService::DIRECTORY.'/v'.ImageVariantService::VERSION.'/w{width}/{path}', ImageVariantController::class)
     ->whereIn('width', array_map('strval', ImageVariantService::WIDTHS))
     ->where('path', '.+\.webp')
     ->name('media.variant');

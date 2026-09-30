@@ -23,13 +23,16 @@ class BuildImageVariants extends Command
         $built = 0;
         $failed = 0;
         $disk = Storage::disk('public');
-        $marker = ImageVariantService::DIRECTORY.'/VERSION';
+        $current = ImageVariantService::DIRECTORY.'/v'.ImageVariantService::VERSION;
 
-        // Copies made with older encoder settings are dropped and rebuilt once.
-        if (trim((string) $disk->get($marker)) !== (string) ImageVariantService::VERSION) {
-            $disk->deleteDirectory(ImageVariantService::DIRECTORY);
-            $this->info('Encoder settings changed: rebuilding every copy.');
+        // Copies made with other encoder settings (older URL versions) are dropped.
+        foreach ($disk->directories(ImageVariantService::DIRECTORY) as $directory) {
+            if ($directory !== $current) {
+                $disk->deleteDirectory($directory);
+                $this->info("Removed outdated copies in {$directory}.");
+            }
         }
+        $disk->delete(ImageVariantService::DIRECTORY.'/VERSION');
 
         $sources = collect(Storage::disk('public')->allFiles())
             ->filter(fn (string $path) => $variants->isEligible($path));
@@ -48,8 +51,6 @@ class BuildImageVariants extends Command
                 $built += $existed ? 0 : 1;
             }
         }
-
-        $disk->put($marker, (string) ImageVariantService::VERSION);
 
         $this->info("{$sources->count()} images checked, {$built} copies built".($failed ? ", {$failed} unreadable" : '').'.');
 

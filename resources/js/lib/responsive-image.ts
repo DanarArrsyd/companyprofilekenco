@@ -1,12 +1,15 @@
 /**
  * Responsive sources for stored images (performance audit 2026-09-30).
  * Every jpg/png/webp on the public disk has WebP copies at these widths
- * under /storage/_variants/w{width}/{path}.webp, built on first request by
+ * under /storage/_variants/v{VARIANT_VERSION}/w{width}/{path}.webp, built on first request by
  * App\Services\ImageVariantService (keep the widths in sync with its
  * WIDTHS). The browser picks the smallest copy that covers `sizes`, so a
  * phone never downloads the 2000 px original.
  */
 export const VARIANT_WIDTHS = [480, 960, 1440, 2000] as const;
+
+/** Encoder version in the URL; keep in sync with ImageVariantService::VERSION. */
+export const VARIANT_VERSION = 2;
 
 const VARIANT_SOURCE = /^(?!_variants\/)[^\\]+\.(?:jpe?g|png|webp)$/i;
 
@@ -41,7 +44,7 @@ function publicUrl(path: string): string {
 }
 
 export function variantUrl(path: string, width: number): string {
-    return `/storage/_variants/w${width}/${path}.webp`;
+    return `/storage/_variants/v${VARIANT_VERSION}/w${width}/${path}.webp`;
 }
 
 /**

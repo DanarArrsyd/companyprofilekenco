@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
  * Responsive copies of public-disk images (performance audit 2026-09-30).
  *
  * A variant is a WebP no wider than one of WIDTHS, stored on the public disk
- * at "_variants/w{width}/{source path}.webp" — the same address the browser
+ * at "_variants/v{VERSION}/w{width}/{source path}.webp" — the same address the browser
  * asks for under /storage, so after the first request Apache and the CDN
  * serve it as a plain static file and PHP never sees it again. The first
  * miss falls through to ImageVariantController, which builds it here.
@@ -32,14 +32,16 @@ class ImageVariantService
     private const QUALITY = [480 => 78, 960 => 78, 1440 => 70, 2000 => 70];
 
     /**
-     * Bump when the encoding changes: `media:variants` sees a different
-     * number in _variants/VERSION and rebuilds every copy once.
+     * Part of every copy's URL, so bumping it (when the encoding changes)
+     * sidesteps copies the CDN and browsers still hold; `media:variants`
+     * deletes the other versions' folders. Keep in sync with
+     * VARIANT_VERSION in resources/js/lib/responsive-image.ts.
      */
     public const VERSION = 2;
 
     public function variantPath(string $source, int $width): string
     {
-        return self::DIRECTORY."/w{$width}/{$source}.webp";
+        return self::DIRECTORY.'/v'.self::VERSION."/w{$width}/{$source}.webp";
     }
 
     /**
