@@ -28,3 +28,6 @@ Thumbs.db
 
 # Written at runtime from the Settings favicon (favicon:publish)
 /public/favicon.ico
+
+# Local index of the codebase-memory agent tool (rebuilt on demand)
+/.codebase-memory
