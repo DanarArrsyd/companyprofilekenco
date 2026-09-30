@@ -195,7 +195,7 @@ const FALLBACK_ICONS: LucideIcon[] = [ShieldCheck, Recycle, ClipboardCheck, Rota
 const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
 
 /**
- * The wheel drawn in SVG from the user's artwork (resources/img/wheelie_value.png):
+ * The wheel drawn in SVG from the user's artwork (resources/design/reference/wheelie_value.png):
  * each value is a coloured band with its name on an arc and a pastel slice
  * with its icon. The whole wheel turns; labels on the lower half switch to
  * an anticlockwise arc (crossfaded) so they always read upright. Mouse and

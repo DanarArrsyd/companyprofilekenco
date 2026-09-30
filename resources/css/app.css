@@ -100,7 +100,7 @@
         /* TikTok, X and Threads are black marks. */
         --color-brand-mono: 0 0 0;
 
-        /* Operating Values wheel (user artwork resources/img/wheelie_value.png): band colour + pastel slice. */
+        /* Operating Values wheel (user artwork resources/design/reference/wheelie_value.png): band colour + pastel slice. */
         --color-value-green: 103 186 106;
         --color-value-green-soft: 199 229 201;
         --color-value-yellow: 255 213 79;

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Public;
 
+use App\Enums\CustomerSegment;
 use App\Enums\PageType;
 use App\Http\Controllers\Controller;
 use App\Models\Article;
 use App\Models\Capability;
 use App\Models\Certification;
-use App\Enums\CustomerSegment;
 use App\Models\Customer;
 use App\Models\Facility;
 use App\Models\JobVacancy;

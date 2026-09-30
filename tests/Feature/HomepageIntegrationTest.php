@@ -8,17 +8,19 @@ use App\Models\Certification;
 use App\Models\Customer;
 use App\Models\Facility;
 use App\Models\Machine;
+use App\Models\Milestone;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\SettingsService;
 use Spatie\Permission\Models\Permission;
+use Tests\TestCase;
 
 beforeEach(function () {
     Permission::findOrCreate('pages.view', 'web');
 });
 
-function publishedHomepage(\Tests\TestCase $testCase): Page
+function publishedHomepage(TestCase $testCase): Page
 {
     $user = User::factory()->create();
     $user->givePermissionTo('pages.view');
@@ -193,7 +195,7 @@ test('homepage stays safe with no certifications or customers configured', funct
 
 test('the homepage no longer shows the company milestones timeline', function () {
     publishedHomepage($this);
-    App\Models\Milestone::factory()->create(['year' => 2005]);
+    Milestone::factory()->create(['year' => 2005]);
 
     $this->get('/')->assertOk()->assertInertia(fn ($assert) => $assert->missing('milestones'));
 });

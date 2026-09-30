@@ -3,14 +3,13 @@
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ArticleController;
 use App\Http\Controllers\Admin\CapabilityController;
-use App\Http\Controllers\Admin\CapabilityStepController;
 use App\Http\Controllers\Admin\CertificationController;
 use App\Http\Controllers\Admin\ContactInquiryController;
+use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FacilityCategoryController;
 use App\Http\Controllers\Admin\FacilityController;
 use App\Http\Controllers\Admin\HomepageController;
-use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\JobApplicationController;
 use App\Http\Controllers\Admin\JobVacancyController;
 use App\Http\Controllers\Admin\MachineController;
@@ -133,13 +132,7 @@ Route::prefix('admin')->group(function () {
         Route::post('capabilities/{capability}/restore', [CapabilityController::class, 'restore'])->name('admin.capabilities.restore')->middleware('permission:capabilities.delete');
         Route::post('capabilities/{capability}/publish', [CapabilityController::class, 'publish'])->name('admin.capabilities.publish')->middleware('permission:capabilities.update');
         Route::post('capabilities/{capability}/archive', [CapabilityController::class, 'archive'])->name('admin.capabilities.archive')->middleware('permission:capabilities.update');
-        Route::post('capabilities/{capability}/machines', [CapabilityController::class, 'syncMachines'])->name('admin.capabilities.machines')->middleware('permission:capabilities.update');
         Route::get('capabilities/{capability}/preview', [CapabilityController::class, 'preview'])->name('admin.capabilities.preview')->middleware('permission:capabilities.view');
-
-        Route::post('capabilities/{capability}/steps', [CapabilityStepController::class, 'store'])->name('admin.capabilities.steps.store')->middleware('permission:capabilities.update');
-        Route::put('capabilities/{capability}/steps/{step}', [CapabilityStepController::class, 'update'])->name('admin.capabilities.steps.update')->middleware('permission:capabilities.update');
-        Route::delete('capabilities/{capability}/steps/{step}', [CapabilityStepController::class, 'destroy'])->name('admin.capabilities.steps.destroy')->middleware('permission:capabilities.update');
-        Route::post('capabilities/{capability}/steps/reorder', [CapabilityStepController::class, 'reorder'])->name('admin.capabilities.steps.reorder')->middleware('permission:capabilities.update');
 
         // Facility Categories
         Route::middleware('permission:facilities.view')->group(function () {
@@ -194,7 +187,6 @@ Route::prefix('admin')->group(function () {
         Route::get('customers/{customer}/edit', [CustomerController::class, 'edit'])->name('admin.customers.edit')->middleware('permission:customers.update');
         Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('admin.customers.update')->middleware('permission:customers.update');
         Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('admin.customers.destroy')->middleware('permission:customers.delete');
-
 
         // Milestones
         Route::get('milestones', [MilestoneController::class, 'index'])->name('admin.milestones')->middleware('permission:milestones.view');

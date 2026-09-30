@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Article;
 use App\Models\ActivityLog;
+use App\Models\Article;
 use App\Models\Capability;
 use App\Models\ContactInquiry;
 use App\Models\Facility;

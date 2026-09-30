@@ -133,4 +133,3 @@ test('unauthorized user cannot create, update, or delete a milestone', function 
     $this->actingAs($user)->put(route('admin.milestones.update', $milestone), ['year' => 2020, 'title' => 'X'])->assertForbidden();
     $this->actingAs($user)->delete(route('admin.milestones.destroy', $milestone))->assertForbidden();
 });
-

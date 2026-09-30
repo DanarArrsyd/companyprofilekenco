@@ -15,8 +15,8 @@ class UpdateUserStatus
 
     /**
      * @throws ValidationException when the guardrails below would leave
-     *         the system without an active Super Admin, or the actor is
-     *         suspending themselves.
+     *                             the system without an active Super Admin, or the actor is
+     *                             suspending themselves.
      */
     public function handle(User $actor, User $target, UserStatus $status): User
     {

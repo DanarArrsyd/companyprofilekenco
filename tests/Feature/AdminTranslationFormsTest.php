@@ -1,8 +1,6 @@
 <?php
 
 use App\Enums\SectionType;
-use App\Models\Capability;
-use App\Models\CapabilityStep;
 use App\Models\Page;
 use App\Models\PageSection;
 use App\Models\Product;
@@ -97,20 +95,6 @@ test('controllers that save validated() input wholesale keep translations', func
         ])->assertSessionHasNoErrors();
 
     expect($category->fresh()->getTranslations('name'))->toBe(['en' => 'Stamped Parts', 'id' => 'Komponen Stamping']);
-});
-
-test('capability steps save their Indonesian title and description', function () {
-    $capability = Capability::factory()->create();
-    $step = CapabilityStep::create(['capability_id' => $capability->id, 'title' => 'Die design', 'sort_order' => 1]);
-
-    $this->actingAs(translationAdmin(['capabilities.update']))
-        ->put(route('admin.capabilities.steps.update', [$capability, $step]), [
-            'title' => 'Die design',
-            'description' => 'CAD modelling.',
-            'translations' => ['id' => ['title' => 'Desain die', 'description' => 'Pemodelan CAD.']],
-        ])->assertSessionHasNoErrors();
-
-    expect($step->fresh()->getTranslations('title'))->toBe(['en' => 'Die design', 'id' => 'Desain die']);
 });
 
 test('section editors receive raw per-locale content and save both languages', function () {

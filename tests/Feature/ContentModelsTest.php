@@ -6,6 +6,7 @@ use App\Models\Facility;
 use App\Models\JobApplication;
 use App\Models\JobVacancy;
 use App\Models\Machine;
+use App\Models\Media;
 use App\Models\NewsCategory;
 use App\Models\Page;
 use App\Models\PageSection;
@@ -30,7 +31,7 @@ test('product category has many products', function () {
 test('product has many product images and belongs to a category', function () {
     $category = ProductCategory::factory()->create();
     $product = Product::factory()->create(['product_category_id' => $category->id]);
-    $media = \App\Models\Media::create(['disk' => 'public', 'path' => 'x.jpg', 'filename' => 'x.jpg']);
+    $media = Media::create(['disk' => 'public', 'path' => 'x.jpg', 'filename' => 'x.jpg']);
 
     $product->images()->create(['media_id' => $media->id, 'order' => 0, 'is_primary' => true]);
 

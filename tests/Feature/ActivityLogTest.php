@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\ActivityLogService;
+use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -29,7 +31,7 @@ test('sensitive values are sanitized before being persisted', function () {
         'new' => ['token' => 'def456', 'company_name' => 'New Co'],
     ]);
 
-    $log = \App\Models\ActivityLog::latest('id')->first();
+    $log = ActivityLog::latest('id')->first();
 
     expect($log->properties['password'])->toBe('[REDACTED]')
         ->and($log->properties['old']['token'])->toBe('[REDACTED]')
@@ -38,5 +40,5 @@ test('sensitive values are sanitized before being persisted', function () {
 });
 
 test('activity log detail view is read only and exposes no edit route', function () {
-    expect(\Illuminate\Support\Facades\Route::has('admin.activity-logs.update'))->toBeFalse();
+    expect(Route::has('admin.activity-logs.update'))->toBeFalse();
 });

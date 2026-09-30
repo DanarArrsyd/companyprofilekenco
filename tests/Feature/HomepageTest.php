@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ContentStatus;
 use App\Enums\PageType;
 use App\Models\Page;
 use App\Models\User;
@@ -34,7 +35,7 @@ test('empty related modules do not break the public homepage', function () {
     $this->actingAs($user)->get(route('admin.homepage'));
 
     $page = Page::where('page_type', PageType::Homepage)->firstOrFail();
-    $page->update(['status' => \App\Enums\ContentStatus::Published, 'published_at' => now()->subDay()]);
+    $page->update(['status' => ContentStatus::Published, 'published_at' => now()->subDay()]);
 
     $capabilitiesSection = $page->sections()->where('section_type', 'capabilities')->first();
     $capabilitiesSection->update(['content' => ['capability_ids' => [999999]], 'is_active' => true]);

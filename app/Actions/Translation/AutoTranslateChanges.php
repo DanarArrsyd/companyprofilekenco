@@ -2,6 +2,7 @@
 
 namespace App\Actions\Translation;
 
+use App\Models\Concerns\HasLocalizedContent;
 use App\Models\Contracts\HasTranslatableContent;
 use App\Services\Translation\TranslationFailed;
 use App\Services\Translation\Translator;
@@ -33,7 +34,7 @@ class AutoTranslateChanges
     public function __construct(private readonly Translator $translator) {}
 
     /**
-     * @param  Model&\App\Models\Concerns\HasLocalizedContent  $model
+     * @param  Model&HasLocalizedContent  $model
      *
      * @throws TranslationFailed
      */

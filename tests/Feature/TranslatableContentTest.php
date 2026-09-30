@@ -101,6 +101,7 @@ test('editing in the English admin keeps the Indonesian translation', function (
 });
 
 test('the translatable migration wraps legacy text once and unwraps on rollback', function () {
+    restoreStatisticsTable();
     $migration = require collect(glob(database_path('migrations/*_make_cms_text_translatable.php')))->sole();
 
     $id = DB::table('statistics')->insertGetId(['label' => 'Legacy label', 'value' => '10', 'order' => 0]);
@@ -118,6 +119,7 @@ test('the translatable migration wraps legacy text once and unwraps on rollback'
 });
 
 test('the Indonesian drafts migration fills untranslated known text only and rolls back its own drafts', function () {
+    restoreStatisticsTable();
     $migration = require collect(glob(database_path('migrations/*_add_indonesian_drafts_for_existing_content.php')))->sole();
 
     $draftId = DB::table('statistics')->insertGetId(['label' => '{"en":"Employees"}', 'value' => '500', 'order' => 0]);
@@ -162,6 +164,7 @@ test('the Indonesian drafts migration fills untranslated known text only and rol
 });
 
 test('the draft revision migration only rewrites untouched drafts', function () {
+    restoreStatisticsTable();
     $migration = require collect(glob(database_path('migrations/*_revise_indonesian_drafts.php')))->sole();
 
     $draftId = DB::table('statistics')->insertGetId(['label' => '{"en":"Metal Stamping","id":"Stamping Logam"}', 'value' => '1', 'order' => 0]);
@@ -184,3 +187,9 @@ test('the draft revision migration only rewrites untouched drafts', function () 
     expect(DB::table('statistics')->where('id', $draftId)->value('label'))->toBe('{"en":"Metal Stamping","id":"Stamping Logam"}')
         ->and($section->fresh()->getTranslation('title', 'id'))->toBe('Bergabung dengan Tim Kami');
 });
+
+/** The statistics table was dropped as unused (2026-09-30); these older data migrations still need one to rewrite. */
+function restoreStatisticsTable(): void
+{
+    (require database_path('migrations/2026_09_30_000002_drop_unused_statistics_table.php'))->down();
+}

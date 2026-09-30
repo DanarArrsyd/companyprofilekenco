@@ -81,8 +81,8 @@ test('og image prefers the entity featured image over the site default', functio
 test('draft preview metadata is always noindex, nofollow', function () {
     setSeoSetting('seo_default_robots', 'index,follow');
     $product = Product::factory()->create(['name' => 'Draft Product', 'status' => 'draft']);
-    $user = App\Models\User::factory()->create();
-    $user->givePermissionTo(Spatie\Permission\Models\Permission::findOrCreate('products.view', 'web'));
+    $user = User::factory()->create();
+    $user->givePermissionTo(Permission::findOrCreate('products.view', 'web'));
 
     $response = $this->actingAs($user)->get(route('admin.products.preview', $product));
 

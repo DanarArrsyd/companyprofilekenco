@@ -1,8 +1,8 @@
 <?php
 
-use App\Services\Translation\AzureTranslator;
 use App\Services\Translation\TranslationFailed;
 use App\Services\Translation\Translator;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -73,7 +73,7 @@ test('an HTTP error or a dropped connection throws TranslationFailed', function 
 })->with([
     'quota exceeded' => fn () => fn () => Http::response(['error' => ['code' => 403001]], 403),
     'server error' => fn () => fn () => Http::response('', 500),
-    'connection' => fn () => fn () => throw new Illuminate\Http\Client\ConnectionException('timeout'),
+    'connection' => fn () => fn () => throw new ConnectionException('timeout'),
 ])->throws(TranslationFailed::class);
 
 test('without a key the translator reports itself unconfigured and never calls out', function () {

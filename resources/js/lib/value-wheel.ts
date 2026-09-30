@@ -1,6 +1,6 @@
 /**
  * Geometry of the Operating Values wheel (user design 2026-09-29,
- * resources/img/wheelie_value.png): a coloured outer band carrying the
+ * resources/design/reference/wheelie_value.png): a coloured outer band carrying the
  * value's name, a pastel slice with its icon, and a white hub. Measured
  * from the 630 px artwork and drawn in a 640 × 640 viewBox.
  *

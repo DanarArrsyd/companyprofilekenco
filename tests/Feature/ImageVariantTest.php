@@ -1,6 +1,10 @@
 <?php
 
+use App\Enums\PageType;
+use App\Models\PageSection;
 use App\Services\ImageVariantService;
+use App\Services\MediaUploadService;
+use Database\Seeders\DemoContentSeeder;
 use Illuminate\Support\Facades\Storage;
 
 function storeTestImage(string $path, int $width, int $height, string $format = 'png'): void
@@ -56,7 +60,7 @@ test('replacing or deleting a stored image drops its variants', function () {
     $variants->ensure('library/photo.png', 480);
     Storage::disk('public')->assertExists('_variants/v2/w480/library/photo.png.webp');
 
-    app(App\Services\MediaUploadService::class)->deletePublic('library/photo.png');
+    app(MediaUploadService::class)->deletePublic('library/photo.png');
 
     Storage::disk('public')->assertMissing('_variants/v2/w480/library/photo.png.webp');
 });
@@ -69,9 +73,9 @@ test('the private disk has no public storage route', function () {
 });
 
 test('the homepage head preloads the hero photo with the same srcset the page uses', function () {
-    $this->seed(Database\Seeders\DemoContentSeeder::class);
-    $hero = App\Models\PageSection::where('section_type', 'hero')
-        ->whereHas('page', fn ($q) => $q->where('page_type', App\Enums\PageType::Homepage))
+    $this->seed(DemoContentSeeder::class);
+    $hero = PageSection::where('section_type', 'hero')
+        ->whereHas('page', fn ($q) => $q->where('page_type', PageType::Homepage))
         ->firstOrFail();
     $hero->update(['content' => array_merge((array) $hero->getRawOriginal('content') ? json_decode($hero->getRawOriginal('content'), true) : [], ['image' => 'library/hero.jpg'])]);
 

@@ -9,7 +9,6 @@ use App\Actions\Capability\UpdateCapability;
 use App\Enums\ContentStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Capability\StoreCapabilityRequest;
-use App\Http\Requests\Admin\Capability\SyncCapabilityMachinesRequest;
 use App\Http\Requests\Admin\Capability\UpdateCapabilityRequest;
 use App\Models\Capability;
 use App\Models\Machine;
@@ -111,13 +110,6 @@ class CapabilityController extends Controller
         Capability::onlyTrashed()->findOrFail($capability)->restore();
 
         return back()->with('success', 'Capability restored.');
-    }
-
-    public function syncMachines(SyncCapabilityMachinesRequest $request, Capability $capability): RedirectResponse
-    {
-        $capability->machines()->sync($request->validated('machine_ids', []));
-
-        return back()->with('success', 'Machine assignments updated.');
     }
 
     public function preview(Capability $capability, SeoService $seo): Response

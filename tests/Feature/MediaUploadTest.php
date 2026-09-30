@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -50,7 +51,7 @@ test('valid image upload is accepted and stored', function () {
     ]);
 
     $response->assertRedirect();
-    $product = \App\Models\Product::where('name', 'Valid Upload Product')->firstOrFail();
+    $product = Product::where('name', 'Valid Upload Product')->firstOrFail();
     expect($product->featured_image)->not->toBeNull();
     Storage::disk('public')->assertExists($product->featured_image);
 });

@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectOldSlugs;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Support\Locale;
@@ -40,7 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
-            'slug.redirect' => \App\Http\Middleware\RedirectOldSlugs::class,
+            'slug.redirect' => RedirectOldSlugs::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

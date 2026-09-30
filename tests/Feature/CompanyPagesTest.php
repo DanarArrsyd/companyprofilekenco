@@ -3,7 +3,10 @@
 use App\Enums\ContentStatus;
 use App\Enums\PageType;
 use App\Enums\SectionType;
+use App\Models\ActivityLog;
 use App\Models\Page;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Permission;
 
 function publishedStandardPage(string $slug, string $title): Page
 {
@@ -108,14 +111,14 @@ test('company page renders its header shell with no 404 when no Page records exi
 });
 
 test('industries are dropped from the database and permissions', function () {
-    expect(Illuminate\Support\Facades\Schema::hasTable('industries'))->toBeFalse()
-        ->and(Spatie\Permission\Models\Permission::where('name', 'like', 'industries.%')->exists())->toBeFalse();
+    expect(Schema::hasTable('industries'))->toBeFalse()
+        ->and(Permission::where('name', 'like', 'industries.%')->exists())->toBeFalse();
 });
 
 test('dropping industries detaches their activity log entries', function () {
     $migration = require database_path('migrations/2026_09_30_000001_drop_industries.php');
     $migration->down();
-    $log = App\Models\ActivityLog::create(['action' => 'industry.created', 'subject_type' => 'App\\Models\\Industry', 'subject_id' => 1]);
+    $log = ActivityLog::create(['action' => 'industry.created', 'subject_type' => 'App\\Models\\Industry', 'subject_id' => 1]);
 
     $migration->up();
 

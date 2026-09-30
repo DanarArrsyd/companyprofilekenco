@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Database\Seeders\RolePermissionSeeder;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -34,7 +35,7 @@ test('admin without matching permission is forbidden from a module placeholder p
 });
 
 test('super admin can reach every seeded module placeholder route', function () {
-    $this->seed(\Database\Seeders\RolePermissionSeeder::class);
+    $this->seed(RolePermissionSeeder::class);
 
     $user = User::factory()->create();
     $user->assignRole('Super Admin');

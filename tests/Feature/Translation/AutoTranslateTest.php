@@ -3,6 +3,7 @@
 use App\Models\Article;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Translation\Translator;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -142,7 +143,7 @@ test('article HTML keeps its markup', function () {
 
 test('a translator failure still saves the edit and warns the admin', function () {
     config(['translation.azure.endpoint' => 'https://broken.example']);
-    app()->forgetInstance(App\Services\Translation\Translator::class);
+    app()->forgetInstance(Translator::class);
     Http::fake(['broken.example/*' => Http::response('', 500)]);
     $product = productWith(['en' => 'Old', 'id' => 'Lama']);
 
@@ -157,7 +158,7 @@ test('the admin sees the option only when a translator is configured', function 
     $this->actingAs($this->admin)->get(route('admin.products'))->assertInertia(fn ($page) => $page->where('autoTranslate', true));
 
     config(['translation.azure.key' => null]);
-    app()->forgetInstance(App\Services\Translation\Translator::class);
+    app()->forgetInstance(Translator::class);
 
     $this->actingAs($this->admin)->get(route('admin.products'))->assertInertia(fn ($page) => $page->where('autoTranslate', false));
 });
