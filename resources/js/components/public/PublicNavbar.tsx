@@ -234,17 +234,24 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
             left: body.style.left,
             right: body.style.right,
             width: body.style.width,
+            paddingRight: body.style.paddingRight,
         };
+        // A classic scrollbar (Safari/Windows with our styled one) disappears with the
+        // lock; the body is padded by its width and the fixed controls shifted back, so
+        // the footer wave, mascot and centred content never widen or jump.
+        const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
         const previousRootOverflow = root.style.overflow;
         const previousScrollBehavior = root.style.scrollBehavior;
-        const lockStyles = getBodyScrollLockStyles(lockedScrollY);
+        const lockStyles = getBodyScrollLockStyles(lockedScrollY, scrollbarWidth);
 
         pauseSmoothScroll();
         Object.assign(body.style, lockStyles);
+        root.style.setProperty('--scrollbar-compensation', `${scrollbarWidth}px`);
         root.style.overflow = 'hidden';
 
         return () => {
             Object.assign(body.style, previousBodyStyles);
+            root.style.removeProperty('--scrollbar-compensation');
             root.style.overflow = previousRootOverflow;
             root.style.scrollBehavior = 'auto';
             window.scrollTo(0, lockedScrollY);
@@ -302,7 +309,10 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
 
             {/* Controls stay put on scroll and sit above the panel, so the
                 trigger doubles as the close button. */}
-            <div className="fixed right-4 top-3 z-[70] flex items-center gap-2 sm:right-6 sm:top-4 sm:gap-3 lg:right-8">
+            <div
+                className="fixed right-4 top-3 z-[70] flex items-center gap-2 sm:right-6 sm:top-4 sm:gap-3 lg:right-8"
+                style={{ marginRight: 'var(--scrollbar-compensation, 0px)' }}
+            >
                 <LanguageSwitch hidden={drawerOpen} />
 
                 <button

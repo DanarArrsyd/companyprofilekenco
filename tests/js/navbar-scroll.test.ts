@@ -21,7 +21,7 @@ const getTrappedFocusIndex = (
 ).getTrappedFocusIndex;
 const getBodyScrollLockStyles = (
     navbarState as unknown as {
-        getBodyScrollLockStyles?: (scrollY: number) => Record<string, string>;
+        getBodyScrollLockStyles?: (scrollY: number, scrollbarWidth?: number) => Record<string, string>;
     }
 ).getBodyScrollLockStyles;
 const createNavbarHiddenUpdater = (
@@ -99,4 +99,9 @@ test('captures the previous position before React evaluates the state update', (
     const updateHidden = createNavbarHiddenUpdater?.({ previousY: 40, currentY: 80, drawerOpen: false });
 
     assert.equal(updateHidden?.(false), true);
+});
+
+test('pads the locked page by the scrollbar it hides so the layout keeps its width', () => {
+    assert.equal(getBodyScrollLockStyles?.(0, 10).paddingRight, '10px');
+    assert.equal(getBodyScrollLockStyles?.(0, 0).paddingRight, undefined);
 });

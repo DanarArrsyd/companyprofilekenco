@@ -34,13 +34,19 @@ export function getNavbarTransformClass(navbarHidden: boolean, drawerOpen = fals
     return navbarHidden ? '-translate-y-full' : 'translate-y-0';
 }
 
-export function getBodyScrollLockStyles(scrollY: number): Record<string, string> {
+/**
+ * Body styles that freeze the page under the open menu. `scrollbarWidth` is the
+ * classic scrollbar the lock removes (0 for overlay scrollbars); padding the body
+ * by it keeps the layout from widening, so nothing jumps as the menu opens/closes.
+ */
+export function getBodyScrollLockStyles(scrollY: number, scrollbarWidth = 0): Record<string, string> {
     return {
         position: 'fixed',
         top: `-${scrollY}px`,
         left: '0',
         right: '0',
         width: '100%',
+        ...(scrollbarWidth > 0 ? { paddingRight: `${scrollbarWidth}px` } : {}),
     };
 }
 
