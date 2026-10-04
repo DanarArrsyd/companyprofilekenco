@@ -3,6 +3,7 @@ import { ChevronRight, Home } from 'lucide-react';
 import { KeyboardEvent as ReactKeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 
 import logoKmi from '../../../img/logo_kmi.png';
+import mascot from '../../../img/footer_maskot1.webp';
 
 import {
     createNavbarHiddenUpdater,
@@ -284,8 +285,6 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
     }
 
     const closeMenu = () => setDrawerOpen(false);
-    const year = new Date().getFullYear();
-    const phoneHref = siteSettings?.phone ? `tel:${siteSettings?.phone.replace(/[^+\d]/g, '')}` : null;
 
     return (
         <header onKeyDown={trapFocus}>
@@ -337,6 +336,32 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
 
             {drawerMounted && (
                 <div className="fixed inset-0 z-[60]">
+                    {/*
+                      Beside the panel (md+): the footer's KMI mascot on a light field with a navy
+                      curve (user reference 2026-10-04), dimmed by the backdrop above it like the page was.
+                    */}
+                    <div
+                        aria-hidden="true"
+                        className={`absolute inset-y-0 left-0 hidden w-[32%] overflow-hidden bg-background transition-opacity duration-300 motion-reduce:transition-none md:block ${
+                            drawerEntered ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    >
+                        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+                            <path d="M0 38 Q 45 47 100 51 L100 100 L0 100 Z" className="fill-navy-950" />
+                        </svg>
+                        {/* Sized by height so he always stands head-high and is cut around the thigh, whatever the screen ratio. */}
+                        <img
+                            src={mascot}
+                            alt=""
+                            draggable={false}
+                            className="absolute left-[2%] top-[26%] h-[112%] w-auto max-w-none select-none"
+                        />
+                        {/* Same white logo tab as the header, so it stays in place (dimmed with the art) while the menu is open. */}
+                        <div className="absolute left-0 top-0 flex h-16 items-center rounded-br-[1.75rem] bg-white pl-5 pr-6 sm:h-20 sm:rounded-br-[2.5rem] sm:pl-8 sm:pr-10 lg:pl-10 lg:pr-12">
+                            <img src={logoKmi} alt="" className="h-5 w-auto sm:h-8 lg:h-9" />
+                        </div>
+                    </div>
+
                     <div
                         aria-hidden="true"
                         onClick={closeMenu}
@@ -351,7 +376,7 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                         aria-modal="true"
                         aria-label={t('Navigation menu')}
                         data-lenis-prevent
-                        className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] md:rounded-l-[2.5rem] ${
+                        className={`scrollbar-hide absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto bg-navy-900 text-white transition-transform duration-[320ms] ${DRAWER_EASE} motion-reduce:transition-none md:w-[68%] ${
                             drawerEntered ? 'translate-x-0' : 'translate-x-full'
                         }`}
                     >
@@ -502,23 +527,10 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
                             )}
                         </div>
 
-                        <div className="mt-auto flex flex-col gap-3 border-t border-white/10 px-6 py-[clamp(1rem,3vh,1.5rem)] sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-14">
-                            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2 text-small font-medium">
-                                <li>
-                                    <Link href={localize('/contact')} className="text-white hover:underline hover:underline-offset-4">{t('Contact Us')}</Link>
-                                </li>
-                                {siteSettings?.phone && phoneHref && (
-                                    <li>
-                                        <a href={phoneHref} className="text-white/70 hover:text-white">{siteSettings?.phone}</a>
-                                    </li>
-                                )}
-                                {siteSettings?.email && (
-                                    <li>
-                                        <a href={`mailto:${siteSettings?.email}`} className="text-white/70 hover:text-white">{siteSettings?.email}</a>
-                                    </li>
-                                )}
-                            </ul>
-                            <p className="text-caption text-white/50">© {year} {companyName}</p>
+                        <div className="mt-auto border-t border-white/10 px-6 py-[clamp(1rem,3vh,1.5rem)] text-center sm:px-10 lg:px-14">
+                            <p className="text-small text-white/80">
+                                {t('Copyright')} {companyName}
+                            </p>
                         </div>
                     </div>
                 </div>

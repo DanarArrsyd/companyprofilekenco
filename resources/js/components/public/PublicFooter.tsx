@@ -9,12 +9,16 @@ import { SOCIAL_PLATFORM_INFO, socialLinkName } from '@/lib/social-links';
 import mascot from '../../../img/footer_maskot1.webp';
 import wave from '../../../img/element_footer.webp';
 
+/** Credit line under the footer (user reference 2026-10-04); a person's name, never translated. */
+const DEVELOPER = 'Eka Danar Arrasyid';
+
 /**
  * "Connect With Us" footer (user reference, 2026-09-26): a navy wave
  * (resources/img/element_footer — its navy is the navy-950 token) rising to
  * the right, the KMI mascot standing on the left with his head above the
  * wave, and the call to action on the right. The info strip (links,
- * address, copyright) was removed on 2026-09-26 pending a redesign.
+ * address) was removed on 2026-09-26; a copyright + developer credit line
+ * sits bottom-right since 2026-10-04.
  *
  * The wave image scales with the viewport width, so the content overlaps it
  * by a vw amount; everything else is rem so desktop scaling still applies.
@@ -104,6 +108,16 @@ export function PublicFooter() {
                 <div aria-hidden="true" className="pointer-events-none mx-auto -mt-4 h-[19rem] w-[20rem] overflow-hidden sm:h-[23rem] sm:w-[24rem] lg:hidden">
                     <img src={mascot} alt="" className="w-full select-none" draggable={false} />
                 </div>
+
+                {/* Copyright + credit: its own bar under the mascot on phones, bottom-right of the footer on desktop. */}
+                <p className="relative z-10 border-t border-white/10 px-5 py-4 text-center font-montserrat text-caption text-white/85 sm:text-small lg:absolute lg:text-body lg:bottom-5 lg:right-[max(2rem,calc(50%_-_42rem))] lg:border-0 lg:p-0 lg:text-right">
+                    {t('Copyright')} {companyName}
+                    <span aria-hidden="true" className="mx-2 hidden text-white/40 sm:inline">
+                        |
+                    </span>
+                    <br className="sm:hidden" />
+                    {t('Developed by')} {DEVELOPER}
+                </p>
             </div>
         </footer>
     );
