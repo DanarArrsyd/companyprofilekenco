@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 
-import { CapabilityFeature, CapabilityFeatureItem } from '@/components/public/CapabilityFeature';
+import { CapabilityCardItem, CapabilityShowcase } from '@/components/public/CapabilityShowcase';
 import { CertificationItem, CertificationItemData } from '@/components/public/CertificationItem';
 import { ContactCTA } from '@/components/public/ContactCTA';
 import { FacilityFeature, FacilityFeatureItem } from '@/components/public/FacilityFeature';
@@ -34,7 +34,7 @@ interface StatsContent {
 interface PickerContent {
     heading?: string;
     description?: string;
-    items?: (CapabilityFeatureItem | ProductShowcaseItem | FacilityFeatureItem)[];
+    items?: (CapabilityCardItem | ProductShowcaseItem | FacilityFeatureItem)[];
 }
 
 /**
@@ -353,21 +353,19 @@ export function SectionRenderer({
         // Homepage-exclusive sections.
         case 'capabilities': {
             const c = content as PickerContent;
-            const items = (c.items ?? []) as CapabilityFeatureItem[];
+            const items = (c.items ?? []) as CapabilityCardItem[];
             if (items.length === 0) return null;
 
             return (
-                <Container as="section" spacing="section">
-                    <SectionHeader
-                        eyebrow={t('What We Do')}
-                        heading={c.heading ?? section.title}
-                        description={c.description ?? section.subtitle ?? undefined}
-                        cta={{ label: t('View All Capabilities'), href: '/capabilities' }}
-                    />
-                    <div className="mt-4">
-                        <CapabilityFeature items={items} />
-                    </div>
-                </Container>
+                <CapabilityShowcase
+                    items={items}
+                    heading={c.heading ?? section.title ?? t('Manufacturing Capabilities')}
+                    description={
+                        c.description ??
+                        section.subtitle ??
+                        t('Integrated manufacturing capabilities supporting production, engineering, fabrication, and assembly processes with a strong focus on quality, precision, and efficiency.')
+                    }
+                />
             );
         }
 

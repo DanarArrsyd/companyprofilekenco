@@ -247,6 +247,27 @@
         animation: submenu-item-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
+    /* Capability cards: each photo drifts slowly (Ken Burns), out of phase per card via animation-delay. */
+    @keyframes capability-drift {
+        from {
+            transform: scale(1.04) translate3d(-1.5%, 1%, 0);
+        }
+        to {
+            transform: scale(1.14) translate3d(1.5%, -1.5%, 0);
+        }
+    }
+
+    .capability-card__photo {
+        animation: capability-drift 18s ease-in-out infinite alternate both;
+        will-change: transform;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .capability-card__photo {
+            animation: none;
+        }
+    }
+
     /* Footer social links: the brand mark drops in from above on hover. */
     @keyframes social-slide-in {
         from {
