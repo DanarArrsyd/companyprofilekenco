@@ -35,19 +35,15 @@ export function getNavbarTransformClass(navbarHidden: boolean, drawerOpen = fals
 }
 
 /**
- * Body styles that freeze the page under the open menu. `scrollbarWidth` is the
- * classic scrollbar the lock removes (0 for overlay scrollbars); padding the body
- * by it keeps the layout from widening, so nothing jumps as the menu opens/closes.
+ * Body styles while the menu locks scrolling. The lock itself is `overflow: hidden`
+ * on <html> (plus Lenis stopped): the page never moves, so there is no scroll
+ * position to save and restore — moving the body (position: fixed + top) made
+ * Safari jump to the footer. `scrollbarWidth` is the classic scrollbar the lock
+ * hides (0 for overlay scrollbars); padding the body by it keeps the layout from
+ * widening, so nothing resizes as the menu opens and closes.
  */
-export function getBodyScrollLockStyles(scrollY: number, scrollbarWidth = 0): Record<string, string> {
-    return {
-        position: 'fixed',
-        top: `-${scrollY}px`,
-        left: '0',
-        right: '0',
-        width: '100%',
-        ...(scrollbarWidth > 0 ? { paddingRight: `${scrollbarWidth}px` } : {}),
-    };
+export function getBodyScrollLockStyles(scrollbarWidth = 0): Record<string, string> {
+    return scrollbarWidth > 0 ? { paddingRight: `${scrollbarWidth}px` } : {};
 }
 
 /**

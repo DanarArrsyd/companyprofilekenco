@@ -21,7 +21,7 @@ const getTrappedFocusIndex = (
 ).getTrappedFocusIndex;
 const getBodyScrollLockStyles = (
     navbarState as unknown as {
-        getBodyScrollLockStyles?: (scrollY: number, scrollbarWidth?: number) => Record<string, string>;
+        getBodyScrollLockStyles?: (scrollbarWidth?: number) => Record<string, string>;
     }
 ).getBodyScrollLockStyles;
 const createNavbarHiddenUpdater = (
@@ -85,14 +85,11 @@ test('leaves focus moves between inner menu elements to the browser', () => {
     assert.equal(getTrappedFocusIndex?.(0, 0, false), null);
 });
 
-test('locks the page without losing its current scroll offset', () => {
-    assert.deepEqual(getBodyScrollLockStyles?.(640), {
-        position: 'fixed',
-        top: '-640px',
-        left: '0',
-        right: '0',
-        width: '100%',
-    });
+test('the menu lock never moves the body, so the page keeps its scroll position', () => {
+    const styles = getBodyScrollLockStyles?.(0) ?? {};
+
+    assert.equal(styles.position, undefined);
+    assert.equal(styles.top, undefined);
 });
 
 test('captures the previous position before React evaluates the state update', () => {
@@ -102,6 +99,6 @@ test('captures the previous position before React evaluates the state update', (
 });
 
 test('pads the locked page by the scrollbar it hides so the layout keeps its width', () => {
-    assert.equal(getBodyScrollLockStyles?.(0, 10).paddingRight, '10px');
-    assert.equal(getBodyScrollLockStyles?.(0, 0).paddingRight, undefined);
+    assert.equal(getBodyScrollLockStyles?.(10).paddingRight, '10px');
+    assert.equal(getBodyScrollLockStyles?.(0).paddingRight, undefined);
 });

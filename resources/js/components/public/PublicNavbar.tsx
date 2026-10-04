@@ -83,10 +83,9 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
     closeMenu();
     window.history.replaceState(null, '', href);
 
-    // Wait out the menu's own close animation first — the page is still
-    // scroll-locked (position: fixed) until then, and its cleanup forces
-    // window.scrollTo back to the position captured when the menu opened,
-    // which would otherwise stomp on this scroll if it ran any earlier.
+    // Wait out the menu's own close animation first — the page stays
+    // scroll-locked (Lenis stopped, <html> overflow hidden) until it unmounts;
+    // scrollToElement queues the jump until Lenis runs again anyway.
     window.setTimeout(() => {
         const target = document.getElementById(href.slice(hashIndex + 1));
         if (target) scrollToElement(target);
@@ -225,37 +224,23 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
     useEffect(() => {
         if (!drawerMounted) return;
 
-        const lockedScrollY = window.scrollY;
         const body = document.body;
         const root = document.documentElement;
-        const previousBodyStyles = {
-            position: body.style.position,
-            top: body.style.top,
-            left: body.style.left,
-            right: body.style.right,
-            width: body.style.width,
-            paddingRight: body.style.paddingRight,
-        };
-        // A classic scrollbar (Safari/Windows with our styled one) disappears with the
-        // lock; the body is padded by its width and the fixed controls shifted back, so
-        // the footer wave, mascot and centred content never widen or jump.
-        const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
+        const previousBodyPadding = body.style.paddingRight;
         const previousRootOverflow = root.style.overflow;
-        const previousScrollBehavior = root.style.scrollBehavior;
-        const lockStyles = getBodyScrollLockStyles(lockedScrollY, scrollbarWidth);
+        // Measured before the lock hides it: a classic scrollbar (Safari/Windows with our
+        // styled one) is replaced by padding and the fixed controls shift back by it.
+        const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
 
         pauseSmoothScroll();
-        Object.assign(body.style, lockStyles);
+        Object.assign(body.style, getBodyScrollLockStyles(scrollbarWidth));
         root.style.setProperty('--scrollbar-compensation', `${scrollbarWidth}px`);
         root.style.overflow = 'hidden';
 
         return () => {
-            Object.assign(body.style, previousBodyStyles);
+            body.style.paddingRight = previousBodyPadding;
             root.style.removeProperty('--scrollbar-compensation');
             root.style.overflow = previousRootOverflow;
-            root.style.scrollBehavior = 'auto';
-            window.scrollTo(0, lockedScrollY);
-            root.style.scrollBehavior = previousScrollBehavior;
             resumeSmoothScroll();
         };
     }, [drawerMounted]);
