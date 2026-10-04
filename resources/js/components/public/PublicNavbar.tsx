@@ -14,7 +14,7 @@ import {
 } from '@/components/public/navbar-scroll';
 import { useLocale } from '@/hooks/use-locale';
 import { stripLocale } from '@/lib/locale';
-import { pauseSmoothScroll, resumeSmoothScroll, scrollToElement } from '@/lib/smooth-scroll';
+import { scrollToElement } from '@/lib/smooth-scroll';
 import type { PageProps } from '@/types';
 import { IMAGE_SIZES, responsiveImage } from '@/lib/responsive-image';
 
@@ -83,9 +83,8 @@ function handleAnchorLinkClick(e: MouseEvent, href: string, closeMenu: () => voi
     closeMenu();
     window.history.replaceState(null, '', href);
 
-    // Wait out the menu's own close animation first — the page stays
-    // scroll-locked (Lenis stopped, <html> overflow hidden) until it unmounts;
-    // scrollToElement queues the jump until Lenis runs again anyway.
+    // Wait out the menu's own close animation first, so the scroll starts
+    // once the panel has slid away.
     window.setTimeout(() => {
         const target = document.getElementById(href.slice(hashIndex + 1));
         if (target) scrollToElement(target);
@@ -224,24 +223,20 @@ export function PublicNavbar({ companyName }: { companyName: string }) {
     useEffect(() => {
         if (!drawerMounted) return;
 
+        // Same as astra.co.id: Lenis keeps running and only <body> gets overflow-y: hidden,
+        // so the page never stops, moves or jumps; a classic scrollbar it hides is replaced
+        // by padding and the fixed controls shift back by it.
         const body = document.body;
         const root = document.documentElement;
-        const previousBodyPadding = body.style.paddingRight;
-        const previousRootOverflow = root.style.overflow;
-        // Measured before the lock hides it: a classic scrollbar (Safari/Windows with our
-        // styled one) is replaced by padding and the fixed controls shift back by it.
+        const previous = { overflowY: body.style.overflowY, paddingRight: body.style.paddingRight };
         const scrollbarWidth = Math.max(0, window.innerWidth - root.clientWidth);
 
-        pauseSmoothScroll();
-        Object.assign(body.style, getBodyScrollLockStyles(scrollbarWidth));
+        Object.assign(body.style, { overflowY: 'hidden' }, getBodyScrollLockStyles(scrollbarWidth));
         root.style.setProperty('--scrollbar-compensation', `${scrollbarWidth}px`);
-        root.style.overflow = 'hidden';
 
         return () => {
-            body.style.paddingRight = previousBodyPadding;
+            Object.assign(body.style, previous);
             root.style.removeProperty('--scrollbar-compensation');
-            root.style.overflow = previousRootOverflow;
-            resumeSmoothScroll();
         };
     }, [drawerMounted]);
 
