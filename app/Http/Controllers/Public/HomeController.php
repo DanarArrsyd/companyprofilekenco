@@ -107,11 +107,9 @@ class HomeController extends Controller
             $content = $section->content ?? [];
             $type = $section->section_type->value;
 
-            if ($type === 'capabilities' && ! empty($content['capability_ids'])) {
-                $content['items'] = Capability::query()
-                    ->published()
-                    ->whereIn('id', $content['capability_ids'])
-                    ->get(['id', 'name', 'slug', 'summary', 'featured_image']);
+            // Same list as /capabilities, so both pages always show the same cards.
+            if ($type === 'capabilities') {
+                $content['items'] = Capability::showcase();
             }
 
             if ($type === 'products' && ! empty($content['product_ids'])) {

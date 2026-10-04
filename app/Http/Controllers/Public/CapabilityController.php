@@ -18,13 +18,8 @@ class CapabilityController extends Controller
 
     public function index(): Response
     {
-        $capabilities = Capability::query()
-            ->published()
-            ->orderBy('sort_order')
-            ->get(['id', 'name', 'slug', 'summary', 'featured_image', 'icon']);
-
         return Inertia::render('public/capabilities/Index', [
-            'capabilities' => $capabilities,
+            'capabilities' => Capability::showcase(),
             'seo' => $this->seo->resolveStatic(__('Capabilities'), __('Explore our manufacturing capabilities.')),
         ]);
     }

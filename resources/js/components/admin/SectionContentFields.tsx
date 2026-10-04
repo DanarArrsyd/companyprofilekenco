@@ -467,6 +467,12 @@ export function SectionContentFields({
                         <TextArea id="description" value={text('description')} placeholder={hint('description')} onChange={(v) => setText('description', v)} />
                     </div>
 
+                    {sectionType === 'capabilities' ? (
+                        <p className="rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-slate-700">
+                            Bagian ini otomatis menampilkan semua kapabilitas yang tayang, dengan urutan yang sama seperti halaman
+                            /capabilities. Tambah, sembunyikan, atau ubah urutannya di menu Kapabilitas.
+                        </p>
+                    ) : (
                     <div>
                         <Label>Featured {sectionType}</Label>
                         {!options || options.length === 0 ? (
@@ -490,6 +496,7 @@ export function SectionContentFields({
                             </div>
                         )}
                     </div>
+                    )}
                 </div>
             );
         }

@@ -51,23 +51,24 @@ test('selected featured products render on the public homepage', function () {
     );
 });
 
-test('selected featured capabilities render on the public homepage', function () {
+test('the homepage capability section lists the same capabilities, in the same order, as /capabilities', function () {
     $page = publishedHomepage($this);
-    $capability = Capability::factory()->published()->create(['name' => 'Precision Welding']);
+    Capability::factory()->published()->create(['name' => 'Welding', 'sort_order' => 2]);
+    Capability::factory()->published()->create(['name' => 'Stamping', 'sort_order' => 1]);
+    Capability::factory()->create(['name' => 'Draft Only', 'status' => ContentStatus::Draft]);
 
+    // A stale hand-picked list no longer limits the section.
     $page->sections()->where('section_type', 'capabilities')->first()->update([
-        'content' => ['capability_ids' => [$capability->id]],
+        'content' => ['capability_ids' => [999999]],
         'is_active' => true,
     ]);
 
-    $response = $this->get('/');
+    $homepage = collect($this->get('/')->assertOk()->viewData('page')['props']['sections'])
+        ->firstWhere('section_type', 'capabilities')['content']['items'];
+    $listing = $this->get('/capabilities')->assertOk()->viewData('page')['props']['capabilities'];
 
-    $response->assertOk();
-    $response->assertInertia(fn ($assert) => $assert
-        ->component('public/Home')
-        ->where('sections', fn ($sections) => collect($sections)
-            ->firstWhere('section_type', 'capabilities')['content']['items'][0]['name'] === 'Precision Welding')
-    );
+    expect(collect($homepage)->pluck('name')->all())->toBe(['Stamping', 'Welding'])
+        ->and(collect($listing)->pluck('name')->all())->toBe(['Stamping', 'Welding']);
 });
 
 test('homepage renders without error when no products or capabilities exist yet', function () {

@@ -10,6 +10,7 @@ use App\Models\Concerns\HasSeoMetadata;
 use App\Models\Concerns\RedirectsOldSlugs;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -49,5 +50,21 @@ class Capability extends Model
     public function scopeFeatured(Builder $query): Builder
     {
         return $query->where('is_featured', true);
+    }
+
+    /**
+     * The capability cards: every published capability in admin order, the
+     * same list on /capabilities and in the homepage section so the two
+     * pages never disagree.
+     *
+     * @return Collection<int, self>
+     */
+    public static function showcase()
+    {
+        return static::query()
+            ->published()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name', 'slug', 'summary', 'featured_image']);
     }
 }
