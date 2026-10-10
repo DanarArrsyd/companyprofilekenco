@@ -158,6 +158,7 @@ jobs:
               --exclude ".env" \
               --exclude "storage" \
               --exclude "public/storage" \
+              --exclude "bootstrap/cache/*.php" \
               ./ "production:${{ secrets.PRODUCTION_PATH }}/incoming/"
             code=$?
             set -e

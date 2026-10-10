@@ -191,6 +191,10 @@ log "Running composer install..."
     --no-scripts \
     --working-dir="$APP_DIR"
 
+# Drop framework caches first: a stale packages.php/services.php (e.g. one
+# built with dev packages) would stop artisan from booting at all.
+rm -f "${APP_DIR}"/bootstrap/cache/*.php
+
 log "Running package discovery (composer's own post-install hook can't, see above)..."
 artisan package:discover --ansi
 
