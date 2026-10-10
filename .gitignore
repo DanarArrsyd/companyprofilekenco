@@ -31,3 +31,8 @@ Thumbs.db
 
 # Local index of the codebase-memory agent tool (rebuilt on demand)
 /.codebase-memory
+
+# Claude Code: shared config (settings.json, commands/, agents/, skills/) is
+# committed; personal settings and the local preview launcher are not.
+/.claude/settings.local.json
+/.claude/launch.json
