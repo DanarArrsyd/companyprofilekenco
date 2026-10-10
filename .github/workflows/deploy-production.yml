@@ -1,14 +1,15 @@
 name: Deploy to Production
 
-# Manual trigger only — NEVER on push. This workflow is not touched by any
-# other automation in this repo, and this file alone does not perform a
-# cutover: it syncs a release to production's incoming/ and runs
-# scripts/deploy-production.sh, which itself defaults to PREPARE mode
-# (application/ only, public_html/ never touched) unless explicitly told
-# to cut over — see the "Confirm cutover" input below and
-# docs/deployment/PRODUCTION-CUTOVER.md for the full human checklist this is one part
-# of. Do not run this workflow casually; running it with cutover confirmed
-# switches live production traffic.
+# Manual trigger only — NEVER on push. Syncs a release to production's
+# incoming/ and runs scripts/deploy-production.sh in one of its three modes:
+#
+#   prepare  (default) builds application/ and the staged public_html_new/;
+#            the live site and the database are untouched.
+#   cutover  first go-live: swaps Laravel into public_html/ (the legacy site
+#            is kept in backups/legacy/). Needs confirm = SWITCH-PRODUCTION-NOW.
+#   update   every release after go-live. Needs confirm = DEPLOY-PRODUCTION-UPDATE.
+#
+# Read docs/deployment/PRODUCTION-CUTOVER.md before the cutover.
 #
 # This workflow deploys to kencomanufactur.co.id ONLY, using its own
 # `production` GitHub Environment and its own PRODUCTION_* secrets — it
@@ -17,23 +18,53 @@ name: Deploy to Production
 on:
   workflow_dispatch:
     inputs:
-      confirm_cutover:
-        description: 'Type SWITCH-PRODUCTION-NOW to actually cut over (anything else runs PREPARE only, leaving the live legacy site untouched)'
+      mode:
+        description: 'prepare (safe, default) · cutover (first go-live) · update (release after go-live)'
+        type: choice
+        options: [prepare, cutover, update]
+        default: prepare
+      confirm:
+        description: 'cutover: type SWITCH-PRODUCTION-NOW · update: type DEPLOY-PRODUCTION-UPDATE · prepare: leave blank'
         required: false
         default: ''
+      import_staging_content:
+        description: 'cutover only: replace the production database and uploads with the staging content'
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
 
 jobs:
   deploy-production:
-    name: Build and deploy to production
+    name: Build and deploy to production (${{ inputs.mode }})
     runs-on: ubuntu-latest
     environment: production
     steps:
+      - name: Check the confirmation
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRM: ${{ inputs.confirm }}
+          IMPORT: ${{ inputs.import_staging_content }}
+        run: |
+          case "$MODE" in
+            prepare) [ -z "$CONFIRM" ] || { echo "::error::Leave confirm blank for prepare."; exit 1; } ;;
+            cutover) [ "$CONFIRM" = "SWITCH-PRODUCTION-NOW" ] || { echo "::error::cutover needs confirm = SWITCH-PRODUCTION-NOW"; exit 1; } ;;
+            update)  [ "$CONFIRM" = "DEPLOY-PRODUCTION-UPDATE" ] || { echo "::error::update needs confirm = DEPLOY-PRODUCTION-UPDATE"; exit 1; } ;;
+          esac
+          if [ "$IMPORT" = "true" ] && [ "$MODE" != "cutover" ]; then
+            echo "::error::import_staging_content is only allowed with cutover."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
-      - name: Setup PHP 8.3 (for composer.lock validation only — vendor/ is installed server-side, not shipped)
+      - name: Setup PHP 8.3 (composer validation + tests — vendor/ is installed server-side, not shipped)
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
+          extensions: mbstring, pdo, pdo_sqlite, tokenizer, ctype, fileinfo, xml, dom, curl, gd
           coverage: none
 
       - name: Validate composer files
@@ -54,11 +85,11 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Copy .env for the frontend build and test run
+        run: cp .env.example .env
+
       - name: Build frontend assets
         run: npm run build
-
-      - name: Copy .env for CI test run
-        run: cp .env.example .env
 
       - name: Generate app key for CI test run
         run: php artisan key:generate
@@ -66,57 +97,127 @@ jobs:
       - name: Run backend tests (must pass before any production deploy)
         run: php artisan test
 
+      - name: Remove the CI .env before syncing
+        run: rm -f .env
+
       - name: Load SSH deploy key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
 
-      - name: Add production host to known_hosts
+      # Hostinger's SSH sometimes closes new connections before login. Every
+      # SSH use below goes through ONE multiplexed connection (the
+      # `production` host alias), and only connection set-up is retried — the
+      # deploy script itself runs once.
+      - name: Open one SSH connection to production (with retries)
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_PORT: ${{ secrets.PRODUCTION_PORT }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p "${{ secrets.PRODUCTION_PORT }}" "${{ secrets.PRODUCTION_HOST }}" >> ~/.ssh/known_hosts
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          cat >> ~/.ssh/config <<CONFIG
+          Host production
+            HostName ${PRODUCTION_HOST}
+            Port ${PRODUCTION_PORT}
+            User ${PRODUCTION_USER}
+            ControlMaster auto
+            ControlPath ~/.ssh/cm-%r@%h:%p
+            ControlPersist 20m
+            ConnectTimeout 20
+            ServerAliveInterval 15
+            ServerAliveCountMax 4
+          CONFIG
+          chmod 600 ~/.ssh/config
+
+          for attempt in 1 2 3 4 5; do
+            if keys="$(ssh-keyscan -T 20 -p "$PRODUCTION_PORT" "$PRODUCTION_HOST" 2>/dev/null)" && [ -n "$keys" ]; then
+              echo "$keys" >> ~/.ssh/known_hosts
+              if ssh -o ControlMaster=yes -fN production; then
+                echo "SSH connection open (attempt $attempt)."
+                exit 0
+              fi
+            fi
+            wait_s=$((attempt * 20))
+            echo "::warning::Production SSH refused the connection (attempt $attempt/5); retrying in ${wait_s}s."
+            sleep "$wait_s"
+          done
+          echo "::error::Could not open an SSH connection to production after 5 attempts. Check hPanel → SSH Access / blocked IPs."
+          exit 1
 
       - name: Sync release to production "incoming" directory
         run: |
-          rsync -az --delete \
-            -e "ssh -p ${{ secrets.PRODUCTION_PORT }}" \
-            --exclude ".git" \
-            --exclude "node_modules" \
-            --exclude "tests" \
-            --exclude ".env" \
-            --exclude "storage" \
-            --exclude "public/storage" \
-            ./ "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}:${{ secrets.PRODUCTION_PATH }}/incoming/"
+          # rsync is safe to repeat; retry only when the SSH transport drops (exit 255).
+          for attempt in 1 2 3; do
+            set +e
+            rsync -az --delete \
+              -e "ssh" \
+              --exclude ".git" \
+              --exclude "node_modules" \
+              --exclude "tests" \
+              --exclude ".env" \
+              --exclude "storage" \
+              --exclude "public/storage" \
+              ./ "production:${{ secrets.PRODUCTION_PATH }}/incoming/"
+            code=$?
+            set -e
+            [ "$code" -eq 0 ] && exit 0
+            [ "$code" -ne 255 ] && exit "$code"
+            echo "::warning::SSH dropped during rsync (attempt $attempt/3); reopening."
+            ssh -O exit production 2>/dev/null || true
+            sleep $((attempt * 20))
+            ssh -o ControlMaster=yes -fN production || true
+          done
+          exit 255
 
       - name: Run remote deploy script
+        # Never retried: the script must not run twice. It proves the app
+        # renders its key pages in-process (artisan app:smoke) and, during
+        # the cutover, swaps the legacy site back if that fails.
         env:
-          CONFIRM_CUTOVER_INPUT: ${{ github.event.inputs.confirm_cutover }}
+          MODE: ${{ inputs.mode }}
+          CONFIRM: ${{ inputs.confirm }}
+          IMPORT: ${{ inputs.import_staging_content }}
         run: |
-          if [ "$CONFIRM_CUTOVER_INPUT" = "SWITCH-PRODUCTION-NOW" ]; then
-            echo "::warning::Cutover confirmed via workflow input — public_html will be switched."
-            CUTOVER_ENV="CUTOVER_CONFIRM=SWITCH-PRODUCTION-NOW"
-          else
-            echo "Cutover NOT confirmed — running in PREPARE mode only (public_html untouched)."
-            CUTOVER_ENV=""
+          case "$MODE" in
+            cutover)
+              echo "::warning::Cutover confirmed — public_html will be switched."
+              REMOTE_ENV="CUTOVER_CONFIRM=$CONFIRM"
+              [ "$IMPORT" = "true" ] && REMOTE_ENV="$REMOTE_ENV IMPORT_STAGING_CONTENT=1"
+              ;;
+            update) REMOTE_ENV="UPDATE_CONFIRM=$CONFIRM" ;;
+            *)      REMOTE_ENV="" ;;
+          esac
+          ssh production "${REMOTE_ENV} bash ${{ secrets.PRODUCTION_PATH }}/incoming/scripts/deploy-production.sh"
+
+      - name: Smoke test (public URLs)
+        if: inputs.mode != 'prepare'
+        # Hostinger's edge sometimes answers GitHub runners with 403 even when
+        # the site is fine, so a 403 is a warning, while 5xx or no answer fails
+        # the run (then follow docs/deployment/PRODUCTION-ROLLBACK.md).
+        run: |
+          base=https://kencomanufactur.co.id
+          ua="Mozilla/5.0 (compatible; KencoDeploySmoke/1.0; +https://github.com/DanarArrsyd/companyprofilekenco)"
+          blocked=0
+          for path in /up / /en /admin/login /products /news /contact /sitemap.xml /robots.txt; do
+            status=000
+            for attempt in 1 2 3; do
+              status="$(curl -sS -o /dev/null -w '%{http_code}' -A "$ua" --max-time 20 "$base$path")" || status=000
+              [ "$status" -ge 200 ] && [ "$status" -lt 400 ] && break
+              sleep 5
+            done
+            echo "$status $path"
+            if [ "$status" = "403" ]; then
+              blocked=$((blocked + 1))
+            elif ! [ "$status" -ge 200 ] 2>/dev/null || [ "$status" -ge 400 ]; then
+              echo "::error::$path answered $status"
+              exit 1
+            fi
+          done
+          if [ "$blocked" -gt 0 ]; then
+            echo "::warning::The CDN answered 403 to this runner for $blocked page(s); the in-process smoke check on the server passed."
           fi
 
-          ssh -p "${{ secrets.PRODUCTION_PORT }}" "${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }}" \
-            "${CUTOVER_ENV} bash ${{ secrets.PRODUCTION_PATH }}/incoming/scripts/deploy-production.sh"
-
-      - name: Smoke test
-        env:
-          CONFIRM_CUTOVER_INPUT: ${{ github.event.inputs.confirm_cutover }}
-        run: |
-          if [ "$CONFIRM_CUTOVER_INPUT" != "SWITCH-PRODUCTION-NOW" ]; then
-            echo "PREPARE mode only — skipping public smoke tests (public_html still serves the legacy site)."
-            exit 0
-          fi
-
-          curl -fsS https://kencomanufactur.co.id/up
-          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/
-          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/admin/login
-          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/products
-          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/news
-          curl -fsS -o /dev/null -w "%{http_code}\n" https://kencomanufactur.co.id/contact
-          curl -fsS https://kencomanufactur.co.id/sitemap.xml > /dev/null
-          curl -fsS https://kencomanufactur.co.id/robots.txt
+      - name: Close SSH connection
+        if: always()
+        run: ssh -O exit production 2>/dev/null || true

@@ -46,7 +46,7 @@ Then, over SSH, as the production user:
 
 ```bash
 DOMAIN_ROOT="/home/u518638233/domains/kencomanufactur.co.id"
-LATEST_LEGACY="$(ls -td "${DOMAIN_ROOT}"/backups/legacy/public_html-*/ | head -n1)"
+LATEST_LEGACY="$(ls -td "${DOMAIN_ROOT}"/backups/legacy/public_html-2*/ | head -n1)"  # timestamped legacy copies only, never public_html-failed-*
 
 # Put the Laravel public_html aside instead of deleting it, in case its
 # state is needed to diagnose what went wrong.

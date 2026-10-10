@@ -2,10 +2,12 @@
 
 This is the human-run checklist for switching `kencomanufactur.co.id` from
 the legacy PHP Native site to the Laravel application. It is written to be
-followed top to bottom, in order, by whoever runs the cutover. Nothing in
-this document has been executed as part of Phase 11A.3 — this phase only
-prepares the repository, scripts, and documentation for this checklist to
-exist and be ready when cutover is explicitly approved.
+followed top to bottom, in order, by whoever runs the cutover. A first cutover was
+attempted on 2026-09-18: `/up` answered 500 (composer could not run
+package discovery because the host's PHP CLI has `proc_open` disabled) and
+the script rolled the legacy site back. On 2026-10-10 the production
+pipeline was brought in line with everything staging learned since (see
+"Hostinger specifics" at the top of `scripts/deploy-production.sh`).
 
 **Do not start this checklist without explicit, separate approval to cut
 over production.** Preparing the repository (Phase 11A.3) is not that
@@ -27,6 +29,9 @@ do not proceed with a partial prerequisite.
       `PRODUCTION_HOST`, `PRODUCTION_PORT`, `PRODUCTION_USER`,
       `PRODUCTION_SSH_PRIVATE_KEY`, `PRODUCTION_PATH` — a dedicated SSH
       keypair, not staging's.
+- [ ] `application/.env` on production has `APP_DEBUG=false` (the script
+      refuses `true`) and the Azure Translator / mail settings you want live
+      (copy them from staging's `.env` by hand; never copy `APP_KEY`).
 - [ ] The `production` GitHub Environment has required-reviewer protection
       configured in repo settings (Settings → Environments → production →
       Required reviewers), so `workflow_dispatch` on
@@ -75,11 +80,11 @@ explicitly and skip.
 
 ### 4. Verify Laravel application ready
 
-Run the deploy workflow in PREPARE mode (the default — leave "Confirm
-cutover" blank):
+Run the deploy workflow in PREPARE mode (the default — leave "confirm"
+blank):
 
 ```bash
-gh workflow run deploy-production.yml --ref main
+gh workflow run deploy-production.yml --ref main -f mode=prepare
 ```
 
 This builds, tests, rsyncs to `incoming/`, and runs
@@ -99,7 +104,7 @@ Still safe, still read-only against the live site. Over SSH:
 Confirm it connects to the correct, dedicated production database (not
 staging's).
 
-### 6. Run migrations
+### 6. Content and migrations
 
 This is the first step that touches the production database — it happens
 automatically as part of the confirmed cutover run (step 7), not
@@ -107,12 +112,23 @@ separately, because `scripts/deploy-production.sh` backs up the database
 immediately before migrating as one atomic sequence. Do not migrate by
 hand ahead of time.
 
+The production database is empty; the real content was entered on staging.
+Ticking `import_staging_content` in step 7 makes the cutover, right after
+its production backup, run `scripts/import-staging-content.sh`: it replaces
+the production database with staging's (structure + content; sessions,
+cache, queues, contact inquiries, job applications and activity logs start
+empty), rewrites `staging.kencomanufactur.co.id` URLs to the production
+domain and copies `storage/app/public`. Freeze content edits on staging
+from this point until go-live is confirmed. Admin users arrive with their
+staging passwords — change them in step 12.
+
 ### 7. Switch `public_html` safely
 
 This is the actual cutover. Trigger the workflow with cutover confirmed:
 
 ```bash
-gh workflow run deploy-production.yml --ref main -f confirm_cutover=SWITCH-PRODUCTION-NOW
+gh workflow run deploy-production.yml --ref main \
+  -f mode=cutover -f confirm=SWITCH-PRODUCTION-NOW -f import_staging_content=true
 ```
 
 If GitHub Environment protection is configured (it should be, per the
@@ -120,7 +136,8 @@ prerequisites above), this pauses for the required reviewer(s) to approve
 before the job actually runs.
 
 On the server, this one confirmed run does, in order: backs up the
-production database, runs migrations, optimizes caches, and atomically
+production database, imports the staging content (when ticked), runs
+migrations, optimizes caches, and atomically
 renames the current `public_html/` to
 `backups/legacy/public_html-<timestamp>/` before renaming the staged
 `public_html_new/` into `public_html/`. See
@@ -139,17 +156,21 @@ Also automatic as part of step 7 (`config:cache`, `route:cache`,
 
 ### 10. Health check
 
-Automatic: `scripts/deploy-production.sh` curls `https://kencomanufactur.co.id/up`
-immediately after bringing the app out of maintenance mode. **If this
+Automatic: right after the swap `scripts/deploy-production.sh` runs
+`artisan app:smoke`, which renders the key pages in-process (the server
+cannot reach its own public URL through Hostinger's CDN). **If any page
 fails, the script automatically rolls back** (restores the previous
-`public_html/`) and exits non-zero — you do not need to manually roll back
-in that case, but you do need to investigate before retrying.
+`public_html/`, keeps the failed one as `backups/legacy/public_html-failed-*`)
+and exits non-zero — investigate `application/storage/logs/laravel.log`
+before retrying.
 
 ### 11. Public smoke tests
 
-Automatic, in the workflow's "Smoke test" step (only runs when cutover was
-confirmed): `/`, `/admin/login`, `/products`, `/news`, `/contact`,
-`/sitemap.xml`, `/robots.txt`.
+Automatic, in the workflow's "Smoke test (public URLs)" step: `/up`, `/`,
+`/en`, `/admin/login`, `/products`, `/news`, `/contact`, `/sitemap.xml`,
+`/robots.txt` through the CDN. A 403 from the edge is only a warning
+(Hostinger sometimes blocks GitHub runners); 5xx fails the run, and then
+you follow `PRODUCTION-ROLLBACK.md` by hand.
 
 Manually, also check:
 
@@ -165,7 +186,8 @@ Manually, also check:
 ### 12. Admin login test
 
 Log into `/admin/login` with a real admin account and confirm the
-dashboard loads. Do not leave this for "later" — an admin who can't log in
+dashboard loads. If the staging content was imported, change every admin
+password now (they are staging's). Do not leave this for "later" — an admin who can't log in
 means content can't be managed until fixed.
 
 ### 13. Robots/sitemap verification
@@ -208,3 +230,19 @@ retry later.
 - It does not delete the legacy site. It is renamed into
   `backups/legacy/public_html-<timestamp>/` and stays there.
 - It does not touch `staging.kencomanufactur.co.id` in any way.
+
+## Releases after go-live
+
+Once Laravel serves `public_html/`, the cutover is refused. Every later
+release (after it has been checked on staging) is:
+
+```bash
+gh workflow run deploy-production.yml --ref main -f mode=update -f confirm=DEPLOY-PRODUCTION-UPDATE
+```
+
+It mirrors the staging deploy: maintenance mode, production database
+backup, public assets synced into `public_html/` (`public_html/storage`
+untouched), migrations, caches, favicon, responsive image copies and the
+in-process smoke check, then the public smoke test from the runner. If the
+smoke check fails the site stays up and the run fails; restore from the
+logged database backup per `PRODUCTION-ROLLBACK.md` if needed.

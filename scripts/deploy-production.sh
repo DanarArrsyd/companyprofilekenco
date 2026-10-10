@@ -6,36 +6,44 @@
 # and refuses to run against anything else (see the guard checks below).
 #
 # ---------------------------------------------------------------------------
-# TWO MODES — this is the whole safety model of this script
+# THREE MODES — this is the whole safety model of this script
 # ---------------------------------------------------------------------------
 #
-# 1. PREPARE (default — this is what running the script normally does):
-#      sync incoming/ -> application/, composer install, run the Laravel
-#      app's public/ output into a STAGED, NOT-YET-LIVE directory called
-#      public_html_new/. It never touches the real public_html/ (the live
-#      legacy PHP Native site) and never touches the production database.
-#      Safe to run as many times as needed to keep the prepared release
-#      warm and current before a cutover is scheduled.
+# 1. PREPARE (default — what a bare `bash scripts/deploy-production.sh` does):
+#      sync incoming/ -> application/, composer install, and build the
+#      Laravel app's public/ output into a STAGED, NOT-YET-LIVE directory
+#      called public_html_new/. It never touches the live public_html/ and
+#      never touches the production database. Safe to repeat.
 #
-# 2. CUTOVER (only with explicit confirmation — see below):
-#      everything PREPARE does, plus: back up the production database,
-#      run migrations, optimize caches, and atomically swap public_html_new/
-#      into public_html/ (the previous public_html/ is renamed, never
-#      deleted, into backups/legacy/ — see scripts/backup-legacy-site.sh
-#      for a standalone full backup of it before this point). If the
-#      post-swap health check fails, this script automatically swaps the
-#      previous public_html/ back and exits non-zero.
-#
-#      Cutover only runs when invoked as:
+# 2. CUTOVER (first go-live only; refused once Laravel already serves
+#    public_html/):
 #        CUTOVER_CONFIRM=SWITCH-PRODUCTION-NOW bash scripts/deploy-production.sh
-#      Any other invocation — including a bare `bash scripts/deploy-production.sh`
-#      — runs PREPARE only. There is no flag, no interactive prompt shortcut,
-#      and no default that performs a cutover. This is deliberate: it must
-#      be impossible to switch production by accident.
+#      everything PREPARE does, plus: back up the production database,
+#      optionally replace it with the staging content
+#      (IMPORT_STAGING_CONTENT=1, see scripts/import-staging-content.sh),
+#      migrate, optimize, and swap public_html_new/ into public_html/ (the
+#      legacy site is renamed, never deleted, into backups/legacy/). If the
+#      in-process smoke check fails after the swap, the legacy site is
+#      swapped straight back and the script exits non-zero.
 #
-# See docs/deployment/PRODUCTION-CUTOVER.md for the full, human-run cutover checklist
-# this script is one part of — do not run this script as the only step of
-# a real cutover; read that document first.
+# 3. UPDATE (every release after go-live; refused while the legacy site
+#    still serves public_html/):
+#        UPDATE_CONFIRM=DEPLOY-PRODUCTION-UPDATE bash scripts/deploy-production.sh
+#      the same release steps as scripts/deploy-staging.sh: maintenance
+#      mode, database backup, sync public assets into public_html/
+#      (public_html/storage untouched), migrate, optimize, smoke check.
+#
+# There is no flag, prompt shortcut or default that performs a cutover or
+# an update: both need their exact token. See
+# docs/deployment/PRODUCTION-CUTOVER.md before the first cutover.
+#
+# Hostinger specifics learned on staging (keep in sync with
+# scripts/deploy-staging.sh):
+#   - the PHP CLI has proc_open disabled, so composer runs with --no-scripts
+#     and package discovery runs directly afterwards;
+#   - the server cannot reach its own public URL through the CDN edge, so
+#     health is proven in-process with `artisan app:smoke`; the workflow
+#     checks the public URLs from the runner.
 #
 set -euo pipefail
 
@@ -54,15 +62,27 @@ LEGACY_BACKUP_DIR="${BACKUP_ROOT}/legacy"
 DB_BACKUP_DIR="${BACKUP_ROOT}/db"
 
 PHP_BIN="/opt/alt/php83/usr/bin/php"
-HEALTH_URL="https://kencomanufactur.co.id/up"
-HOMEPAGE_URL="https://kencomanufactur.co.id/"
 EXPECTED_APP_URL="https://kencomanufactur.co.id"
 
-CUTOVER="${CUTOVER_CONFIRM:-}"
+# Marker line in deploy/production/public_html/index.php: its presence in the
+# live docroot means Laravel (not the legacy site) is serving production.
+FRONT_CONTROLLER_MARKER="Production front controller"
+
 CUTOVER_TOKEN="SWITCH-PRODUCTION-NOW"
+UPDATE_TOKEN="DEPLOY-PRODUCTION-UPDATE"
 
 log() { echo "[deploy-production] $*"; }
 fail() { echo "[deploy-production] FAILED: $*" >&2; exit 1; }
+
+if [[ "${CUTOVER_CONFIRM:-}" == "$CUTOVER_TOKEN" && "${UPDATE_CONFIRM:-}" == "$UPDATE_TOKEN" ]]; then
+    fail "Both CUTOVER_CONFIRM and UPDATE_CONFIRM are set — pick one."
+elif [[ "${CUTOVER_CONFIRM:-}" == "$CUTOVER_TOKEN" ]]; then
+    MODE="cutover"
+elif [[ "${UPDATE_CONFIRM:-}" == "$UPDATE_TOKEN" ]]; then
+    MODE="update"
+else
+    MODE="prepare"
+fi
 
 # ---------------------------------------------------------------------------
 # 0. Guard checks — refuse to run anywhere except exactly this production
@@ -80,25 +100,63 @@ fail() { echo "[deploy-production] FAILED: $*" >&2; exit 1; }
 COMPOSER_BIN="$(command -v composer || true)"
 [[ -n "$COMPOSER_BIN" ]] || fail "composer not found on PATH"
 
-# .env content is never printed (STEP 4 secrecy requirement) but its
-# presence/shape is checked, since a wrong .env is exactly the kind of
-# mistake this script exists to catch before it reaches production traffic.
+# .env content is never printed, but its shape is checked, since a wrong
+# .env is exactly the kind of mistake this script exists to catch.
 env_get() { grep -E "^${1}=" "${APP_DIR}/.env" | tail -n1 | cut -d '=' -f2- | sed -e 's/^"//' -e 's/"$//'; }
 
 [[ "$(env_get APP_ENV)" == "production" ]] || fail ".env APP_ENV is not 'production' — refusing to deploy."
 [[ "$(env_get APP_URL)" == "$EXPECTED_APP_URL" ]] || fail ".env APP_URL is not '${EXPECTED_APP_URL}' — refusing to deploy."
+[[ "$(env_get APP_DEBUG)" != "true" ]] || fail ".env APP_DEBUG is true — never run production with debug on."
 [[ -n "$(env_get APP_KEY)" ]] || fail ".env APP_KEY is empty — run 'artisan key:generate' on the server first (docs/deployment/PRODUCTION-ENV.md). Never copy APP_KEY from staging or local."
 [[ -n "$(env_get DB_DATABASE)" ]] || fail ".env DB_DATABASE is empty — refusing to deploy."
 [[ -n "$(env_get DB_USERNAME)" ]] || fail ".env DB_USERNAME is empty — refusing to deploy."
 
+LARAVEL_IS_LIVE=0
+if [[ -f "${PUBLIC_DIR}/index.php" ]] && grep -q "$FRONT_CONTROLLER_MARKER" "${PUBLIC_DIR}/index.php"; then
+    LARAVEL_IS_LIVE=1
+fi
+
+if [[ "$MODE" == "cutover" && "$LARAVEL_IS_LIVE" -eq 1 ]]; then
+    fail "Laravel already serves ${PUBLIC_DIR} — the cutover has been done. Release with UPDATE_CONFIRM=${UPDATE_TOKEN} instead."
+fi
+if [[ "$MODE" == "update" && "$LARAVEL_IS_LIVE" -eq 0 ]]; then
+    fail "${PUBLIC_DIR} still serves the legacy site — run the cutover (docs/deployment/PRODUCTION-CUTOVER.md) before an update."
+fi
+if [[ "${IMPORT_STAGING_CONTENT:-0}" == "1" && "$MODE" != "cutover" ]]; then
+    fail "IMPORT_STAGING_CONTENT=1 is only allowed together with the cutover — it replaces the whole production database."
+fi
+
 log "Target: ${DOMAIN_ROOT}"
 log "PHP:    $("$PHP_BIN" -v | head -n1)"
-log "Mode:   $([[ "$CUTOVER" == "$CUTOVER_TOKEN" ]] && echo "CUTOVER (public_html WILL be switched)" || echo "PREPARE only (public_html untouched)")"
+case "$MODE" in
+    prepare) log "Mode:   PREPARE only (public_html and the database untouched)" ;;
+    cutover) log "Mode:   CUTOVER (public_html WILL be switched; staging content import: ${IMPORT_STAGING_CONTENT:-0})" ;;
+    update)  log "Mode:   UPDATE (live Laravel release)" ;;
+esac
+
+artisan() { "$PHP_BIN" "${APP_DIR}/artisan" "$@"; }
+
+MAINTENANCE_ENABLED=0
+ROLLBACK_DONE=0
+cleanup() {
+    if [[ "$MAINTENANCE_ENABLED" -eq 1 && "$ROLLBACK_DONE" -eq 0 ]]; then
+        log "Restoring from maintenance mode (artisan up)..."
+        artisan up || true
+    fi
+}
+trap cleanup EXIT
+
+# In UPDATE mode the app is live, so it goes into maintenance before its
+# code changes underneath it.
+if [[ "$MODE" == "update" ]]; then
+    log "Enabling maintenance mode..."
+    artisan down || true
+    MAINTENANCE_ENABLED=1
+fi
 
 # ---------------------------------------------------------------------------
 # 1. Sync incoming release into application/ — never touch .env, storage/,
 #    or vendor/ (vendor is rebuilt by Composer below, not shipped here).
-#    Safe in both modes.
 # ---------------------------------------------------------------------------
 log "Syncing incoming release into ${APP_DIR}..."
 mkdir -p "$APP_DIR"
@@ -119,8 +177,10 @@ do
 done
 
 # ---------------------------------------------------------------------------
-# 2. Install PHP dependencies (production, no dev tooling). Safe in both
-#    modes — this only affects application/, never public_html/.
+# 2. Install PHP dependencies (production, no dev tooling). --no-scripts
+#    because this host's PHP CLI has proc_open disabled, which breaks the
+#    "@php artisan package:discover" hook composer spawns; without discovery
+#    the app cannot boot (the 2026-09-18 cutover answered 500 and rolled back).
 # ---------------------------------------------------------------------------
 log "Running composer install..."
 "$PHP_BIN" "$COMPOSER_BIN" install \
@@ -128,13 +188,105 @@ log "Running composer install..."
     --prefer-dist \
     --no-interaction \
     --optimize-autoloader \
+    --no-scripts \
     --working-dir="$APP_DIR"
 
+log "Running package discovery (composer's own post-install hook can't, see above)..."
+artisan package:discover --ansi
+
+# Copies the split-layout front controller pair (they differ from
+# application/public/'s own copies, which expect vendor/ beside them).
+install_front_controller() {
+    cp "${APP_DIR}/deploy/production/public_html/index.php" "$1/index.php"
+    cp "${APP_DIR}/deploy/production/public_html/.htaccess" "$1/.htaccess"
+    grep -q "$FRONT_CONTROLLER_MARKER" "$1/index.php" \
+        || fail "$1/index.php lacks the '${FRONT_CONTROLLER_MARKER}' marker — refusing to continue."
+}
+
+# Verifies or creates <docroot>/storage -> ../application/storage/app/public.
+# Deliberately not `artisan storage:link`: see deploy-staging.sh step 5.
+ensure_storage_link() {
+    local link="$1/storage" target="../application/storage/app/public"
+    if [[ -L "$link" ]]; then
+        [[ "$(readlink "$link")" == "$target" ]] \
+            || fail "${link} exists but points at '$(readlink "$link")', not '${target}' — investigate before continuing."
+    elif [[ -e "$link" ]]; then
+        fail "${link} exists and is NOT a symlink — refusing to overwrite automatically."
+    else
+        log "Creating storage symlink: ${link} -> ${target}"
+        ln -s "$target" "$link"
+    fi
+}
+
+backup_database() {
+    log "Backing up production database..."
+    bash "${APP_DIR}/scripts/backup-production-db.sh"
+    LATEST_DB_BACKUP="$(ls -t "${DB_BACKUP_DIR}"/production-*.sql.gz 2>/dev/null | head -n1 || true)"
+    [[ -n "$LATEST_DB_BACKUP" ]] || fail "No database backup file found after running backup-production-db.sh — refusing to migrate."
+    [[ -s "$LATEST_DB_BACKUP" ]] || fail "Database backup file ${LATEST_DB_BACKUP} is empty — refusing to migrate."
+    log "Database backup verified: ${LATEST_DB_BACKUP}"
+}
+
+migrate_and_optimize() {
+    log "Running database migrations..."
+    artisan migrate --force
+
+    log "Optimizing (config/route/view cache)..."
+    artisan optimize:clear
+    artisan config:cache
+    artisan route:cache
+    artisan view:cache
+}
+
+# Renders the key pages through the HTTP kernel (no network, no CDN).
+smoke_check() {
+    log "Smoke-checking key pages in-process..."
+    artisan app:smoke
+}
+
+# Steps that need the live docroot and must never fail a release.
+post_release() {
+    # Web-root copy of the Settings favicon (Hostinger serves /favicon.ico itself).
+    artisan favicon:publish --web-root="${PUBLIC_DIR}" || true
+    # Responsive WebP copies of stored images; a page still builds any
+    # missing copy on demand.
+    log "Building missing responsive image copies..."
+    artisan media:variants || true
+}
+
+# ===========================================================================
+# UPDATE — a normal release while Laravel is live.
+# ===========================================================================
+if [[ "$MODE" == "update" ]]; then
+    backup_database
+
+    log "Syncing public assets into ${PUBLIC_DIR}..."
+    rsync -a \
+        --exclude "storage" \
+        --exclude ".htaccess" \
+        --exclude "index.php" \
+        --exclude ".well-known" \
+        "${APP_DIR}/public/" "${PUBLIC_DIR}/"
+    install_front_controller "$PUBLIC_DIR"
+    [[ -f "${PUBLIC_DIR}/build/manifest.json" ]] || fail "Vite manifest missing at ${PUBLIC_DIR}/build/manifest.json — frontend was not built before sync."
+    ensure_storage_link "$PUBLIC_DIR"
+
+    migrate_and_optimize
+
+    log "Restoring from maintenance mode..."
+    artisan up
+    MAINTENANCE_ENABLED=0
+
+    post_release
+    smoke_check || fail "Smoke check failed: a key page did not render. The site is up; see docs/deployment/PRODUCTION-ROLLBACK.md (database backup: ${LATEST_DB_BACKUP})."
+
+    log "Update complete. Database backup taken before migrating: ${LATEST_DB_BACKUP}"
+    exit 0
+fi
+
 # ---------------------------------------------------------------------------
-# 3. Build the STAGED public output in public_html_new/ — this is never the
-#    live docroot. It exists so the cutover step below only has to do a
-#    fast rename, not a slow rsync, while the site is briefly down.
-#    Safe in both modes.
+# PREPARE / CUTOVER — build the STAGED public output in public_html_new/,
+# never the live docroot, so the cutover only has to rename directories.
 # ---------------------------------------------------------------------------
 log "Preparing staged public output in ${NEW_PUBLIC_DIR}..."
 mkdir -p "$NEW_PUBLIC_DIR"
@@ -142,97 +294,51 @@ rsync -a --delete \
     --exclude "storage" \
     --exclude ".htaccess" \
     --exclude "index.php" \
+    --exclude ".well-known" \
     "${APP_DIR}/public/" "${NEW_PUBLIC_DIR}/"
-
-cp "${APP_DIR}/deploy/production/public_html/index.php" "${NEW_PUBLIC_DIR}/index.php"
-cp "${APP_DIR}/deploy/production/public_html/.htaccess" "${NEW_PUBLIC_DIR}/.htaccess"
+install_front_controller "$NEW_PUBLIC_DIR"
 
 [[ -f "${NEW_PUBLIC_DIR}/build/manifest.json" ]] || fail "Vite manifest missing at ${NEW_PUBLIC_DIR}/build/manifest.json — frontend was not built before sync. Refusing to continue."
-[[ -f "${NEW_PUBLIC_DIR}/index.php" ]] || fail "${NEW_PUBLIC_DIR}/index.php missing after copy — refusing to continue."
+ensure_storage_link "$NEW_PUBLIC_DIR"
 
-STAGED_STORAGE_LINK="${NEW_PUBLIC_DIR}/storage"
-STAGED_STORAGE_TARGET="../application/storage/app/public"
-if [[ -L "$STAGED_STORAGE_LINK" ]]; then
-    CURRENT_TARGET="$(readlink "$STAGED_STORAGE_LINK")"
-    [[ "$CURRENT_TARGET" == "$STAGED_STORAGE_TARGET" ]] \
-        || fail "${STAGED_STORAGE_LINK} exists but points at '$CURRENT_TARGET', not '$STAGED_STORAGE_TARGET' — investigate before continuing."
-elif [[ -e "$STAGED_STORAGE_LINK" ]]; then
-    fail "${STAGED_STORAGE_LINK} exists and is NOT a symlink — refusing to overwrite automatically."
-else
-    log "Creating staged storage symlink: ${STAGED_STORAGE_LINK} -> ${STAGED_STORAGE_TARGET}"
-    ln -s "$STAGED_STORAGE_TARGET" "$STAGED_STORAGE_LINK"
-fi
-
-if [[ "$CUTOVER" != "$CUTOVER_TOKEN" ]]; then
-    log "PREPARE complete. public_html/ was NOT touched — the live legacy site is still serving all traffic."
-    log "To perform the real cutover, re-run this script as:"
-    log "  CUTOVER_CONFIRM=${CUTOVER_TOKEN} bash scripts/deploy-production.sh"
+if [[ "$MODE" == "prepare" ]]; then
+    log "PREPARE complete. public_html/ and the database were NOT touched."
+    log "Cut over with:  CUTOVER_CONFIRM=${CUTOVER_TOKEN} bash scripts/deploy-production.sh"
     log "Read docs/deployment/PRODUCTION-CUTOVER.md fully before doing that."
     exit 0
 fi
 
 # ===========================================================================
-# Everything below here only runs when CUTOVER_CONFIRM is set correctly.
-# From this point on, the script touches the production database and the
-# live docroot.
+# CUTOVER — touches the production database and the live docroot.
 # ===========================================================================
 log "CUTOVER confirmed — proceeding with database backup, migration, and the public_html switch."
 
-# ---------------------------------------------------------------------------
-# 4. Maintenance mode on application/ (this doesn't affect public_html/ or
-#    the legacy site's own traffic yet — it only prepares Laravel to refuse
-#    requests the instant it does start receiving them post-swap).
-# ---------------------------------------------------------------------------
+# Maintenance on application/ only: it is not serving traffic yet, but this
+# makes it refuse requests until the swap below is complete.
 log "Enabling maintenance mode on the staged application..."
-"$PHP_BIN" "${APP_DIR}/artisan" down || true
+artisan down || true
+MAINTENANCE_ENABLED=1
 
-ROLLBACK_DONE=0
-cleanup() {
-    if [[ "$ROLLBACK_DONE" -eq 0 ]]; then
-        "$PHP_BIN" "${APP_DIR}/artisan" up || true
-    fi
-}
-trap cleanup EXIT
+backup_database
 
-# ---------------------------------------------------------------------------
-# 5. Backup production database BEFORE migrating. Fail loudly and stop
-#    (do not migrate) if the backup does not exist or is empty.
-# ---------------------------------------------------------------------------
-log "Backing up production database before migrating..."
-bash "${APP_DIR}/scripts/backup-production-db.sh"
-LATEST_DB_BACKUP="$(ls -t "${DB_BACKUP_DIR}"/production-*.sql.gz 2>/dev/null | head -n1 || true)"
-[[ -n "$LATEST_DB_BACKUP" ]] || fail "No database backup file found after running backup-production-db.sh — refusing to migrate."
-[[ -s "$LATEST_DB_BACKUP" ]] || fail "Database backup file ${LATEST_DB_BACKUP} is empty — refusing to migrate."
-log "Database backup verified: ${LATEST_DB_BACKUP}"
+if [[ "${IMPORT_STAGING_CONTENT:-0}" == "1" ]]; then
+    bash "${APP_DIR}/scripts/import-staging-content.sh"
+fi
 
-# ---------------------------------------------------------------------------
-# 6. Migrate. --force required because APP_ENV=production blocks migrate
-#    without it. This only runs inside the CUTOVER branch, never PREPARE.
-# ---------------------------------------------------------------------------
-log "Running database migrations..."
-"$PHP_BIN" "${APP_DIR}/artisan" migrate --force
+migrate_and_optimize
 
-# ---------------------------------------------------------------------------
-# 7. Optimize caches.
-# ---------------------------------------------------------------------------
-log "Optimizing (config/route/view cache)..."
-"$PHP_BIN" "${APP_DIR}/artisan" optimize:clear
-"$PHP_BIN" "${APP_DIR}/artisan" config:cache
-"$PHP_BIN" "${APP_DIR}/artisan" route:cache
-"$PHP_BIN" "${APP_DIR}/artisan" view:cache
-
-# ---------------------------------------------------------------------------
-# 8. Atomic-as-possible public_html switch. The previous public_html/ (the
-#    legacy site) is RENAMED, never deleted, into backups/legacy/ with a
-#    timestamp — it can be renamed straight back by docs/deployment/PRODUCTION-ROLLBACK.md
-#    at any time. No wildcard delete of public_html/ ever happens here.
-# ---------------------------------------------------------------------------
 mkdir -p "$LEGACY_BACKUP_DIR"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 LEGACY_MOVE_TARGET="${LEGACY_BACKUP_DIR}/public_html-${TIMESTAMP}"
 
 [[ -e "$PUBLIC_DIR" ]] || fail "${PUBLIC_DIR} does not exist — nothing to swap out, this looks like an unexpected state. Investigate manually before continuing."
 [[ ! -e "$LEGACY_MOVE_TARGET" ]] || fail "${LEGACY_MOVE_TARGET} already exists — refusing to overwrite a previous backup."
+
+# Keep the domain's ACME / verification files (e.g. SSL renewal) served.
+if [[ -d "${PUBLIC_DIR}/.well-known" ]]; then
+    log "Carrying public_html/.well-known over to the new docroot..."
+    rsync -a "${PUBLIC_DIR}/.well-known/" "${NEW_PUBLIC_DIR}/.well-known/"
+fi
 
 log "Moving current public_html/ (legacy site) to ${LEGACY_MOVE_TARGET}..."
 mv "$PUBLIC_DIR" "$LEGACY_MOVE_TARGET"
@@ -242,33 +348,24 @@ mv "$NEW_PUBLIC_DIR" "$PUBLIC_DIR"
 
 rollback_swap() {
     log "Rolling back: restoring previous public_html/ (legacy site)..."
-    rm -rf "$PUBLIC_DIR"
+    mv "$PUBLIC_DIR" "${LEGACY_BACKUP_DIR}/public_html-failed-${TIMESTAMP}"
     mv "$LEGACY_MOVE_TARGET" "$PUBLIC_DIR"
     ROLLBACK_DONE=1
-    fail "Cutover rolled back — legacy site restored. See docs/deployment/PRODUCTION-ROLLBACK.md and investigate before retrying."
+    fail "Cutover rolled back — legacy site restored. The failed docroot is kept at ${LEGACY_BACKUP_DIR}/public_html-failed-${TIMESTAMP}; see storage/logs/laravel.log and docs/deployment/PRODUCTION-ROLLBACK.md before retrying."
 }
 
-# ---------------------------------------------------------------------------
-# 9. Bring the (now-live) Laravel app out of maintenance mode.
-# ---------------------------------------------------------------------------
 log "Restoring from maintenance mode..."
-"$PHP_BIN" "${APP_DIR}/artisan" up
+artisan up
+MAINTENANCE_ENABLED=0
 
-# ---------------------------------------------------------------------------
-# 10. Health check + homepage smoke check. Automatic rollback if either
-#     fails — production must never be left serving a broken Laravel app.
-# ---------------------------------------------------------------------------
-log "Health-checking ${HEALTH_URL}..."
-if ! curl -fsS --max-time 15 "$HEALTH_URL" > /dev/null; then
+# The server cannot reach its own public URL through the CDN, so the app is
+# proven in-process here; production must never be left serving a broken app.
+if ! smoke_check; then
     rollback_swap
 fi
 
-log "Smoke-checking ${HOMEPAGE_URL}..."
-HOMEPAGE_STATUS="$(curl -s -o /dev/null --max-time 15 -w '%{http_code}' "$HOMEPAGE_URL" || echo "000")"
-if [[ "$HOMEPAGE_STATUS" != "200" ]]; then
-    rollback_swap
-fi
+post_release
 
-log "Cutover complete. ${HOMEPAGE_URL} is healthy (HTTP ${HOMEPAGE_STATUS})."
+log "Cutover complete. Laravel now serves ${EXPECTED_APP_URL} (public URLs are checked by the workflow)."
 log "Previous legacy site preserved at: ${LEGACY_MOVE_TARGET}"
 log "Database backup taken before migration: ${LATEST_DB_BACKUP}"

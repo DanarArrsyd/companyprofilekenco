@@ -20,9 +20,10 @@
 | accidentally diverge from a single shared file being edited for one
 | environment and silently affecting the other.
 |
-| Deployed only during the explicit cutover step of scripts/deploy-production.sh
-| — do not hand-edit this file directly on the server; edit this source
-| copy and redeploy.
+| Deployed by scripts/deploy-production.sh (cutover and update modes), which
+| also looks for the "Production front controller" line above to tell
+| whether Laravel already serves public_html — keep it. Do not hand-edit
+| this file directly on the server; edit this source copy and redeploy.
 */
 
 use Illuminate\Foundation\Application;
@@ -41,5 +42,10 @@ require __DIR__.'/../application/vendor/autoload.php';
 // Bootstrap Laravel and handle the request...
 /** @var Application $app */
 $app = require_once __DIR__.'/../application/bootstrap/app.php';
+
+// The one addition beyond the paths above: public_path() is this web root,
+// so files the app writes for the web server (favicon.ico) land where
+// Hostinger actually serves them.
+$app->usePublicPath(__DIR__);
 
 $app->handleRequest(Request::capture());
