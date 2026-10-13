@@ -151,8 +151,8 @@ test('saving a favicon writes it to the web root as favicon.ico and removing it 
         'favicon' => UploadedFile::fake()->image('icon.png', 32, 32),
     ])->assertSessionHasNoErrors();
 
-    $stored = app(SettingsService::class)->get('favicon');
-    expect(file_get_contents("{$webRoot}/favicon.ico"))->toBe(Storage::disk('public')->get($stored));
+    $ico = file_get_contents("{$webRoot}/favicon.ico");
+    expect(substr($ico, 0, 6))->toBe(pack('vvv', 0, 1, 3)); // ICO header, 3 frames
 
     app(FaviconFileService::class)->publish(null);
     expect(file_exists("{$webRoot}/favicon.ico"))->toBeFalse();
@@ -168,6 +168,62 @@ test('favicon:publish copies the current favicon into the given web root', funct
     $this->artisan('favicon:publish', ['--web-root' => $webRoot])->assertSuccessful();
 
     expect(file_get_contents("{$webRoot}/favicon.ico"))->toBe('png-bytes');
+});
+
+/** A 64 px PNG that is fully transparent except for a navy square in the middle. */
+function transparentIconPng(): string
+{
+    $image = imagecreatetruecolor(64, 64);
+    imagealphablending($image, false);
+    imagesavealpha($image, true);
+    imagefill($image, 0, 0, imagecolorallocatealpha($image, 0, 0, 0, 127));
+    imagefilledrectangle($image, 16, 16, 47, 47, imagecolorallocate($image, 0, 0, 128));
+    ob_start();
+    imagepng($image);
+
+    return (string) ob_get_clean();
+}
+
+test('a transparent favicon is served as white-background PNGs and a real ICO', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('settings/icon.png', transparentIconPng());
+    app(SettingsService::class)->setMany(['favicon' => 'settings/icon.png']);
+    $favicons = app(FaviconFileService::class);
+
+    $this->get('/')
+        ->assertSee('<link rel="icon" type="image/png" href="/storage/'.$favicons->iconPath('settings/icon.png', 32).'">', false)
+        ->assertSee('<link rel="apple-touch-icon" href="/storage/'.$favicons->iconPath('settings/icon.png', 180).'">', false);
+
+    foreach ([32, 180] as $size) {
+        $png = imagecreatefromstring(Storage::disk('public')->get($favicons->iconPath('settings/icon.png', $size)));
+        expect([imagesx($png), imagesy($png)])->toBe([$size, $size]);
+        $corner = imagecolorsforindex($png, imagecolorat($png, 0, 0));
+        expect($corner)->toMatchArray(['red' => 255, 'green' => 255, 'blue' => 255, 'alpha' => 0]);
+    }
+
+    $webRoot = sys_get_temp_dir().'/webroot-'.uniqid();
+    mkdir($webRoot);
+    $favicons->publish('settings/icon.png', $webRoot);
+    $ico = file_get_contents("{$webRoot}/favicon.ico");
+    $firstFrame = unpack('Vlength/Voffset', substr($ico, 6 + 8, 8));
+    $frame = imagecreatefromstring(substr($ico, $firstFrame['offset'], $firstFrame['length']));
+    expect(imagecolorsforindex($frame, imagecolorat($frame, 0, 0)))
+        ->toMatchArray(['red' => 255, 'green' => 255, 'blue' => 255, 'alpha' => 0]);
+});
+
+test('a new favicon replaces the generated icons of the previous one', function () {
+    Storage::fake('public');
+    $webRoot = useTempWebRoot();
+    Storage::disk('public')->put('settings/old.png', transparentIconPng());
+    Storage::disk('public')->put('settings/new.png', transparentIconPng());
+    $favicons = app(FaviconFileService::class);
+
+    $favicons->publish('settings/old.png', $webRoot);
+    $favicons->publish('settings/new.png', $webRoot);
+
+    Storage::disk('public')->assertMissing($favicons->iconPath('settings/old.png', 32));
+    Storage::disk('public')->assertExists($favicons->iconPath('settings/new.png', 32));
+    Storage::disk('public')->assertExists($favicons->iconPath('settings/new.png', 180));
 });
 
 /** Favicon saves write favicon.ico to the web root; point it at a temp dir, not public/. */

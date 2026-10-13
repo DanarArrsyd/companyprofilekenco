@@ -76,10 +76,12 @@ class SettingsService
     }
 
     /**
-     * The browser tab icon: the uploaded favicon, else the logo. Returns the
-     * public URL and its MIME type, or null when neither is set.
+     * The browser tab icon: the uploaded favicon, else the logo, as the
+     * white-background PNGs made by FaviconFileService (the upload itself
+     * when GD cannot read it). Returns the tab icon URL, its MIME type and
+     * the apple-touch-icon URL, or null when neither is set.
      *
-     * @return array{url: string, type: string}|null
+     * @return array{url: string, type: string, touch_url: string}|null
      */
     public function siteIcon(): ?array
     {
@@ -89,7 +91,18 @@ class SettingsService
             return null;
         }
 
-        $url = preg_match('#^(https?:)?//|^/#', $path) ? $path : '/storage/'.ltrim($path, '/');
+        $isStored = ! preg_match('#^(https?:)?//|^/#', $path);
+        $favicons = app(FaviconFileService::class);
+
+        if ($isStored && $favicons->ensure($path)) {
+            return [
+                'url' => '/storage/'.$favicons->iconPath($path, FaviconFileService::TAB_SIZE),
+                'type' => 'image/png',
+                'touch_url' => '/storage/'.$favicons->iconPath($path, FaviconFileService::TOUCH_SIZE),
+            ];
+        }
+
+        $url = $isStored ? '/storage/'.ltrim($path, '/') : $path;
         $extension = strtolower(pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
 
         return [
@@ -101,6 +114,7 @@ class SettingsService
                 'svg' => 'image/svg+xml',
                 default => 'image/png',
             },
+            'touch_url' => $url,
         ];
     }
 

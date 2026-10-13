@@ -15,7 +15,7 @@
 
         @if ($siteIcon = app(\App\Services\SettingsService::class)->siteIcon())
             <link rel="icon" type="{{ $siteIcon['type'] }}" href="{{ $siteIcon['url'] }}">
-            <link rel="apple-touch-icon" href="{{ $siteIcon['url'] }}">
+            <link rel="apple-touch-icon" href="{{ $siteIcon['touch_url'] }}">
         @endif
 
         @if (request()->is('admin*'))
