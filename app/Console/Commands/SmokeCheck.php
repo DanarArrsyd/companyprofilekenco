@@ -25,8 +25,13 @@ class SmokeCheck extends Command
     {
         $failed = false;
 
+        // Requests carry the real APP_URL host: pages cache what they render
+        // (the sitemap for 30 minutes), so a bare path would cache
+        // https://localhost links for real visitors.
+        $baseUrl = rtrim((string) config('app.url'), '/');
+
         foreach ($this->option('path') ?: self::PATHS as $path) {
-            $request = Request::create($path, 'GET', server: ['HTTPS' => 'on']);
+            $request = Request::create($baseUrl.$path, 'GET');
             $response = $kernel->handle($request);
             $kernel->terminate($request, $response);
 
