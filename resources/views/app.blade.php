@@ -1,9 +1,14 @@
 @php
     // Public pages open behind the page loader (resources/js/lib/page-loader.ts).
-    $pageLoader = str_starts_with($page['component'], 'public/') && ! request()->is('admin*');
+    $publicPage = str_starts_with($page['component'], 'public/') && ! request()->is('admin*');
+    $pageLoader = $publicPage;
+    // `public-root` turns on the desktop rem scaling (app.css) in the first
+    // paint, so the loader is never laid out at 16px and then shrunk once
+    // React mounts `.public-site`.
+    $htmlClasses = array_filter([$publicPage ? 'public-root' : null, $pageLoader ? 'page-loading' : null]);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"@if ($pageLoader) class="page-loading"@endif>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"@if ($htmlClasses) class="{{ implode(' ', $htmlClasses) }}"@endif>
     <head>
         <meta charset="utf-8">
         @if ($contentSecurityPolicyMeta ?? null)

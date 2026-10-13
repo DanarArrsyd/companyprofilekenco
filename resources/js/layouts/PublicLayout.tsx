@@ -24,6 +24,9 @@ export default function PublicLayout({
     const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
 
     useEffect(() => startSmoothScroll(), []);
+    // app.blade.php marks a public first load with `public-root`; drop it
+    // when a client-side visit leaves the public site so admin keeps 16px.
+    useEffect(() => () => document.documentElement.classList.remove('public-root'), []);
     useScrollRevealBoundary(mainRef, url);
 
     return (
