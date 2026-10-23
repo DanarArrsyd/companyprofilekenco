@@ -66,4 +66,16 @@ class Article extends Model
     {
         return $this->belongsTo(User::class, 'author_id');
     }
+
+    public function readingMinutes(): int
+    {
+        $plainText = trim(html_entity_decode(
+            preg_replace('/<[^>]*>/', ' ', $this->content ?: $this->excerpt ?: '') ?? '',
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8',
+        ));
+        $wordCount = count(preg_split('/\s+/u', $plainText, -1, PREG_SPLIT_NO_EMPTY) ?: []);
+
+        return max(1, (int) ceil($wordCount / 200));
+    }
 }

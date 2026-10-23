@@ -112,11 +112,12 @@ class ArticleController extends Controller
 
         return Inertia::render('public/news/Show', [
             'article' => $article,
+            'readingMinutes' => $article->readingMinutes(),
             'relatedArticles' => [],
             'seo' => $seo->preview($article->title),
             'breadcrumb' => [
-                ['label' => 'News', 'href' => '/news'],
-                ...($article->category ? [['label' => $article->category->name, 'href' => "/news?category={$article->category->slug}"]] : []),
+                ['label' => __('Home'), 'href' => '/'],
+                ['label' => __('News'), 'href' => $article->category ? "/news?category={$article->category->slug}" : '/news'],
                 ['label' => $article->title],
             ],
             'preview' => true,

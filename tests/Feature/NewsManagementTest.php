@@ -118,8 +118,64 @@ test('public news listing shows only published articles', function () {
     );
 });
 
+test('public news feature and article list stay inside the selected category', function () {
+    $companyNews = NewsCategory::factory()->create(['name' => 'Company News', 'slug' => 'company-news']);
+    $otherNews = NewsCategory::factory()->create(['name' => 'Other News', 'slug' => 'other-news']);
+
+    $companyArticle = Article::factory()->published()->create([
+        'news_category_id' => $companyNews->id,
+        'title' => 'Company article',
+        'published_at' => now()->subDays(3),
+    ]);
+    Article::factory()->published()->create([
+        'news_category_id' => $otherNews->id,
+        'title' => 'Other featured article',
+        'is_featured' => true,
+        'published_at' => now()->subDay(),
+    ]);
+
+    $this->get('/en/news?category=company-news')->assertOk()->assertInertia(fn ($page) => $page
+        ->component('public/news/Index')
+        ->where('featuredArticle.id', $companyArticle->id)
+        ->has('articles.data', 1)
+        ->where('articles.data.0.id', $companyArticle->id)
+        ->where('filters.category', 'company-news')
+    );
+});
+
+test('public news list filters by year and search and sorts oldest first', function () {
+    $category = NewsCategory::factory()->create();
+    $older = Article::factory()->published()->create([
+        'news_category_id' => $category->id,
+        'title' => 'Factory opened',
+        'published_at' => '2024-02-15 12:00:00',
+    ]);
+    $newer = Article::factory()->published()->create([
+        'news_category_id' => $category->id,
+        'title' => 'Factory expanded',
+        'published_at' => '2024-08-15 12:00:00',
+    ]);
+    Article::factory()->published()->create([
+        'news_category_id' => $category->id,
+        'title' => 'Factory upgraded',
+        'published_at' => '2025-02-15 12:00:00',
+    ]);
+
+    $this->get('/news?year=2024&sort=oldest&search=Factory')->assertOk()->assertInertia(fn ($page) => $page
+        ->component('public/news/Index')
+        ->has('articles.data', 2)
+        ->where('articles.data.0.id', $older->id)
+        ->where('articles.data.1.id', $newer->id)
+        ->where('filters.sort', 'oldest')
+        ->where('filters.search', 'Factory')
+    );
+});
+
 test('public news detail page renders for a published article', function () {
-    $article = Article::factory()->published()->create(['slug' => 'my-article']);
+    $article = Article::factory()->published()->create([
+        'slug' => 'my-article',
+        'content' => '<p>'.str_repeat('quality ', 401).'</p>',
+    ]);
 
     $response = $this->get('/news/my-article');
 
@@ -127,6 +183,20 @@ test('public news detail page renders for a published article', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('public/news/Show')
         ->where('article.id', $article->id)
+        ->where('readingMinutes', 3)
+        ->where('breadcrumb.0.href', '/')
+    );
+});
+
+test('admin article preview uses the same reading layout data', function () {
+    $user = createNewsAdmin(['news.view']);
+    $article = Article::factory()->create(['content' => '<p>Preview text</p>']);
+
+    $this->actingAs($user)->get(route('admin.news.preview', $article))->assertOk()->assertInertia(fn ($page) => $page
+        ->component('public/news/Show')
+        ->where('preview', true)
+        ->where('readingMinutes', 1)
+        ->where('breadcrumb.0.href', '/')
     );
 });
 

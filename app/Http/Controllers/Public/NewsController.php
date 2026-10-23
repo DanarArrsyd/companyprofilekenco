@@ -20,27 +20,60 @@ class NewsController extends Controller
 
     public function index(Request $request): Response
     {
-        $featured = Article::query()
+        $filters = $request->validate([
+            'category' => ['nullable', 'string', 'max:100'],
+            'year' => ['nullable', 'integer', 'between:2000,2100'],
+            'sort' => ['nullable', 'in:newest,oldest'],
+            'search' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $category = $filters['category'] ?? null;
+        $year = $filters['year'] ?? null;
+        $sort = $filters['sort'] ?? 'newest';
+        $search = trim($filters['search'] ?? '');
+
+        $categoryArticles = Article::query()
             ->published()
+            ->when($category, fn ($q) => $q->whereHas('category', fn ($sub) => $sub->where('slug', $category)));
+
+        $featured = (clone $categoryArticles)
             ->where('is_featured', true)
             ->with('category:id,name,slug')
             ->latest('published_at')
-            ->first();
+            ->first()
+            ?? (clone $categoryArticles)
+                ->with('category:id,name,slug')
+                ->latest('published_at')
+                ->first();
 
-        $articles = Article::query()
-            ->published()
+        $articles = (clone $categoryArticles)
             ->with('category:id,name,slug')
-            ->when($request->filled('category'), fn ($q) => $q->whereHas('category', fn ($sub) => $sub->where('slug', $request->string('category'))))
-            ->when($featured, fn ($q) => $q->where('id', '!=', $featured->id))
-            ->latest('published_at')
+            ->when($year, fn ($q) => $q->whereYear('published_at', $year))
+            ->when($search !== '', fn ($q) => $q->where(fn ($sub) => $sub
+                ->where('title', 'like', "%{$search}%")
+                ->orWhere('excerpt', 'like', "%{$search}%")))
+            ->orderBy('published_at', $sort === 'oldest' ? 'asc' : 'desc')
+            ->orderBy('id', $sort === 'oldest' ? 'asc' : 'desc')
             ->paginate(9)
             ->withQueryString();
+
+        $years = (clone $categoryArticles)
+            ->whereNotNull('published_at')
+            ->selectRaw('DISTINCT SUBSTR(published_at, 1, 4) as year')
+            ->orderByDesc('year')
+            ->pluck('year');
 
         return Inertia::render('public/news/Index', [
             'featuredArticle' => $featured,
             'articles' => $articles,
             'categories' => NewsCategory::orderBy('name')->get(['id', 'name', 'slug']),
-            'filters' => $request->only(['category']),
+            'years' => $years,
+            'filters' => [
+                'category' => $category,
+                'year' => $year,
+                'sort' => $sort,
+                'search' => $search,
+            ],
             'seo' => $this->seo->resolveStatic(__('News'), __('Latest company news and updates.')),
         ]);
     }
@@ -63,8 +96,8 @@ class NewsController extends Controller
             ->get(['id', 'title', 'slug', 'excerpt', 'featured_image', 'published_at', 'news_category_id']);
 
         $breadcrumb = [
-            ['label' => __('News'), 'href' => '/news'],
-            ...($article->category ? [['label' => $article->category->name, 'href' => "/news?category={$article->category->slug}"]] : []),
+            ['label' => __('Home'), 'href' => '/'],
+            ['label' => __('News'), 'href' => $article->category ? "/news?category={$article->category->slug}" : '/news'],
             ['label' => $article->title],
         ];
 
@@ -72,6 +105,7 @@ class NewsController extends Controller
 
         return Inertia::render('public/news/Show', [
             'article' => $article,
+            'readingMinutes' => $article->readingMinutes(),
             'relatedArticles' => $relatedArticles,
             'seo' => $seo,
             'breadcrumb' => $breadcrumb,
