@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.bunny.net/css?family=inter:500,600|montserrat:600,700,800&display=block" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #051F41; }
+  .card { position: relative; width: 1200px; height: 630px; overflow: hidden; background: #051F41; }
+
+  /* Factory photo, toned navy, strongest on the right where the mascot stands. */
+  .photo { position: absolute; inset: 0; background: url(../photos/hero_about.png) 70% 40% / cover no-repeat; filter: grayscale(1) contrast(1.2) brightness(1.05); }
+  .tone { position: absolute; inset: 0; background: #17466B; mix-blend-mode: multiply; }
+  .fade { position: absolute; inset: 0; background: linear-gradient(90deg, #051F41 0%, #051F41 38%, rgba(5,31,65,.82) 52%, rgba(5,31,65,.25) 78%, rgba(5,31,65,.1) 100%); }
+  .floor { position: absolute; inset: auto 0 0 0; height: 220px; background: linear-gradient(0deg, rgba(5,31,65,.9), rgba(5,31,65,0)); }
+
+  /* Brush texture from the page loader, very faint. */
+  .brush { position: absolute; left: -160px; top: -120px; width: 900px; opacity: .06; }
+
+  .mascot { position: absolute; right: -10px; bottom: -520px; height: 1040px; filter: drop-shadow(0 30px 40px rgba(0,0,0,.35)); }
+
+  .content { position: absolute; left: 80px; top: 78px; bottom: 70px; width: 640px; display: flex; flex-direction: column; }
+  .logo { width: 380px; display: block; }
+  .rule { width: 56px; height: 3px; background: #fff; margin: 56px 0 26px; border-radius: 2px; }
+  h1 { font-family: Montserrat, Inter, sans-serif; font-weight: 800; color: #fff; font-size: 64px; line-height: 1.04; letter-spacing: -.02em; }
+  p { font-family: Inter, sans-serif; font-weight: 500; color: #D9DEE3; font-size: 25px; line-height: 1.45; margin-top: 24px; max-width: 470px; }
+  .foot { margin-top: auto; display: flex; align-items: center; gap: 14px; font-family: Montserrat, Inter, sans-serif; font-weight: 600; font-size: 22px; color: #fff; letter-spacing: .01em; }
+  .foot i { width: 10px; height: 10px; border-radius: 50%; background: #fff; display: block; opacity: .9; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="photo"></div>
+    <div class="tone"></div>
+    <div class="fade"></div>
+    <div class="floor"></div>
+    <img class="brush" src="../loader/brush_load.png" alt="">
+    <img class="mascot" src="../sources/footer_maskot1.png" alt="">
+    <div class="content">
+      <img class="logo" src="../loader/logo_kmi_white.png" alt="">
+      <div class="rule"></div>
+      <h1>Stamping &amp;<br>Engineering<br>Production</h1>
+      <p>Dies, jigs and parts made in Bekasi, West Java.</p>
+      <div class="foot"><i></i>kencomanufactur.co.id</div>
+    </div>
+  </div>
+</body>
+</html>

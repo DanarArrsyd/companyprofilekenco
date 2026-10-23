@@ -155,6 +155,16 @@ Rendering and Operations") and was intentionally left out of this phase's
 scope — it should be done before the site is actually deployed to production,
 as its own reviewed change.
 
+**Partial fix (2026-10-23):** without SSR, `resources/views/partials/seo-head.blade.php`
+(included by `app.blade.php` whenever the page has a `seo` prop) prints the
+resolved title, description, robots, canonical, hreflang, OpenGraph and Twitter
+tags into the initial HTML, so link-preview scrapers see them. Each tag carries
+the `inertia` attribute, so Inertia's head manager replaces them on hydration
+(no duplicates). JSON-LD and page content are still client-rendered. When no
+OG image comes from the page, its entity or Settings, `SeoService` falls back to
+the branded 1200×630 banner `public/images/og/default.jpg` (source
+`resources/design/og/og-default.html`, rendered with headless Chrome).
+
 ### Metadata resolution — `App\Services\SeoService`
 
 Every public controller resolves metadata through one of three methods —

@@ -16,6 +16,12 @@ use Illuminate\Support\Facades\Storage;
  */
 class SeoService
 {
+    /**
+     * Branded 1200x630 share banner (source: resources/design/og/og-default.html),
+     * used when neither the page, its entity nor Settings provides an OG image.
+     */
+    public const FALLBACK_OG_IMAGE = 'images/og/default.jpg';
+
     public function __construct(
         private readonly SettingsService $settings,
         private readonly Request $request,
@@ -132,7 +138,8 @@ class SeoService
     {
         $ogTitle = $seo?->og_title ?: $title;
         $ogDescription = $seo?->og_description ?: $description;
-        $ogImage = $this->absoluteImageUrl($seo?->og_image ?: $entityImage ?: $this->settings->get('seo_default_og_image'));
+        $ogImage = $this->absoluteImageUrl($seo?->og_image ?: $entityImage ?: $this->settings->get('seo_default_og_image'))
+            ?? asset(self::FALLBACK_OG_IMAGE);
 
         [$robotsIndex, $robotsFollow] = $this->resolveRobots($seo);
 

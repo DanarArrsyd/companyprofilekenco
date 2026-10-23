@@ -67,6 +67,38 @@ test('og image falls back to the site default when neither the entity nor its se
     );
 });
 
+test('og image falls back to the built-in share banner when nothing else provides one', function () {
+    $product = Product::factory()->published()->create(['slug' => 'bare-product', 'featured_image' => null]);
+
+    $this->get('/products/bare-product')->assertInertia(fn ($page) => $page
+        ->where('seo.og_image', asset('images/og/default.jpg'))
+        ->where('seo.twitter_card', 'summary_large_image')
+    );
+
+    expect(public_path('images/og/default.jpg'))->toBeFile();
+});
+
+test('the initial html carries the seo and share tags for crawlers that skip javascript', function () {
+    setSeoSetting('company_name', 'PT. Kenco Manufactur Indonesia');
+    Product::factory()->published()->create(['name' => 'Precision Shaft', 'slug' => 'html-shaft', 'featured_image' => null]);
+
+    $html = $this->get('/products/html-shaft')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<title inertia>Precision Shaft | PT. Kenco Manufactur Indonesia</title>')
+        ->toContain('<meta inertia property="og:title" content="Precision Shaft | PT. Kenco Manufactur Indonesia">')
+        ->toContain('<meta inertia property="og:image" content="'.asset('images/og/default.jpg').'">')
+        ->toContain('<meta inertia name="twitter:card" content="summary_large_image">')
+        ->toContain('<link inertia rel="canonical" href="'.url('/products/html-shaft').'">')
+        ->toContain('<meta inertia property="og:site_name" content="PT. Kenco Manufactur Indonesia">');
+});
+
+test('pages without resolved seo, like the login page, render no share tags', function () {
+    $html = $this->get('/admin/login')->assertOk()->getContent();
+
+    expect($html)->not->toContain('property="og:image"');
+});
+
 test('og image prefers the entity featured image over the site default', function () {
     setSeoSetting('seo_default_og_image', 'settings/default-og.jpg', 'image');
     $product = Product::factory()->published()->create(['slug' => 'with-image-product', 'featured_image' => 'products/shaft.jpg']);

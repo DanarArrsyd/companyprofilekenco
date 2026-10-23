@@ -16,7 +16,11 @@
         @endif
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        @php($seo = is_array($page['props']['seo'] ?? null) ? $page['props']['seo'] : null)
+        <title inertia>{{ $seo['title'] ?? config('app.name', 'Laravel') }}</title>
+        @if ($seo)
+            @include('partials.seo-head', ['seo' => $seo])
+        @endif
 
         @if ($siteIcon = app(\App\Services\SettingsService::class)->siteIcon())
             <link rel="icon" type="{{ $siteIcon['type'] }}" href="{{ $siteIcon['url'] }}">
