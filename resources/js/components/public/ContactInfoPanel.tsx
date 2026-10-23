@@ -10,6 +10,14 @@ function isEmbeddableMapUrl(url: string): boolean {
     return url.includes('/maps/embed') || url.includes('output=embed');
 }
 
+function mapPreviewUrl(url: string, address: string | null): string | null {
+    if (isEmbeddableMapUrl(url)) return url;
+    if (!address) return null;
+
+    // A Maps share link cannot be framed. Use the saved address for its preview.
+    return `https://maps.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+}
+
 function InfoRow({ icon: Icon, label, children }: { icon: typeof MapPin; label: string; children: ReactNode }) {
     return (
         <div className="flex gap-3 py-4">
@@ -32,7 +40,10 @@ function InfoRow({ icon: Icon, label, children }: { icon: typeof MapPin; label: 
 export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
     const { t, locale } = useLocale();
     const { siteSettings } = usePage().props;
-    const hasAny = siteSettings.address || siteSettings.phone || siteSettings.email || siteSettings.operating_hours;
+    const hasAny = siteSettings.address || siteSettings.phone || siteSettings.email || siteSettings.operating_hours || siteSettings.map_embed_url;
+    const previewUrl = siteSettings.map_embed_url
+        ? mapPreviewUrl(siteSettings.map_embed_url, siteSettings.address)
+        : null;
 
     if (!hasAny) return null;
 
@@ -90,25 +101,24 @@ export function ContactInfoPanel({ compact = false }: { compact?: boolean }) {
 
             {siteSettings.map_embed_url && (
                 <div className="mt-8">
-                    {isEmbeddableMapUrl(siteSettings.map_embed_url) ? (
+                    {previewUrl && (
                         <iframe
-                            src={siteSettings.map_embed_url}
+                            src={previewUrl}
                             title={t('Location map')}
                             loading="lazy"
                             referrerPolicy="no-referrer-when-downgrade"
-                            className="aspect-[4/3] w-full border border-border"
+                            className="aspect-[4/3] w-full rounded-xl border border-border bg-muted"
                         />
-                    ) : (
-                        <a
-                            href={siteSettings.map_embed_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 text-small font-medium text-navy-700 hover:text-navy-900"
-                        >
-                            {t('View on Map')}
-                            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                        </a>
                     )}
+                    <a
+                        href={siteSettings.map_embed_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 inline-flex items-center gap-1.5 text-small font-medium text-navy-700 hover:text-navy-900"
+                    >
+                        {t('View on Map')}
+                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                    </a>
                 </div>
             )}
         </div>
