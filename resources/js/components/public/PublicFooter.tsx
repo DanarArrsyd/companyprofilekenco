@@ -110,7 +110,7 @@ export function PublicFooter() {
                 </div>
 
                 {/* Copyright + credit: its own bar under the mascot on phones, bottom-right of the footer on desktop. */}
-                <p className="relative z-10 border-t border-white/10 px-5 py-4 text-center font-montserrat text-caption text-white/85 sm:text-small lg:absolute lg:text-body lg:bottom-5 lg:right-[max(2rem,calc(50%_-_42rem))] lg:border-0 lg:p-0 lg:text-right">
+                <p className="relative z-10 border-t border-white/10 px-5 py-4 text-center font-montserrat text-caption text-white/85 lg:absolute lg:text-small lg:bottom-5 lg:right-[max(2rem,calc(50%_-_42rem))] lg:border-0 lg:p-0 lg:text-right">
                     {t('Copyright')} {companyName}
                     <span aria-hidden="true" className="mx-2 hidden text-white/40 sm:inline">
                         |
