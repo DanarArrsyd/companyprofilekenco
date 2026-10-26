@@ -17,13 +17,13 @@ test('authorized admin can update settings', function () {
     $user->givePermissionTo('settings.manage');
 
     $response = $this->actingAs($user)->put(route('admin.settings.update'), [
-        'company_name' => 'PT. Kenco Manufactur Indonesia',
+        'company_name' => 'PT Kenco Manufactur Indonesia',
         'email' => 'hello@kenco.test',
         'maintenance_mode' => false,
     ]);
 
     $response->assertRedirect();
-    $this->assertDatabaseHas('site_settings', ['key' => 'company_name', 'value' => 'PT. Kenco Manufactur Indonesia']);
+    $this->assertDatabaseHas('site_settings', ['key' => 'company_name', 'value' => 'PT Kenco Manufactur Indonesia']);
 });
 
 test('unauthorized user cannot update settings', function () {

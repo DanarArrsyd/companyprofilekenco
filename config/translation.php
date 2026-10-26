@@ -23,11 +23,7 @@ return [
     */
 
     'glossary' => [
-        'PT. Kenco Manufactur Indonesia',
         'PT Kenco Manufactur Indonesia',
-        'Kenco Manufactur Indonesia',
-        'Kenco Manufacturing',
-        'Kenco',
         'Metal Stamping',
         'Progressive Die Stamping',
         'Progressive Die',

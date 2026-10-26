@@ -53,8 +53,8 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
                 >
                     <DialogPanel className="fixed inset-y-0 left-0 flex w-72 flex-col bg-surface">
                         <div className="flex h-16 items-center justify-between border-b border-border px-4">
-                            <Link href={route('dashboard')} className="text-base font-semibold tracking-tight text-foreground">
-                                Kenco CMS
+                            <Link href={route('dashboard')} className="min-w-0 text-sm font-semibold leading-tight tracking-tight text-foreground">
+                                PT Kenco Manufactur Indonesia CMS
                             </Link>
                             <button
                                 type="button"

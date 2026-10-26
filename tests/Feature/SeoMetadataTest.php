@@ -15,18 +15,18 @@ function setSeoSetting(string $key, string $value, string $type = 'string'): voi
 }
 
 test('product with no seo override falls back to "Name | Company" title format', function () {
-    setSeoSetting('company_name', 'PT. Kenco Manufactur Indonesia');
+    setSeoSetting('company_name', 'PT Kenco Manufactur Indonesia');
     $product = Product::factory()->published()->create(['name' => 'Precision Shaft', 'slug' => 'precision-shaft']);
 
     $response = $this->get('/products/precision-shaft');
 
     $response->assertInertia(fn ($page) => $page
-        ->where('seo.title', 'Precision Shaft | PT. Kenco Manufactur Indonesia')
+        ->where('seo.title', 'Precision Shaft | PT Kenco Manufactur Indonesia')
     );
 });
 
 test('product with a custom seo meta title uses the override verbatim', function () {
-    setSeoSetting('company_name', 'PT. Kenco Manufactur Indonesia');
+    setSeoSetting('company_name', 'PT Kenco Manufactur Indonesia');
     $product = Product::factory()->published()->create(['slug' => 'custom-title-product']);
     $product->seoMetadata()->create(['meta_title' => 'Totally Custom Title']);
 
@@ -79,18 +79,18 @@ test('og image falls back to the built-in share banner when nothing else provide
 });
 
 test('the initial html carries the seo and share tags for crawlers that skip javascript', function () {
-    setSeoSetting('company_name', 'PT. Kenco Manufactur Indonesia');
+    setSeoSetting('company_name', 'PT Kenco Manufactur Indonesia');
     Product::factory()->published()->create(['name' => 'Precision Shaft', 'slug' => 'html-shaft', 'featured_image' => null]);
 
     $html = $this->get('/products/html-shaft')->assertOk()->getContent();
 
     expect($html)
-        ->toContain('<title inertia>Precision Shaft | PT. Kenco Manufactur Indonesia</title>')
-        ->toContain('<meta inertia property="og:title" content="Precision Shaft | PT. Kenco Manufactur Indonesia">')
+        ->toContain('<title inertia>Precision Shaft | PT Kenco Manufactur Indonesia</title>')
+        ->toContain('<meta inertia property="og:title" content="Precision Shaft | PT Kenco Manufactur Indonesia">')
         ->toContain('<meta inertia property="og:image" content="'.asset('images/og/default.jpg').'">')
         ->toContain('<meta inertia name="twitter:card" content="summary_large_image">')
         ->toContain('<link inertia rel="canonical" href="'.url('/products/html-shaft').'">')
-        ->toContain('<meta inertia property="og:site_name" content="PT. Kenco Manufactur Indonesia">');
+        ->toContain('<meta inertia property="og:site_name" content="PT Kenco Manufactur Indonesia">');
 });
 
 test('pages without resolved seo, like the login page, render no share tags', function () {
@@ -152,11 +152,11 @@ test('non-production environments are always noindex, nofollow regardless of any
 });
 
 test('homepage title is the company name alone, never duplicated with a separator', function () {
-    setSeoSetting('company_name', 'PT. Kenco Manufactur Indonesia');
+    setSeoSetting('company_name', 'PT Kenco Manufactur Indonesia');
 
     $response = $this->get('/');
 
-    $response->assertInertia(fn ($page) => $page->where('seo.title', 'PT. Kenco Manufactur Indonesia'));
+    $response->assertInertia(fn ($page) => $page->where('seo.title', 'PT Kenco Manufactur Indonesia'));
 });
 
 test('admin can save an og image for a product via an uploaded file', function () {

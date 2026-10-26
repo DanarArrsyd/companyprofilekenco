@@ -8,7 +8,7 @@ exists and that several of its values look sane, but it never creates,
 overwrites, or prints it.
 
 ```env
-APP_NAME="PT. Kenco Manufactur Indonesia"
+APP_NAME="PT Kenco Manufactur Indonesia"
 APP_ENV=production
 APP_KEY=                          # generate with artisan key:generate, see below — MUST be unique from staging, never copied from staging or local
 APP_DEBUG=false

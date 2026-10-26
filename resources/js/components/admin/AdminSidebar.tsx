@@ -144,8 +144,8 @@ export function AdminSidebar({
         >
             <div className="flex h-16 items-center justify-between border-b border-border px-4">
                 {!collapsed && (
-                    <Link href={route('dashboard')} className="flex flex-col leading-tight">
-                        <span className="text-base font-semibold tracking-tight text-foreground">Kenco CMS</span>
+                    <Link href={route('dashboard')} className="flex min-w-0 flex-col leading-tight">
+                        <span className="text-sm font-semibold tracking-tight text-foreground">PT Kenco Manufactur Indonesia CMS</span>
                         <span className="text-xs text-slate-500">Kelola website perusahaan</span>
                     </Link>
                 )}

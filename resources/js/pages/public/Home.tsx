@@ -85,7 +85,7 @@ export default function Home({
             <PublicLayout>
                 <SeoHead seo={seo} schema={schema} />
                 <Container spacing="section" className="text-center">
-                    <h1 className="text-h1 text-navy-900">{siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia'}</h1>
+                    <h1 className="text-h1 text-navy-900">{siteSettings?.company_name ?? 'PT Kenco Manufactur Indonesia'}</h1>
                     <p className="mt-4 text-slate-500">
                         {t('Homepage content is being prepared. Check back soon.')}
                     </p>

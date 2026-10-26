@@ -9,7 +9,7 @@ use App\Models\SiteSetting;
 use Illuminate\Support\Facades\Cache;
 
 beforeEach(function () {
-    SiteSetting::updateOrCreate(['key' => 'company_name'], ['value' => 'PT. Kenco Manufactur Indonesia', 'type' => 'string']);
+    SiteSetting::updateOrCreate(['key' => 'company_name'], ['value' => 'PT Kenco Manufactur Indonesia', 'type' => 'string']);
     Cache::forget('site_settings.all');
 });
 
@@ -21,7 +21,7 @@ test('homepage exposes valid Organization and WebSite json-ld', function () {
         $schema = $page->toArray()['props']['schema'];
 
         expect($schema[0]['@type'])->toBe('Organization')
-            ->and($schema[0]['name'])->toBe('PT. Kenco Manufactur Indonesia')
+            ->and($schema[0]['name'])->toBe('PT Kenco Manufactur Indonesia')
             ->and($schema[0]['url'])->toBe(url('/'))
             ->and($schema[1]['@type'])->toBe('WebSite');
     });

@@ -1,4 +1,4 @@
-# Production Cutover — Kenco Manufacturing
+# Production Cutover — PT Kenco Manufactur Indonesia
 
 This is the human-run checklist for switching `kencomanufactur.co.id` from
 the legacy PHP Native site to the Laravel application. It is written to be

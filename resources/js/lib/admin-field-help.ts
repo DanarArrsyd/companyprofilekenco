@@ -40,7 +40,7 @@ const MODULES: Record<string, FieldHelp> = {
     'products:product_category_id': { hint: 'Used for the category filter on the Products page.' },
     'products:is_featured': { hint: 'Featured products are listed first on the Products page.' },
 
-    'news:title': { example: 'Kenco commissions a new 400-ton press line' },
+    'news:title': { example: 'PT Kenco Manufactur Indonesia commissions a new 400-ton press line' },
     'news:excerpt': { hint: 'One or two sentences shown on news cards and in search results.', example: 'The new line doubles our stamping capacity for automotive parts.' },
     'news:news_category_id': { hint: 'Optional. Used to group articles.' },
     'news:is_featured': { hint: 'The newest featured article is shown as the headline on the News page.' },
@@ -85,8 +85,8 @@ const MODULES: Record<string, FieldHelp> = {
     'quality-content:title': { example: 'Quality Control Process' },
     'quality-content:summary': { hint: 'One or two sentences shown on the Quality page.', example: 'Every batch is measured against the customer drawing before shipping.' },
 
-    'settings:company_name': { example: 'Kenco Manufacturing' },
-    'settings:legal_name': { hint: 'Registered company name, kept for reference. Not shown on the public site yet.', example: 'PT. Kenco Manufactur Indonesia' },
+    'settings:company_name': { example: 'PT Kenco Manufactur Indonesia' },
+    'settings:legal_name': { hint: 'Registered company name, kept for reference. Not shown on the public site yet.', example: 'PT Kenco Manufactur Indonesia' },
     'settings:tagline': { example: 'Dies, Jigs & Parts Manufacturing' },
     'settings:email': { example: 'sales@kencomanufactur.co.id' },
     'settings:phone': { hint: 'Include the country code so it can be dialled from a phone.', example: '+62 21 1234 5678' },

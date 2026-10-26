@@ -1,4 +1,4 @@
-# Production Rollback — Kenco Manufacturing
+# Production Rollback — PT Kenco Manufactur Indonesia
 
 What to do if the production cutover (`docs/deployment/PRODUCTION-CUTOVER.md`) needs
 to be reversed — either automatically (the deploy script already did it)

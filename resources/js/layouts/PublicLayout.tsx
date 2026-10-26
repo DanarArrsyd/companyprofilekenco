@@ -21,7 +21,7 @@ export default function PublicLayout({
     const { props, url } = usePage();
     const { siteSettings } = props;
     const mainRef = useRef<HTMLElement>(null);
-    const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
+    const companyName = siteSettings?.company_name ?? 'PT Kenco Manufactur Indonesia';
 
     useEffect(() => startSmoothScroll(), []);
     // app.blade.php marks a public first load with `public-root`; drop it

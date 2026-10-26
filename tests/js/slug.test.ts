@@ -8,7 +8,7 @@ const SERVER_RULE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 test('builds server-valid slugs from titles', () => {
     for (const [title, expected] of [
-        ['PT Kenco Manufactur Achieves ISO 9001:2015 Certification', 'pt-kenco-manufactur-achieves-iso-9001-2015-certification'],
+        ['PT Kenco Manufactur Indonesia Achieves ISO 9001:2015 Certification', 'pt-kenco-manufactur-indonesia-achieves-iso-9001-2015-certification'],
         ['Précision Parts & Assembly', 'precision-parts-and-assembly'],
         ['  Tool   &  Die -- Design  ', 'tool-and-die-design'],
         ['Kapabilitas Produksi (CNC)', 'kapabilitas-produksi-cnc'],

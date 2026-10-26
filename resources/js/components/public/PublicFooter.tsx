@@ -26,7 +26,7 @@ const DEVELOPER = 'Eka Danar Arrasyid';
 export function PublicFooter() {
     const { localize, t } = useLocale();
     const { siteSettings } = usePage().props;
-    const companyName = siteSettings?.company_name ?? 'PT. Kenco Manufactur Indonesia';
+    const companyName = siteSettings?.company_name ?? 'PT Kenco Manufactur Indonesia';
 
     // White circles with a navy mark; hover fills the brand colour and drops the mark in from above.
     const socials = (siteSettings?.social_links ?? []).map((link) => ({
@@ -110,13 +110,9 @@ export function PublicFooter() {
                 </div>
 
                 {/* Copyright + credit: its own bar under the mascot on phones, bottom-right of the footer on desktop. */}
-                <p className="relative z-10 border-t border-white/10 px-5 py-4 text-center font-montserrat text-caption text-white/85 lg:absolute lg:text-small lg:bottom-5 lg:right-[max(2rem,calc(50%_-_42rem))] lg:border-0 lg:p-0 lg:text-right">
-                    {t('Copyright')} {companyName}
-                    <span aria-hidden="true" className="mx-2 hidden text-white/40 sm:inline">
-                        |
-                    </span>
-                    <br className="sm:hidden" />
-                    {t('Developed by')} {DEVELOPER}
+                <p className="relative z-10 border-t border-white/10 px-5 py-4 text-balance text-center font-montserrat text-caption text-white/85 lg:absolute lg:bottom-5 lg:right-[max(2rem,calc(50%_-_42rem))] lg:border-0 lg:p-0 lg:text-right lg:text-small">
+                    <span className="inline-block max-w-full">© {new Date().getFullYear()} {companyName} ·</span>{' '}
+                    <span className="inline-block max-w-full">Developed by {DEVELOPER}</span>
                 </p>
             </div>
         </footer>

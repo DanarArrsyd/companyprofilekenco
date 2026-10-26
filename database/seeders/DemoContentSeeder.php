@@ -306,11 +306,11 @@ class DemoContentSeeder extends Seeder
         ])->map(fn (array $c) => NewsCategory::query()->firstOrCreate(['slug' => $c['slug']], $c));
 
         $articles = [
-            ['title' => 'Kenco Manufactur Achieves IATF 16949 Certification', 'excerpt' => 'Our quality management system is now certified to the automotive industry standard.'],
+            ['title' => 'PT Kenco Manufactur Indonesia Achieves IATF 16949 Certification', 'excerpt' => 'Our quality management system is now certified to the automotive industry standard.'],
             ['title' => 'New Injection Molding Line Now Operational', 'excerpt' => 'Plant 2 has added a new production line to support growing customer demand.'],
             ['title' => 'Expanding Our Automotive Supply Partnerships', 'excerpt' => 'We are pleased to announce new partnerships with tier-1 automotive suppliers.'],
             ['title' => 'How We Reduced Defect Rates Through Automation', 'excerpt' => 'A look at the automated inspection systems now running across our production lines.'],
-            ['title' => 'Kenco Manufactur Joins Regional Manufacturing Association', 'excerpt' => 'Strengthening our connections within the regional manufacturing community.'],
+            ['title' => 'PT Kenco Manufactur Indonesia Joins Regional Manufacturing Association', 'excerpt' => 'Strengthening our connections within the regional manufacturing community.'],
             ['title' => 'Year in Review: Production Milestones', 'excerpt' => 'A look back at the production milestones reached this year.'],
         ];
 
@@ -388,7 +388,7 @@ class DemoContentSeeder extends Seeder
                 'title' => 'Who We Are',
                 'subtitle' => null,
                 'content' => [
-                    'body' => 'PT. Kenco Manufactur Indonesia is a precision manufacturing partner serving automotive, electronics, and industrial customers. We combine metal stamping, injection molding, and CNC machining under one roof to deliver components on schedule and to print.',
+                    'body' => 'PT Kenco Manufactur Indonesia is a precision manufacturing partner serving automotive, electronics, and industrial customers. We combine metal stamping, injection molding, and CNC machining under one roof to deliver components on schedule and to print.',
                     'image' => 'library/company-about-hero.png',
                 ],
                 'settings_json' => [
