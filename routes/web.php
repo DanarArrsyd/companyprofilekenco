@@ -60,6 +60,9 @@ $registerPublicRoutes = function (string $locale): void {
     Route::get('quality', [QualityController::class, 'index'])->name('public.quality');
 
     Route::get('certifications', [CertificationController::class, 'index'])->name('public.certifications');
+    Route::get('certifications/{certification}/document', [CertificationController::class, 'document'])
+        ->whereNumber('certification')
+        ->name('public.certifications.document');
 
     Route::get('news', [NewsController::class, 'index'])->name('public.news');
     Route::get('news/{slug}', [NewsController::class, 'show'])

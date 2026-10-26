@@ -10,6 +10,7 @@ export interface CertificationItemData {
     expires_at?: string | null;
     is_expired?: boolean;
     image?: string | null;
+    has_document?: boolean;
 }
 
 /**
