@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { useLocale } from '@/hooks/use-locale';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// The hosting layer serves .mjs as text/plain; Vite bundles this worker as .js.
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?worker&url';
 
 let pdfjsPromise: Promise<typeof import('pdfjs-dist')> | null = null;
 
