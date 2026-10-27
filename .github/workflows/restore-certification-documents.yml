@@ -1,0 +1,135 @@
+name: Restore certification documents
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: restore-certification-documents
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: Collect PDFs from staging
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Load staging SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+
+      - name: Trust staging host
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_PORT: ${{ secrets.STAGING_PORT }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          cat >> ~/.ssh/config <<CONFIG
+          Host staging
+            HostName ${STAGING_HOST}
+            Port ${STAGING_PORT}
+            User ${STAGING_USER}
+            ControlMaster auto
+            ControlPath ~/.ssh/cm-%r@%h:%p
+            ControlPersist 20m
+            ConnectTimeout 20
+          CONFIG
+          chmod 600 ~/.ssh/config
+          for attempt in 1 2 3 4 5; do
+            if keys="$(ssh-keyscan -T 20 -p "$STAGING_PORT" "$STAGING_HOST" 2>/dev/null)" && [ -n "$keys" ]; then
+              echo "$keys" >> ~/.ssh/known_hosts
+              if ssh -o ControlMaster=yes -fN staging; then exit 0; fi
+            fi
+            sleep $((attempt * 20))
+          done
+          exit 1
+
+      - name: Download certification PDFs
+        env:
+          STAGING_PATH: ${{ secrets.STAGING_PATH }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/certification-documents"
+          rsync -az -e ssh --include='*.pdf' --exclude='*' \
+            "staging:${STAGING_PATH}/application/storage/app/private/certifications/documents/" \
+            "$RUNNER_TEMP/certification-documents/"
+          if ! find "$RUNNER_TEMP/certification-documents" -type f -name '*.pdf' -print -quit | grep -q .; then
+            echo '::error::No certification PDFs found on staging.'
+            exit 1
+          fi
+          echo "Collected $(find "$RUNNER_TEMP/certification-documents" -type f -name '*.pdf' | wc -l | tr -d ' ') PDF(s)."
+
+      - name: Hold PDFs for production job
+        uses: actions/upload-artifact@v4
+        with:
+          name: certification-documents
+          path: ${{ runner.temp }}/certification-documents/*.pdf
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Close staging SSH connection
+        if: always()
+        run: ssh -O exit staging 2>/dev/null || true
+
+  restore:
+    name: Restore missing PDFs in production
+    needs: collect
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download collected PDFs
+        uses: actions/download-artifact@v4
+        with:
+          name: certification-documents
+          path: ${{ runner.temp }}/certification-documents
+
+      - name: Load production SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+
+      - name: Trust production host
+        env:
+          PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+          PRODUCTION_PORT: ${{ secrets.PRODUCTION_PORT }}
+          PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          cat >> ~/.ssh/config <<CONFIG
+          Host production
+            HostName ${PRODUCTION_HOST}
+            Port ${PRODUCTION_PORT}
+            User ${PRODUCTION_USER}
+            ControlMaster auto
+            ControlPath ~/.ssh/cm-%r@%h:%p
+            ControlPersist 20m
+            ConnectTimeout 20
+          CONFIG
+          chmod 600 ~/.ssh/config
+          for attempt in 1 2 3 4 5; do
+            if keys="$(ssh-keyscan -T 20 -p "$PRODUCTION_PORT" "$PRODUCTION_HOST" 2>/dev/null)" && [ -n "$keys" ]; then
+              echo "$keys" >> ~/.ssh/known_hosts
+              if ssh -o ControlMaster=yes -fN production; then exit 0; fi
+            fi
+            sleep $((attempt * 20))
+          done
+          exit 1
+
+      - name: Copy only missing certification PDFs
+        env:
+          PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+        run: |
+          target="${PRODUCTION_PATH}/application/storage/app/private/certifications/documents"
+          # The trusted production path expands on the runner before SSH.
+          # shellcheck disable=SC2029
+          ssh production "mkdir -p '$target'"
+          rsync -az --ignore-existing -e ssh \
+            "$RUNNER_TEMP/certification-documents/" "production:${target}/"
+          echo 'Missing certification PDFs copied without overwriting production files.'
+
+      - name: Close production SSH connection
+        if: always()
+        run: ssh -O exit production 2>/dev/null || true
